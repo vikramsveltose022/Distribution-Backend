@@ -1,0 +1,20 @@
+{
+    "salesPersonId": "655f0d7a6e63602251480c20",
+    "products": [
+        {
+            "productId": "655de4aa74b6eedcb0a82a4b",
+            "qtyAssign": 10,
+            "price": 15.99,
+            "totalPrice": 159.9
+        },
+        {
+            "productId": "655de3d874b6eedcb0a82a43",
+            "qtyAssign": 5,
+            "price": 24.99,
+            "totalPrice": 124.95
+        }
+    ],
+    "startDate": "2023-12-01T00:00:00.000Z",
+    "endDate": "2023-12-31T23:59:59.999Z",
+    "grandTotal": 284.85
+}

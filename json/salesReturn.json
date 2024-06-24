@@ -1,0 +1,22 @@
+{
+    "status": "shipped",
+    "returnItems": [
+        {
+            "productId": "655de34174b6eedcb0a82a33",
+            "qty":1,
+            "price":29.99
+        },
+        {
+            "productId": "655de4aa74b6eedcb0a82a4b",
+            "qty":1,
+            "price":29.99
+        }
+    ],
+    "Product_Price": 29.99,
+    "Qty_Purchased": 2,
+    "Qty_Return": 1,
+    "mobileNumber": "1234567890",
+    "email": "john.doe@example.com",
+    "Return_amount": 14.99,
+    "orderId": "6561b9bf804334b97d748400"
+}

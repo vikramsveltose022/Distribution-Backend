@@ -1,0 +1,224 @@
+<ProductRgistration>
+
+    <input>
+	<label>Phone No</label>
+	<type type="number">text</type>
+    <name>Phone_Number</name>
+    <placeholder>Enter Phone Number</placeholder>
+	</input>
+
+    <input>
+	<label>Length</label>
+	<type type="number">text</type>
+    <name>P_length</name>
+    <placeholder>Enter length </placeholder>
+	</input>
+
+    <input>
+	<label>height</label>
+	<type type="number">text</type>
+    <name>height</name>
+    <placeholder>Enter height</placeholder>
+	</input>
+
+    <input>
+	<label>Width</label>
+	<type type="number">text</type>
+    <name>width</name>
+    <placeholder>Enter width</placeholder>
+	</input>
+
+    <input>
+	<label>WheelBase</label>
+	<type type="number">text</type>
+    <name>WheelBase</name>
+    <placeholder>Enter Wheelbase</placeholder>
+	</input>
+
+    <input>
+	<label>Ground Clearence</label>
+	<type type="number">text</type>
+    <name>groundClearence</name>
+    <placeholder>Enter Ground Clearnence</placeholder>
+	</input>
+
+    <input>
+	<label>Kerb Weight</label>
+	<type type="number">text</type>
+    <name>KerbWeight</name>
+    <placeholder>Enter Kerb Weight</placeholder>
+	</input>
+
+    <input>
+	<label>Number of Seating Row</label>
+	<type type="number">text</type>
+    <name>Seating_capacity</name>
+    <placeholder>Enter Seating capacity</placeholder>
+	</input>
+
+
+<checkboxmain>
+<checkboxhead>
+	<Heading>Over Speed Warning</Heading>
+
+	<input>
+	<label>Yes</label>
+	<type type="checkbox">text</type>
+    <name>OverSpeed_Yes</name>
+	</input>
+
+	<input>
+	<label>No</label>
+	<type type="checkbox">text</type>
+    <name>OverSpeed_No</name>
+	</input>
+</checkboxhead>
+<checkboxhead>
+	<Heading>Antilock Breaking System</Heading>
+	<input>
+	<label>Yes</label>
+	<type type="checkbox">text</type>
+    <name>ABS_Yes</name>
+	</input>
+
+	<input>
+	<label>No</label>
+	<type type="checkbox">text</type>
+    <name>AbS_No</name>
+	</input>
+    <!-- <placeholder>Enter Address</placeholder> -->
+</checkboxhead>
+<checkboxhead>
+	<Heading>Break Assist</Heading>
+	<input>
+	<label>Yes</label>
+	<type type="checkbox">text</type>
+    <name>BA_Yes</name>
+	</input>
+
+	<input>
+	<label>No</label>
+	<type type="checkbox">text</type>
+    <name>BA_No</name>
+	</input>
+    <!-- <placeholder>Enter Address</placeholder> -->
+</checkboxhead>
+</checkboxmain>
+    <input>
+	<label>Address</label>
+	<type type="textarea">text</type>
+    <name>Address</name>
+    <placeholder>Enter Address</placeholder>
+	</input>
+
+    <input>
+	<label>ShowRoom Address/office Address</label>
+	<type type="textarea">text</type>
+    <name>ShowroomAddress</name>
+    <placeholder>Enter Address here</placeholder>
+	</input>
+	
+    <input>
+	<label>ShowRoom Address/office Address</label>
+	<type type="textarea">text</type>
+    <name>ShowroomAddress</name>
+    <placeholder>Enter Address here</placeholder>
+	</input>
+
+
+ 	<input>
+	<label>Street Address1</label>
+	<type type="textarea">text</type>
+    <name>StreetAddress1</name>
+    <placeholder>Enter Street Address1 here</placeholder>
+	</input>
+
+
+ 	<input>
+	<label>Street Address2</label>
+	<type type="textarea">text</type>
+    <name>StreetAddress2</name>
+    <placeholder>Enter Street Address2 here</placeholder>
+	</input>
+
+ 	<input>
+	<label>Street LandMark</label>
+	<type type="text">text</type>
+    <name>Landmark</name>
+    <placeholder>Enter landmark here</placeholder>
+	</input>
+
+    <input>
+	<label>Name</label>
+	<type type="text">text</type>
+    <name>name</name>
+    <placeholder>Enter Your Name</placeholder>
+	</input>
+
+
+	<input>
+	<label>UserName</label>
+	<type type="text">text</type>
+    <name>UserName</name>
+    <placeholder>Enter UserName</placeholder>
+	</input>
+
+
+	<input>
+	<label>Email</label>
+	<type type="email">email</type>
+    <name>email</name>
+    <placeholder>Enter email Id.</placeholder>
+	</input>
+
+	<input>
+	<label>Password</label>
+	<type type="password">Password</type>
+    <name>Password</name>
+    <placeholder>Enter Password</placeholder>
+	</input>
+
+	<input>
+	<label>Business Name</label>
+	<type type="text">text</type>
+    <name>B_name</name>
+    <placeholder>Enter Business Name</placeholder>
+	</input>
+
+	<input>
+	 <label>Status</label>
+	<type type="select">checkbox</type>
+    <name>status</name>
+
+	</input>
+	<MyDropdown>
+	<dropdown>
+	<label>abc</label>
+	<name>first dropdown</name>
+	<option value="1st option">1st option</option>
+	<option value="2st option">2st option</option>
+	<option value="3st option">3st option</option>
+	<option value="4st option">4st option</option>
+	<option value="5st option">5st option</option>
+	<option value="6st option">6st option</option>
+	<option value="7th option">PRATIMA</option>
+    <option value="8th option">SADIK</option>
+
+
+	</dropdown>
+	<dropdown>
+	<label>xyz</label>
+	<name>second dropdown</name>
+	<option value="1st option">1st option</option>
+	<option value="2st option">2st option</option>
+	<option value="3st option">3st option</option>
+	<option value="4st option">4st option</option>
+	<option value="5st option">5st option</option>
+	<option value="6st option">6st option</option>
+	<option value="7th option">ANUJESH</option>
+    <option value="8th option">KHAN</option>
+	</dropdown>
+	</MyDropdown>
+	
+ 
+</ProductRgistration>

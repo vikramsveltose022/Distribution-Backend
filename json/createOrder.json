@@ -1,0 +1,109 @@
+{
+    "Parts Order ID": "12345",
+    "New Order": "Yes",
+    "Order Id": "67890",
+    "Ordered By": "OEM",
+    "Partner Code": "001",
+    "Partner Name": "John Doe",
+    "Supplied By": "DISTRIBUTOR",
+    "Supplier Code": "002",
+    "Supplier Name": "Supplier Inc",
+    "Supplier Location": "123 Main Street",
+    "Order Type": "Parts",
+    "ProductDetail": [
+        {
+            "Product Name": "Sample Product",
+            "Product#": "P12345",
+            "Product Image": "product.jpg",
+            "Product Quantity": "10",
+            "Partner Code": "002",
+            "Partner Name": "Bob Johnson",
+            "Address": "789 Oak Street",
+            "OEM Part Price": "$99.99",
+            "Distributor Price": "$49.99",
+            "Dealer Part Price": "$59.99",
+            "Warehouse location": "wh001",
+            "Warehouse location name": "Warehouse 1",
+            "Warranty Covered": "Yes",
+            "Covered Under Warranty": "Yes",
+            "Tied to": "Supplier",
+            "Start Date": "2023-01-01",
+            "End Date": "2023-12-31",
+            "Discount": "10"
+        },
+        {
+            "Product Name": "Another Sample Product",
+            "Product#": "P67890",
+            "Product Image": "product2.jpg",
+            "Product Quantity": "5",
+            "Partner Code": "003",
+            "Partner Name": "Alice Smith",
+            "Address": "456 Elm Street",
+            "OEM Part Price": "$79.99",
+            "Distributor Price": "$39.99",
+            "Dealer Part Price": "$49.99",
+            "Warehouse location": "wh002",
+            "Warehouse location name": "Warehouse 2",
+            "Warranty Covered": "Yes",
+            "Covered Under Warranty": "Yes",
+            "Tied to": "Distributor",
+            "Start Date": "2023-02-01",
+            "End Date": "2023-12-31",
+            "Discount": "15"
+        }
+    ],
+    "PartDetail": [
+        {
+            "Part#": "P12345",
+            "Part Name": "Sample Product",
+            "Part color": "Red",
+            "Part Image": "part.jpg",
+            "OEM Part Price": "$49.99",
+            "Distributor Price": "$29.99",
+            "Dealer Part Price": "$39.99",
+            "Warehouse location": "wh001",
+            "Warehouse location name": "Warehouse 1",
+            "Warranty Covered": "Yes",
+            "Covered Under Warranty": "Yes",
+            "Tied to": "Supplier",
+            "Start Date": "2023-03-01",
+            "End Date": "2024-02-29",
+            "Discount": "20"
+        }
+    ],
+    "PdWarpayable": "Yes",
+    "Payableat": "OEM",
+    "servicerate": "$50",
+    "cost": "$40",
+    "discount": "10",
+    "AmounttoPay": "$450",
+    "whatsapp": "true",
+    "sms": "true",
+    "gmail": "true",
+    "Status": "pending",
+    "Comments": [
+        {
+            "Role": "Dealer",
+            "userName": "vikram_10",
+            "comment": "this is my first comment",
+            "time": "26:10:2023T15:08"
+        },
+        {
+            "Role": "Dealer",
+            "userName": "vikram_10",
+            "comment": "this is my second comment",
+            "time": "29:10:2023T12:05"
+        }
+    ],
+    "attachmentFile": [
+        {
+            "Role": "Dealer",
+            "userName": "vikram_10",
+            "time": "26:10:2023T15:08",
+            "image": [
+                ".jnp",
+                ".webp"
+            ]
+        }
+    ]
+}

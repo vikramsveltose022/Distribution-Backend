@@ -1,0 +1,22 @@
+{
+    "DeliveryAddress": "23 ROSHAN BAG COLONY Near kushwaha nagar banganga indore",
+    "alternateMobileNo": 17000420819,
+    "city": "Indore",
+    "country": "India",
+    "currency": "USD",
+    "fullName": "sadik khan",
+    "landMark": "sunil kirana store",
+    "pincode": 452015,
+    "state": "Madhya Pradesh",
+    "MobileNo": 17896541230,
+    "orderItems": [
+        {
+            "productId": "652e3cb1a64f2d4dc7cbd08f",
+            "quantity": 3
+        }
+    ],
+    "paymentId": "pay_MyitSEsQZDIpPK",
+    "grandTotal": 8800,
+    "taxAmount": 400,
+    "shippingAmount": 400
+}

@@ -1,0 +1,22 @@
+[
+    {
+      "userId": "65293bd8b9e526cad38c1c36",
+      "productId": "65267ad58b199949599afc05",
+      "quantity": 2
+    },
+    {
+      "userId": "65293bd8b9e526cad38c1c36",
+      "productId": "65267ad58b199949599afc08",
+      "quantity": 1
+    },
+    {
+      "userId": "65292375cc311295b35ec7a4",
+      "productId": "65267ad68b199949599afc0e",
+      "quantity": 3
+    },
+    {
+      "userId": "65292375cc311295b35ec7a4",
+      "productId": "65267ad78b199949599afc11",
+      "quantity": 1
+    }
+  ]

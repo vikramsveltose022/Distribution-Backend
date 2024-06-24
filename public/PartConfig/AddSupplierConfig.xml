@@ -1,0 +1,575 @@
+<AddSupplier>
+    <PartnerDropdown>
+		<dropdown>
+        <label>Partner Code</label>
+			<name>Code</name>
+			<option value="1001">1001</option>
+			<option value="1002">1002</option>
+			<option value="1003">1003</option>
+		    <option value="1004">1004</option>
+		</dropdown>
+
+	</PartnerDropdown>
+    <input>
+<label>Partner Name</label>
+<type type="text">text</type>
+<name>PartnerName</name>
+<placeholder>Enter Partner Name</placeholder>		
+</input>
+
+<input>
+<label>Partner Address</label>
+<type type="textarea">text</type>
+<name>PartnerName</name>
+<placeholder>Enter Partner Address</placeholder>		
+</input>
+<input>
+<input>
+<label>Primary Phone</label>
+<type type="number">text</type>
+<name>PrimaryPhone</name>
+<phoneinput>yes</phoneinput>
+<placeholder>Enter Primary Phone No</placeholder>
+</input>
+
+<input>
+<role name="SUPERADMIN">
+<permissions>Edit</permissions>
+</role>
+
+<role name="ADMIN">
+<permissions>View,Edit</permissions>
+</role>
+
+<role name="WARRANTY APPROVER">
+<permissions>View</permissions>
+</role>
+
+<label>DOB</label>
+
+<type type="date">text</type>
+
+<name>DOB</name>
+
+</input>
+
+
+<input>
+
+<label>Secondary Phone</label>
+
+<type type="number">text</type>
+
+<name>SecondaryPhone</name>
+
+<phoneinput>yes</phoneinput>
+
+<placeholder>Enter Secondary Phone No</placeholder>
+
+</input>
+
+
+<input>
+
+<label>Primary Mobile No.</label>
+
+<type type="number">text</type>
+
+<name>Primarymobileno</name>
+
+<phoneinput>yes</phoneinput>
+
+<placeholder>Enter Primary Mobile No.</placeholder>
+
+</input>
+
+
+<input>
+
+<label>Secondary mobile No.</label>
+
+
+<role name="SUPERADMIN">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+
+<role name="ADMIN">
+
+<permissions>View</permissions>
+
+</role>
+
+
+<role name="WARRANTY APPROVER">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+<type type="number">text</type>
+
+<name>Secondarymobile</name>
+
+<phoneinput>yes</phoneinput>
+
+<placeholder>Enter Secondary mobile No</placeholder>
+
+</input>
+
+<input>
+
+<label>Address</label>
+
+<type type="textarea">text</type>
+
+<name>Address</name>
+
+<placeholder>Enter Address</placeholder>
+
+</input>
+
+
+<input>
+
+
+<role name="SUPERADMIN">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+
+<role name="ADMIN">
+
+<permissions>View</permissions>
+
+</role>
+
+
+<role name="WARRANTY APPROVER">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+<label>Country</label>
+
+<name>Country</name>
+
+<type type="text"/>
+
+<library>yes</library>
+
+</input>
+
+
+<input>
+
+<label>State</label>
+
+<role name="SUPERADMIN">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+<role name="ADMIN">
+
+<permissions>View</permissions>
+
+</role>
+<role name="WARRANTY APPROVER">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+<library>yes</library>
+
+<type type="text"/>
+
+<name>State</name>
+
+</input>
+<input>
+
+<role name="SUPERADMIN">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+<role name="ADMIN">
+
+<permissions>View</permissions>
+
+</role>
+
+<role name="WARRANTY APPROVER">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+<label>City</label>
+
+<name>City</name>
+
+<library>yes</library>
+
+<type type="text"/>
+
+</input>
+
+<input>
+
+<role name="SUPERADMIN">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+
+<role name="ADMIN">
+
+<permissions>View</permissions>
+
+</role>
+
+<role name="WARRANTY APPROVER">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+<label>Zipcode</label>
+
+<name>zipcode</name>
+
+<library>yes</library>
+
+<type type="number"/>
+
+</input>
+
+
+<input>
+
+
+<role name="SUPERADMIN">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+
+<role name="ADMIN">
+
+<permissions>View</permissions>
+
+</role>
+
+
+<role name="WARRANTY APPROVER">
+
+<permissions>View,Edit</permissions>
+
+</role>
+
+<label>latititudelongitude</label>
+
+<name>Lat_long</name>
+
+<library>yes</library>
+
+<type type="number"/>
+
+</input>
+
+
+<input>
+
+<label>ShowRoom Address/office Address</label>
+
+
+<role name="SUPERADMIN">
+
+<permissions>View</permissions>
+
+</role>
+
+
+<role name="ADMIN">
+
+<permissions>Edit</permissions>
+
+</role>
+
+
+<role name="WARRANTY APPROVER">
+
+<permissions>View</permissions>
+
+</role>
+
+<type type="textarea">text</type>
+
+<name>ShowroomAddress</name>
+
+<placeholder>Enter Address here</placeholder>
+
+</input>
+
+
+<input>
+
+
+<role name="SUPERADMIN">
+
+<permissions>View</permissions>
+
+</role>
+
+
+<role name="ADMIN">
+
+<permissions>Edit</permissions>
+
+</role>
+
+
+<role name="WARRANTY APPROVER">
+
+<permissions>View</permissions>
+
+</role>
+
+<label>Street Address1</label>
+
+<type type="textarea">text</type>
+
+<name>StreetAddress1</name>
+
+<placeholder>Enter Street Address1 here</placeholder>
+
+</input>
+
+
+<input>
+
+<label>Street Address2</label>
+
+<type type="textarea">text</type>
+
+<name>StreetAddress2</name>
+
+<placeholder>Enter Street Address2 here</placeholder>
+
+</input>
+
+
+<input>
+
+
+<role name="SUPERADMIN">
+
+<permissions>View</permissions>
+
+</role>
+
+
+<role name="ADMIN">
+
+<permissions>Edit</permissions>
+
+</role>
+
+
+<role name="WARRANTY APPROVER">
+
+<permissions>View</permissions>
+
+</role>
+
+<label>Street LandMark</label>
+
+<type type="text">text</type>
+
+<name>Landmark</name>
+
+<placeholder>Enter landmark here</placeholder>
+
+</input>
+
+
+<input>
+
+<label>Name</label>
+
+<type type="text">text</type>
+
+<name>name</name>
+
+<placeholder>Enter Your Name</placeholder>
+
+</input>
+
+
+<input>
+
+<label>UserName</label>
+
+<type type="text">text</type>
+
+<name>UserName</name>
+
+<placeholder>Enter UserName</placeholder>
+
+</input>
+
+
+<input>
+
+<label>Email</label>
+
+<type type="email">email</type>
+
+<name>email</name>
+
+<placeholder>Enter email Id.</placeholder>
+
+</input>
+
+
+<input>
+
+<label>Password</label>
+
+<type type="password">Password</type>
+
+<name>Password</name>
+
+<placeholder>Enter Password</placeholder>
+
+</input>
+
+
+<input>
+
+<label>Business Name</label>
+
+<type type="text">text</type>
+
+<name>B_name</name>
+
+<placeholder>Enter Business Name</placeholder>
+
+</input>
+
+
+<Radiobutton>
+
+<Heading>Status</Heading>
+
+
+<input>
+
+<label>Active</label>
+
+<type type="radio">text</type>
+
+<name>Status</name>
+
+</input>
+
+
+<input>
+
+<label>Deactive</label>
+
+<type type="radio">text</type>
+
+<name>Status</name>
+
+</input>
+
+</Radiobutton>
+
+
+<CheckBox>
+
+
+<input>
+
+<label>Whatsapp</label>
+
+<type type="checkbox">text</type>
+
+<name>whatsapp</name>
+
+</input>
+
+
+<input>
+
+<label>SMS</label>
+
+<type type="checkbox">text</type>
+
+<name>sms</name>
+
+</input>
+
+
+<input>
+
+<label>Mail</label>
+
+<type type="checkbox">text</type>
+
+<name>gmail</name>
+
+</input>
+
+</CheckBox>
+
+
+<MyDropdown>
+
+
+<dropdown>
+
+<label>Role</label>
+
+<name>Role</name>
+
+<option value="OEM">OEM</option>
+
+<option value="SUPERADMIN">SUPERADMIN</option>
+
+<option value="DISTRIBUTOR ADMIN">DISTRIBUTOR ADMIN</option>
+
+<option value="ADMIN">ADMIN</option>
+
+<option value="DISTRIBUTOR">DISTRIBUTOR</option>
+
+<option value="DEALER ADMIN">DEALER ADMIN</option>
+
+<option value="DEALER">DEALER</option>
+
+<option value=" WARRANTY SUPERVISER">WARRANTY SUPERVISER</option>
+
+<option value=" WARRANTY APPROVER">WARRANTY APPROVER</option>
+
+<option value=" WARRANTY REVIWER">WARRANTY REVIWER</option>
+
+<option value="SUPERVISER">SUPERVISER</option>
+
+</dropdown>
+
+</MyDropdown>
+
+</AddSupplierConfig>

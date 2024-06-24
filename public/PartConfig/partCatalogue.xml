@@ -1,0 +1,157 @@
+<PartCatalogue>
+
+    <input>
+        <label>Part Name</label>
+        <type type="text">text</type>
+        <name>Part_Name</name>
+        <placeholder>Enter Part Name</placeholder>
+    </input>
+
+    <input>
+        <label>Part No</label>
+        <type type="text">text</type>
+        <name>Part_No</name>
+        <placeholder>Enter Part Number</placeholder>
+    </input>
+
+    <input>
+        <label>Part Image</label>
+        <type type="file">file</type>
+        <multiple attribute="multiple"></multiple>
+        <name>Part_Image</name>
+    </input>
+
+    <input>
+        <label>Part Quantity</label>
+        <type type="number">number</type>
+        <name>Part_Qty</name>
+        <placeholder>Enter Part Quantity</placeholder>
+    </input>
+
+    <input>
+        <label>OEM Part Price</label>
+        <type type="number">number</type>
+        <name>OEM_Part_Price</name>
+        <placeholder>Enter OEM Part Price</placeholder>
+    </input>
+
+    <input>
+        <label>Distributor Part Price</label>
+        <type type="number">number</type>
+        <name>Distributor_Part_Price</name>
+        <placeholder>Enter Distributor Part Price</placeholder>
+    </input>
+
+    <input>
+        <label>Dealer Part Price</label>
+        <type type="number">number</type>
+        <name>Dealer_Part_Price</name>
+        <placeholder>Enter Dealer Part Price</placeholder>
+    </input>
+
+    <input>
+        <label>Customer Part Price</label>
+        <type type="number">number</type>
+        <name>Customer_Part_Price</name>
+        <placeholder>Enter Customer Part Price</placeholder>
+    </input>
+
+    <input>
+        <label>Tied Under</label>
+        <type type="text">text</type>
+        <name>Tied_Under</name>
+        <placeholder>Enter Tied Under</placeholder>
+    </input>
+
+    <input>
+        <label>Start Date</label>
+        <type type="date">date</type>
+        <name>Start_Date</name>
+        <placeholder>Enter Start Date</placeholder>
+    </input>
+
+    <input>
+        <label>End Date</label>
+        <type type="date">date</type>
+        <name>End_Date</name>
+        <placeholder>Enter End Date</placeholder>
+    </input>
+
+    <input>
+        <label>Discount</label>
+        <type type="number">number</type>
+        <name>Discount</name>
+        <placeholder>Enter Discount</placeholder>
+    </input>
+
+    <input>
+        <label>Shipping</label>
+        <type type="text">text</type>
+        <name>Shipping</name>
+        <placeholder>Enter Shipping</placeholder>
+    </input>
+
+    <input>
+        <label>Shipping Cost</label>
+        <type type="text">text</type>
+        <name>Shipping_Cost</name>
+        <placeholder>Enter Shipping Cost</placeholder>
+    </input>
+
+
+    <input>
+        <label>Tracking no.</label>
+        <type type="text">text</type>
+        <name>Tracking_id</name>
+        <placeholder>Enter Tracking id</placeholder>
+    </input>
+
+    <input>
+        <label>Shipping Address</label>
+        <type type="text">text</type>
+        <name>Shipping_Address</name>
+        <placeholder>Enter Shipping Address...</placeholder>
+    </input>
+
+    <input>
+        <label>Billing Address</label>
+        <type type="text">text</type>
+        <name>Billing_Address</name>
+        <placeholder>Enter Billing Address...</placeholder>
+    </input>
+
+    <MyDropdown>
+        <dropdown>
+            <label>Currency</label>
+            <name>Currency</name>
+            <option value="$">Dollar</option>
+            <option value="Euro">Euro</option>
+            <option value="Rs">Rs</option>
+
+        </dropdown>
+
+        <dropdown>
+            <label>Provided BY</label>
+            <name>Provided_BY</name>
+            <option value="OEM">OEM</option>
+            <option value="Supplier">Supplier</option>
+            <option value="Third Party">Third Party</option>
+        </dropdown>
+
+        <dropdown>
+            <label>WareHouse</label>
+            <name>WareHouse</name>
+            <option value="Indore">Indore</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Hyderabad">Hyderabad</option>
+        </dropdown>
+
+        <dropdown>
+            <label>Warranty Covered</label>
+            <name>Warrenty_Covered</name>
+            <option value="YES">YES</option>
+            <option value="No">No</option>
+        </dropdown>
+
+    </MyDropdown>
+</PartCatalogue>

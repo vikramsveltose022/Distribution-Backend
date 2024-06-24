@@ -1,0 +1,59 @@
+<PurchaseReturn>
+    <MyDropDown>
+        <dropdown>
+            <label>Order Id</label>
+            <name>orderId</name>
+            <option value="001">001</option>
+            <option value="002">002</option>
+            <option value="003">003</option>
+        </dropdown>
+    </MyDropDown>
+    <input>         
+        <label>ProductName</label>
+        <Readonly>yes</Readonly>
+        <type type="text"/>
+        <name>Product_Title</name>
+        <placeholder>Product Name</placeholder>
+    </input>
+    <input>
+        <label>Product Price</label>
+        <Readonly>yes</Readonly>
+        <type type="number"/>
+        <name>Product_Price</name>
+        <placeholder>Product Price</placeholder>
+    </input>
+    <input>
+        <label>Quantity Purchased</label>
+        <type type="number"/>
+        <name>Qty_Purchased</name>
+        <placeholder>Enter Quantity</placeholder>
+    </input>
+    <input>
+        <label>Return Quantity</label>
+        <type type="number"/>
+        <number>yes</number>
+        <name>Qty_Return</name>
+        <placeholder>Enter Mobile Number</placeholder>
+    </input>
+    <input>
+        <label>Mobile No.</label>
+        <type type="text"/>
+        <number>yes</number>
+        <phoneinput>yes</phoneinput>
+        <name>mobileNumber</name>
+        <placeholder>Enter Mobile Number</placeholder>
+    </input>
+    <input>
+        <label>Email id</label>
+        <type type="email"/>
+        <name>email</name>
+        <placeholder>Enter Email id</placeholder>
+    </input>
+    <input>
+        <label>Amount to be Return</label>
+        <type type="number"/>
+        <number>yes</number>
+        <name>Return_amount</name>
+        <placeholder>Total Return Amount</placeholder>
+    </input>
+</PurchaseReturn>

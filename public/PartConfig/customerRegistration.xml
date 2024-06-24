@@ -1,0 +1,97 @@
+<CustomerRegistration>
+
+    <input>
+        <label>Registration Date</label>
+        <type type="date">text</type>
+        <name>registerDate</name>
+        <placeholder>Registration Date</placeholder>
+    </input>
+
+    <input>
+        <label>Product Delivered Date</label>
+        <type type="date">text</type>
+        <name>productDeliveryDate</name>
+        <placeholder>Product Delivered Date </placeholder>
+    </input>
+
+    <input>
+        <label>Shipped Date</label>
+        <type type="date">text</type>
+        <name>shippedDate</name>
+        <placeholder>Enter ShippedDate</placeholder>
+    </input>
+
+    <input>
+        <label>Order Date</label>
+        <type type="date">text</type>
+        <name>orderDate</name>
+        <placeholder>Enter Order Date</placeholder>
+    </input>
+
+    <input>
+        <label>Invoice Date</label>
+        <type type="date">text</type>
+        <name>invoiceDate</name>
+        <placeholder>Enter Invoice Date</placeholder>
+    </input>
+
+    <input>
+        <label>Registered To</label>
+        <type type="text">text</type>
+        <name>registeredTo</name>
+        <placeholder>Enter Registered To</placeholder>
+    </input>
+
+    <input>
+        <label>Product Price</label>
+        <type type="text">text</type>
+        <name>productPrice</name>
+        <placeholder>Enter Product Price</placeholder>
+    </input>
+
+    <MyDropdown>
+        <dropdown>
+            <label>Warranty Applied</label>
+            <name>warrantyApplied</name>
+            <option value="Standard Warranty">Standard Warranty</option>
+            <option value="Extented Warranty">Extented Warranty</option>
+        </dropdown>
+    </MyDropdown>
+
+    <input>
+        <label>Warranty Start Date</label>
+        <type type="date">text</type>
+        <name>warrantyStartDate</name>
+        <placeholder> Warranty Start Date</placeholder>
+    </input>
+
+    <input>
+        <label>Warranty End Date</label>
+        <type type="date">text</type>
+        <name>warrantyEndDate</name>
+        <placeholder> Warranty End Date</placeholder>
+    </input>
+
+    <input>
+        <label>Industry</label>
+        <type type="text">text</type>
+        <name>industry</name>
+        <placeholder>Enter Industry</placeholder>
+    </input>
+
+    <input>
+        <label>Used as</label>
+        <type type="text">text</type>
+        <name>usedAs</name>
+        <placeholder>Enter Used as</placeholder>
+    </input>
+
+    <input>
+        <label>ZipCode</label>
+        <type type="number">text</type>
+        <name>zipCode</name>
+        <placeholder>Enter ZipCode</placeholder>
+    </input>
+
+
+</CustomerRegistration>
