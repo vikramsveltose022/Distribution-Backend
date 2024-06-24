@@ -278,8 +278,8 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
 };
 export const addProductInWarehouse = async (warehouse, warehouseId) => {
   try {
+    console.log(warehouse.productId)
     const user = await Warehouse.findById({ _id: warehouseId })
-    console.log("warehouse " + user)
     if (!user) {
       return console.log("warehouse not found")
     }
@@ -295,7 +295,6 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
       user.markModified('productItems');
       await user.save();
     } else {
-      console.log("not called...............")
       await Warehouse.updateOne({ _id: warehouseId },
         {
           $push: { productItems: warehouse },
