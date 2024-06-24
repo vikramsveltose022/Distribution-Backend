@@ -278,13 +278,13 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
 };
 export const addProductInWarehouse = async (warehouse, warehouseId) => {
   try {
-    console.log(warehouse.productId)
+    console.log(warehouse.productId._id)
     const user = await Warehouse.findById({ _id: warehouseId })
     if (!user) {
       return console.log("warehouse not found")
     }
     const sourceProductItem = user.productItems.find(
-      (pItem) => pItem.productId.toString() === warehouse.productId.toString());
+      (pItem) => pItem.productId.toString() === warehouse.productId._id.toString());
     console.log("exist " + sourceProductItem)
     if (sourceProductItem) {
       console.log("called...............")
