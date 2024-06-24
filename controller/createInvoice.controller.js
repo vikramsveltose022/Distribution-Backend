@@ -60,8 +60,8 @@ export const SaveInvoiceList = async (req, res, next) => {
                         return res.status(404).json({ message: "out of stock", status: false })
                     }
                     pro.pendingStock += (orderItem.qty)
-                    await warehouse.save();
-                    await product.save()
+                    // await warehouse.save();
+                    // await product.save()
                     await ClosingSales(orderItem, product.warehouse)
                 }
             } else {
@@ -162,7 +162,8 @@ export const SavePurchaseInvoice = async (req, res, next) => {
                 product.partyId = req.body.partyId;
                 product.purchaseStatus = true
                 // product.landedCost = orderItem.landedCost;
-                const warehouse = { productId: orderItem.productId, currentStock: (orderItem.qty), transferQty: (orderItem.qty), price: orderItem.price, totalPrice: orderItem.totalPrice, gstPercentage: orderItem.gstPercentage, igstTaxType: orderItem.igstTaxType,primaryUnit:orderItem.primaryUnit,secondaryUnit:orderItem.secondaryUnit,secondarySize:orderItem.secondarySize,landedCost:orderItem.landedCost }
+                product.Opening_Stock += orderItem.qty;
+                const warehouse = { productId: orderItem.productId, currentStock: (orderItem.qty), transferQty: (orderItem.qty), price: orderItem.price, totalPrice: orderItem.totalPrice, gstPercentage: orderItem.gstPercentage, igstTaxType: orderItem.igstTaxType, primaryUnit: orderItem.primaryUnit, secondaryUnit: orderItem.secondaryUnit, secondarySize: orderItem.secondarySize, landedCost: orderItem.landedCost }
                 await product.save();
                 await addProductInWarehouse(warehouse, product.warehouse)
                 await ClosingPurchase(orderItem, product.warehouse)
@@ -250,13 +251,13 @@ export const ClosingSales = async (orderItem, warehouse) => {
         }
         const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: orderItem.productId })
         if (stock) {
-            stock.sQty += ( orderItem.qty);
+            stock.sQty += (orderItem.qty);
             stock.sBAmount += orderItem.totalPrice;
             stock.sTaxAmount += tax;
             stock.sTotal += (orderItem.totalPrice + tax)
             await stock.save()
         } else {
-            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, sQty: ( orderItem.qty), sBAmount: orderItem.totalPrice, sTaxAmount: tax, sTotal: (orderItem.totalPrice + tax) })
+            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, sQty: (orderItem.qty), sBAmount: orderItem.totalPrice, sTaxAmount: tax, sTotal: (orderItem.totalPrice + tax) })
             await closing.save()
         }
         return true

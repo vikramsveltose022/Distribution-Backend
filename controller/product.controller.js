@@ -279,15 +279,12 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
 export const addProductInWarehouse = async (warehouse, warehouseId) => {
   try {
     const user = await Warehouse.findById({ _id: warehouseId })
-    console.log("warehouse " + user)
     if (!user) {
       return console.log("warehouse not found")
     }
     const sourceProductItem = user.productItems.find(
-      (pItem) => pItem.productId.toString() === warehouse.productId.toString());
-    console.log("exist " + sourceProductItem)
+      (pItem) => pItem.productId.toString() === warehouse.productId._id.toString());
     if (sourceProductItem) {
-      console.log("called...............")
       // sourceProductItem.Size += warehouse.Size;
       sourceProductItem.currentStock += warehouse.transferQty
       sourceProductItem.totalPrice += warehouse.totalPrice;
@@ -295,7 +292,6 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
       user.markModified('productItems');
       await user.save();
     } else {
-      console.log("not called...............")
       await Warehouse.updateOne({ _id: warehouseId },
         {
           $push: { productItems: warehouse },

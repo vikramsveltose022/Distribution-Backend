@@ -226,17 +226,18 @@ export const createOrder = async (req, res, next) => {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
                     ware = product.warehouse
-                    // product.salesDate = new Date()
-                    // const warehouse = await Warehouse.findById(product.warehouse)
-                    // if (warehouse) {
-                    //     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
-                    //     pro.currentStock -= (orderItem.Size * orderItem.qty);
-                    //     if (pro.currentStock < 0) {
-                    //         return res.status(404).json({ message: "out of stock", status: false })
-                    //     }
-                    //     await warehouse.save();
-                    //     await product.save()
-                    // }
+                    product.salesDate = new Date()
+                    const warehouse = await Warehouse.findById(product.warehouse)
+                    if (warehouse) {
+                        const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
+                        pro.currentStock -= (orderItem.qty);
+                        product.Opening_Stock -= orderItem.qty;
+                        if (pro.currentStock < 0) {
+                            return res.status(404).json({ message: "out of stock", status: false })
+                        }
+                        await warehouse.save();
+                        await product.save()
+                    }
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
                 }
@@ -247,9 +248,9 @@ export const createOrder = async (req, res, next) => {
                 fullName: req.body.fullName,
                 partyId: req.body.partyId,
                 warehouseId: ware,
-                primaryUnit:req.body.primaryUnit,
-                secondaryUnit:req.body.secondaryUnit,
-                secondarySize:req.body.secondarySize,
+                primaryUnit: req.body.primaryUnit,
+                secondaryUnit: req.body.secondaryUnit,
+                secondarySize: req.body.secondarySize,
                 invoiceId: result,
                 address: req.body.address,
                 MobileNo: req.body.MobileNo,
@@ -358,7 +359,7 @@ export const deleteSalesOrder = async (req, res, next) => {
         if (!order) {
             return res.status(404).json({ error: "Not Found", status: false });
         }
-        if(order.status ==="completed"){
+        if (order.status === "completed") {
             return res.status(400).json({ error: "this order not deleted", status: false });
         }
         order.status = "Deactive";
