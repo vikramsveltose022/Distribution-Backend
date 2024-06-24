@@ -226,17 +226,17 @@ export const createOrder = async (req, res, next) => {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
                     ware = product.warehouse
-                    // product.salesDate = new Date()
-                    // const warehouse = await Warehouse.findById(product.warehouse)
-                    // if (warehouse) {
-                    //     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
-                    //     pro.currentStock -= (orderItem.Size * orderItem.qty);
-                    //     if (pro.currentStock < 0) {
-                    //         return res.status(404).json({ message: "out of stock", status: false })
-                    //     }
-                    //     await warehouse.save();
-                    //     await product.save()
-                    // }
+                    product.salesDate = new Date()
+                    const warehouse = await Warehouse.findById(product.warehouse)
+                    if (warehouse) {
+                        const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
+                        pro.currentStock -= (orderItem.qty);
+                        if (pro.currentStock < 0) {
+                            return res.status(404).json({ message: "out of stock", status: false })
+                        }
+                        await warehouse.save();
+                        await product.save()
+                    }
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
                 }
