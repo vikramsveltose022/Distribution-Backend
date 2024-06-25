@@ -1,27 +1,33 @@
 import mongoose from "mongoose";
 
-const BranchSchema = new mongoose.Schema({
+const BranchSchema = new mongoose.Schema(
+  {
     branchName: {
-        type: String
+      type: String,
     },
     address: {
-        type: String
+      type: String,
     },
     state: {
-        type: String
+      type: String,
     },
     city: {
-        type: String
+      type: String,
     },
     database: {
-        type: String
+      type: String,
     },
     latitude: {
-        type: String
+      type: String,
     },
     longitude: {
-        type: String
-    }
-}, { timestamps: true })
+      type: String,
+    },
+    pincode: {
+      type: String,
+    },
+  },
+  { timestamps: true }
+);
 
-export const UserBranch = mongoose.model("userBranch", BranchSchema)
+export const UserBranch = mongoose.model("userBranch", BranchSchema);
