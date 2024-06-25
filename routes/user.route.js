@@ -1,5 +1,5 @@
 import express from "express";
-import { DeleteUser, DeleteUserDetail, EditProfile, GetExcelKeys, SaveUser, SaveUserDetail, SignIn, SignInWithAdmin, UpdateUser, UpdateUserDetail, UserList, ViewByIdUserDetail, ViewUser, ViewUserById, ViewUserDetail, ViewUserHRM, ViewWarehouse, assignUser, deleteAssignUser, forgetPassword, otpVerify, saveUserWithExcel, updatePassword, updatePlan, updateUserWithExcel, verifyOTP, verifyPanNo, viewApplyRules, viewApplyRulesById } from "../controller/user.controller.js";
+import { DeleteUser, DeleteUserDetail, EditProfile, GetExcelKeys, SaveUser, SaveUserDetail, SignIn, SignInWithAdmin, UpdateUser, UpdateUserDetail, UserList, ViewByIdUserDetail, ViewRegisterUser, ViewUser, ViewUserById, ViewUserDetail, ViewUserHRM, ViewWarehouse, assignUser, deleteAssignUser, forgetPassword, otpVerify, saveUserWithExcel, updatePassword, updatePlan, updateUserWithExcel, verifyOTP, verifyPanNo, viewApplyRules, viewApplyRulesById } from "../controller/user.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -11,6 +11,7 @@ router.post("/import-user-data", uploads.single('file'), saveUserWithExcel)
 router.post("/update-import-user/:database", uploads.single('file'), updateUserWithExcel)
 
 router.post("/save-user", upload.single("file"), SaveUser)
+router.get("/view-register-user/:database", ViewRegisterUser)
 router.get("/view-user/:id", ViewUserById);
 router.get("/view-user-by-id/:id/:database", ViewUser)
 router.get("/delete-user/:id", DeleteUser);
