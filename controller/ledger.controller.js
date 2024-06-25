@@ -32,7 +32,7 @@ export const viewLedgerByUser = async (req, res, next) => {
 export const ViewLastLedgerBalance = async (req, res, next) => {
     try {
         const partyId = req.params.id;
-        const ledger = await Ledger.find({ partyId: partyId }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
+        const ledger = await Ledger.find({ partyId: partyId, ledgerType: "party" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
         if (ledger.length === 0) {
             return res.status(404).json({ message: "Not Found", status: false })
         }
