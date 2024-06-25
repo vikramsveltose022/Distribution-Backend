@@ -235,6 +235,48 @@ export const saveItemWithExcel = async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error', status: false });
   }
 }
+export const updateItemWithExcel = async (req, res) => {
+  try {
+    const filePath = await req.file.path;
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(filePath);
+    const worksheet = workbook.getWorksheet(1);
+    const headerRow = worksheet.getRow(1);
+    const headings = [];
+    headerRow.eachCell((cell) => {
+      headings.push(cell.value);
+    });
+    const insertedDocuments = [];
+    const existingParts = [];
+    for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
+      const dataRow = worksheet.getRow(rowIndex);
+      const document = {};
+      for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
+        const heading = headings[columnIndex - 1];
+        const cellValue = dataRow.getCell(columnIndex).value;
+        document[heading] = cellValue;
+      }
+      // if (document.HSN_Code) {
+      const filter = { Product_Title: document.Product_Title, database: req.params.database }; // Ensure the filter is correctly formed
+      const options = { new: true, upsert: true }; // Consider using upsert if you want to create the document if it doesn't exist
+      const insertedDocument = await Product.findOneAndUpdate(filter, document, options);
+
+      // await addProductInWarehouse1(document, insertedDocument.warehouse,insertedDocument)
+      insertedDocuments.push(insertedDocument);
+      // } else {
+      //   existingParts.push(document.Product_Title)
+      // }
+    }
+    let message = 'Updated Successfull !';
+    if (existingParts.length > 0) {
+      message = `Some product not exist hsn code: ${existingParts.join(', ')}`;
+    }
+    return res.status(200).json({ message, status: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal Server Error', status: false });
+  }
+}
 
 export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
   try {

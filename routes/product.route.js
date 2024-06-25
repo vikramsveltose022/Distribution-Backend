@@ -1,13 +1,25 @@
 import express from "express";
-import { DeleteProduct, HSNWisePurchaseReport, HSNWiseSalesReport, ProductXml, SaveProduct, StockAlert, UpdateProduct, ViewProduct, ViewProductById, ViewProductForPurchase, saveItemWithExcel, viewCurrentStock } from "../controller/product.controller.js";
+import { DeleteProduct, HSNWisePurchaseReport, HSNWiseSalesReport, ProductXml, SaveProduct, StockAlert, UpdateProduct, ViewProduct, ViewProductById, ViewProductForPurchase, saveItemWithExcel, updateItemWithExcel, viewCurrentStock } from "../controller/product.controller.js";
 import multer from "multer";
 
 const router = express.Router();
-const upload = multer({ dest: "public/Images/" });
+// const upload = multer({ dest: "public/Images/" });
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/Images/');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const fileExtension = path.extname(file.originalname);
+        cb(null, file.fieldname + '-' + uniqueSuffix + fileExtension);
+    }
+});
+const upload = multer({ storage: storage });
 const uploads = multer({ dest: "public/ExcelFile/" })
 
 router.get("/get-xml", ProductXml);
 router.post("/import-item-data", uploads.single('file'), saveItemWithExcel)
+router.post("/update-import-product/:database", uploads.single('file'), updateItemWithExcel)
 
 router.post("/save-product", upload.array("files"), SaveProduct)
 router.get("/view-product/:id/:database", ViewProduct)

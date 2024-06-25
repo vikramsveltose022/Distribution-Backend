@@ -57,6 +57,18 @@ export const SaveUser = async (req, res, next) => {
     return res.status(500).json({ error: "Internal Server Error", status: false });
   }
 };
+export const ViewRegisterUser = async (req, res, next) => {
+  try {
+    let user = await User.find({ database: req.params.database, status: "Active" })
+    if (user.length === 0) {
+      return res.status(404).json({ message: "user not found", status: false })
+    }
+    return res.status(200).json({ User: user, status: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal Server Error", status: false });
+  }
+};
 
 export const ViewUserById = async (req, res, next) => {
   try {
