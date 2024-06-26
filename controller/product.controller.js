@@ -91,20 +91,16 @@ export const DeleteProduct = async (req, res, next) => {
 };
 export const UpdateProduct = async (req, res, next) => {
   try {
-    if (req.file) {
-      req.body.Product_image = req.file.filename;
-    }
+    // if (req.file) {
+    //   req.body.Product_image = req.file.filename;
+    // }
     if (req.files) {
       let images = [];
-      let thumb = null;
       req.files.map((file) => {
-        if (file.filename != "file") images.push(file.filename);
-        else {
-          thumb = file.filename;
-        }
+        images.push(file.filename);
       });
-      req.body.thumbnail = thumb;
-      req.body.images = images;
+      // req.body.thumbnail = thumb;
+      req.body.Product_image = images;
     }
     const productId = req.params.id;
     const existingProduct = await Product.findById(productId);

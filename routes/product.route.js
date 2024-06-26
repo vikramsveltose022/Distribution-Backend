@@ -27,7 +27,7 @@ router.get("/view-product/:id/:database", ViewProduct)
 router.get("/view-product-purchase/:database", ViewProductForPurchase)
 router.get("/view-product-by-id/:id", ViewProductById)
 router.delete("/delete-product/:id", DeleteProduct)
-router.put("/update-product/:id", upload.any("file"), UpdateProduct);
+router.put("/update-product/:id", upload.array("files"), UpdateProduct);
 
 
 router.get("/view-stock-alert/:database", StockAlert);
