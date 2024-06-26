@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path"
 import { DeleteCategory, UpdateCategory, ViewCategory, ViewCategoryById, deleteSubCategory, saveCategory, saveSubCategory, updateSubCategory } from "../controller/category.controller.js";
 import multer from "multer";
 
