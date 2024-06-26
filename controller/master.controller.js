@@ -46,7 +46,7 @@ export const createSuperAdmin = async (req, res, next) => {
 export const CreateSuperAdminRole = async (req, res, next) => {
     try {
         const role = await Role.create(req.body);
-        return res.status(200).json({ Role: role, message: "Role Creation successful", status: true });
+        return res.status(200).json({ Role: role, message: "Role Creation successfull", status: true });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal server error", status: false });

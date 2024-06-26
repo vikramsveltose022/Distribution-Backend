@@ -69,7 +69,21 @@ export const ViewRegisterUser = async (req, res, next) => {
     return res.status(500).json({ error: "Internal Server Error", status: false });
   }
 };
-
+export const SuperAdminRoleUpdate = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id)
+    if (!user) {
+      return res.status(404).json({ message: "user not found", status: false })
+    }
+    user.rolename = req.body.rolename || user.rolename
+    await user.save()
+    return res.status(200).json({ message: "updated successfull !", status: true })
+  }
+  catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error", status: false })
+  }
+}
 export const ViewUserById = async (req, res, next) => {
   try {
     let user = await User.findById({ _id: req.params.id, status: "Active" }).populate({ path: "subscriptionPlan", model: "subscription" })
