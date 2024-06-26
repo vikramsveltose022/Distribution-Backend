@@ -99,11 +99,7 @@ export const saveExcelFile = async (req, res) => {
             for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
                 const heading = headings[columnIndex - 1];
                 const cellValue = dataRow.getCell(columnIndex).value;
-                if (heading === 'email' && typeof cellValue === 'object' && 'text' in cellValue) {
-                    document[heading] = cellValue.text;
-                } else {
-                    document[heading] = cellValue;
-                }
+                document[heading] = cellValue;
             }
             if (document.database) {
                 const existingId = await Transporter.findOne({ id: document.id, database: document.database });
@@ -141,19 +137,13 @@ export const UpdateExcelTransporter = async (req, res) => {
             headings.push(cell.value);
         });
         const insertedDocuments = [];
-        const existingIds = []
-        const dataNotExist = []
         for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
             const dataRow = worksheet.getRow(rowIndex);
             const document = {};
             for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
                 const heading = headings[columnIndex - 1];
                 const cellValue = dataRow.getCell(columnIndex).value;
-                if (heading === 'email' && typeof cellValue === 'object' && 'text' in cellValue) {
-                    document[heading] = cellValue.text;
-                } else {
-                    document[heading] = cellValue;
-                }
+                document[heading] = cellValue;
             }
             const filter = { id: document.id, database: req.params.database }
             const options = { new: true, upsert: true };
@@ -162,9 +152,6 @@ export const UpdateExcelTransporter = async (req, res) => {
 
         }
         let message = 'Updated Successfully';
-        if (existingIds.length > 0) {
-            message = `this transporter already exist: ${existingIds.join(', ')}`;
-        }
         return res.status(200).json({ message, status: true });
     } catch (err) {
         console.error(err);
