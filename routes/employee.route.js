@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path"
 import { saveEmployeeDetails, viewEmployeeDetail } from "../controller/employee.controller.js";
 import multer from "multer";
 

@@ -1,5 +1,5 @@
 import express from "express";
-import { CreatRole, getRole, getRoleById, saveDashboardTabs, saveRole, saveTabs, updatedRole, updatedRoleGloble, viewDashboardTab, viewTab } from "../controller/role.controller.js";
+import { CreatRole, deleteRole, getRole, getRoleById, saveDashboardTabs, saveRole, saveTabs, updatedRole, updatedRoleGloble, viewDashboardTab, viewTab } from "../controller/role.controller.js";
 
 const router = express.Router();
 
@@ -16,4 +16,5 @@ router.get("/view-tab/:id", viewTab)
 router.post("/save-dashboard-tab", saveDashboardTabs);
 router.get("/view-dashboard-tab/:id", viewDashboardTab);
 
+router.post("/deleted-roles", deleteRole)
 export default router

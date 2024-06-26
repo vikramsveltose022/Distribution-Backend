@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path"
 import { saveAttendence, saveImage, viewAttendence, viewEmployee } from "../controller/attendence.controller.js";
 import multer from "multer";
 
