@@ -17,6 +17,14 @@ dotenv.config();
 
 export const SaveUser = async (req, res, next) => {
   try {
+    // if (req.body.id) {
+    //   const existing = await User.findOne({ id: req.body.id })
+    //   if (existing) {
+    //     return res.status(404).json({ message: "id already exist", status: false })
+    //   }
+    // } else {
+    //   return res.status(400).json({ message: "id required", status: false })
+    // }
     if (req.file) {
       req.body.profileImage = req.file.filename;
     }

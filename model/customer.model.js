@@ -157,6 +157,10 @@ const CustomerSchema = new mongoose.Schema({
   },
   currentAddress: {
     type: String
+  },
+  leadStatus: {
+    type: Boolean,
+    default: true
   }
 
 }, { timestamps: true });
