@@ -18,6 +18,14 @@ export const WarehouseXml = async (req, res) => {
 
 export const SaveWarehouse = async (req, res, next) => {
     try {
+        // if (req.body.id) {
+        //     const existing = await Warehouse.findOne({ id: req.body.id })
+        //     if (existing) {
+        //         return res.status(404).json({ message: "id already exist", status: false })
+        //     }
+        // } else {
+        //     return res.status(400).json({ message: "id required", status: false })
+        // }
         const warehouse = await Warehouse.create(req.body)
         return warehouse ? res.status(200).json({ message: "Data Save Successfully", Warehouse: warehouse, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
     }

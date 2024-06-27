@@ -14,6 +14,14 @@ dotenv.config();
 
 export const SaveCustomer = async (req, res, next) => {
     try {
+        // if (req.body.id) {
+        //     const existing = await Customer.findOne({ id: req.body.id })
+        //     if (existing) {
+        //         return res.status(404).json({ message: "id already exist", status: false })
+        //     }
+        // } else {
+        //     return res.status(400).json({ message: "id required", status: false })
+        // }
         if (req.body.panNo) {
             req.body.code = req.body.panNo
         } else {
@@ -173,7 +181,7 @@ export const SuperAdminList = async (req, res, next) => {
 export const SignInWithMobile = async (req, res, next) => {
     try {
         const { mobileNo } = req.body;
-        let existingAccount = await Customer.findOne({ mobileNumber:mobileNo }).populate({ path: "rolename", model: "role", });
+        let existingAccount = await Customer.findOne({ mobileNumber: mobileNo }).populate({ path: "rolename", model: "role", });
         if (!existingAccount) {
             return res.status(400).json({ message: "Incorrect mobile No.", status: false });
         }
@@ -305,7 +313,7 @@ export const saveExcelFile = async (req, res) => {
                         const codes = document.panNo;
                         document[code] = codes;
                         const existingRecord = await Customer.findOne({
-                            panNo: document.panNo,database: document.database
+                            panNo: document.panNo, database: document.database
                         });
                         if (!existingRecord) {
                             const insertedDocument = await Customer.create(document);
@@ -318,7 +326,7 @@ export const saveExcelFile = async (req, res) => {
                             const codes = document.aadharNo;
                             document[code] = codes;
                             const existingRecord = await Customer.findOne({
-                                aadharNo: document.aadharNo,database: document.database
+                                aadharNo: document.aadharNo, database: document.database
                             });
                             if (!existingRecord) {
                                 const insertedDocument = await Customer.create(document);
@@ -344,7 +352,7 @@ export const saveExcelFile = async (req, res) => {
         } else if (existingIds.length > 0) {
             message = `this customer id's already exist: ${existingIds.join(', ')}`;
         } else if (dataNotExist.length > 0) {
-            message = `this customer database not already exist: ${dataNotExist.join(', ')}`;
+            message = `this customer database not exist: ${dataNotExist.join(', ')}`;
         }
         return res.status(200).json({ message, status: true });
     } catch (err) {
@@ -497,5 +505,84 @@ export const paymentDueReport = async (req, res) => {
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+}
+
+// ------------------------------------------------------------
+export const SaveLeadPartyExcel = async (req, res) => {
+    try {
+        const filePath = await req.file.path;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(filePath);
+        const worksheet = workbook.getWorksheet(1);
+        const headerRow = worksheet.getRow(1);
+        const headings = [];
+        headerRow.eachCell((cell) => {
+            headings.push(cell.value);
+        });
+        const insertedDocuments = [];
+        const dataNotExist = []
+        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
+            const dataRow = worksheet.getRow(rowIndex);
+            const document = {};
+            for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
+                const heading = headings[columnIndex - 1];
+                const cellValue = dataRow.getCell(columnIndex).value;
+                if (heading === 'email' && typeof cellValue === 'object' && 'text' in cellValue) {
+                    document[heading] = cellValue.text;
+                } else {
+                    document[heading] = cellValue;
+                }
+                // document[heading] = cellValue;
+            }
+            if (document.database) {
+                const insertedDocument = await Customer.create(document);
+                insertedDocuments.push(insertedDocument);
+            } else {
+                dataNotExist.push(document.firstName)
+            }
+        }
+        let message = 'Data Inserted Successfully';
+        if (dataNotExist.length > 0) {
+            message = `this customer database not exist: ${dataNotExist.join(', ')}`;
+        }
+        return res.status(200).json({ message, status: true });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+}
+export const LeadPartyList = async (req, res, next) => {
+    try {
+        const party = await Customer.find({ database: req.params.database, leadStatus: true });
+        if (party.length == 0) {
+            return res.status(404).json({ message: "Data Not Found", status: false })
+        }
+        return res.status(200).json({ LeadParty: party, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const AssignLeadParty = async (req, res, next) => {
+    try {
+        const sales = await User.findById({ _id: req.body.salesPerson })
+        if (!sales) {
+            return res.status(404).json({ message: "user not found", status: false })
+        }
+        for (let id of req.body.leadParty) {
+            const party = await Customer.findById(id.id)
+            if (!party) {
+                continue
+            }
+            party.created_by = req.body.salesPerson
+            await party.save()
+        }
+        return res.status(200).json({ message: "assign successfull!", status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
