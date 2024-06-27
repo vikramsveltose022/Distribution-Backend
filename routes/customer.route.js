@@ -43,4 +43,6 @@ router.post("/payment-due-report/:database", paymentDueReport)
 router.post("/save-lead-party-bulk", uploads.single("file"), SaveLeadPartyExcel)
 router.get("/lead-party-list/:database", LeadPartyList)
 router.post("/assign-lead-party", AssignLeadParty)
+router.get("/lead-party-list/:id", LeadPartyList)
+
 export default router;
