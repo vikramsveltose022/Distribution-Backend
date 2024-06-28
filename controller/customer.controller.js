@@ -512,6 +512,7 @@ export const paymentDueReport = async (req, res) => {
 // ------------------------------------------------------------
 export const SaveLeadPartyExcel = async (req, res) => {
     try {
+        let leadStatusCheck = "leadStatusCheck"
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -537,6 +538,7 @@ export const SaveLeadPartyExcel = async (req, res) => {
                 // document[heading] = cellValue;
             }
             if (document.database) {
+                document[leadStatusCheck] = true;
                 const insertedDocument = await Customer.create(document);
                 insertedDocuments.push(insertedDocument);
             } else {
