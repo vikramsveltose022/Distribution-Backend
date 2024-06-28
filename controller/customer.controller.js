@@ -11,6 +11,7 @@ import { OverDueReport } from "../model/overDue.mode.js";
 import { User } from "../model/user.model.js";
 import { PaymentDueReport } from "../model/payment.due.report.js";
 import { Role } from "../model/role.model.js";
+import { UpdateCheckLimit } from "../service/checkLimit.js";
 dotenv.config();
 
 export const SaveCustomer = async (req, res, next) => {
@@ -139,6 +140,9 @@ export const UpdateCustomer = async (req, res, next) => {
                 req.body.assignTransporter = JSON.parse(req.body.assignTransporter)
             }
             const updatedCustomer = req.body;
+            if (req.body.limit) {
+                await UpdateCheckLimit(customerId)
+            }
             await Customer.findByIdAndUpdate(customerId, updatedCustomer, { new: true });
             return res.status(200).json({ message: 'Customer Updated Successfully', status: true });
         }
