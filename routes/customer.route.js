@@ -19,7 +19,7 @@ const upload = multer({ storage: storage });
 const uploads = multer({ dest: "public/ExcelFile/" })
 
 router.post("/party-data", uploads.single('file'), saveExcelFile)
-router.post("/update-customer/:database", uploads.single('file'), updateExcelFile)
+router.post("/update-customer-bulk-import/:database", uploads.single('file'), updateExcelFile)
 
 router.post("/save-customer", upload.any("files"), SaveCustomer);
 router.get("/view-customer/:id/:database", ViewCustomer);

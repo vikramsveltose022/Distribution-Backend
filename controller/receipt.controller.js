@@ -489,6 +489,8 @@ export const saveReceiptWithExcel111 = async (req, res) => {
         let voucherType = "voucherType";
         let cashRunningAmount = "cashRunningAmount";
         let lockStatus = "lockStatus";
+        let partyId = "partyId";
+        let database = "database";
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -510,9 +512,10 @@ export const saveReceiptWithExcel111 = async (req, res) => {
                 document[heading] = cellValue;
             }
             if (document.partyId) {
-                const customer = await Customer.findById({ _id: document.partyId })
+                document[database] = req.params.database
+                const customer = await Customer.findById({ id: document.partyId, database: document.database })
                 if (customer) {
-                    document[partyId] = customer._id;
+                    document[partyId] = customer._id.toString();
                     if (document.type === "receipt" && document.paymentMode !== "Cash") {
                         const rece = await Receipt.find({ paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
@@ -569,14 +572,15 @@ export const saveReceiptWithExcel111 = async (req, res) => {
     }
 }
 
-export const savePaymentWithExcel11 = async (req, res) => {
+export const savePaymentWithExcel111 = async (req, res) => {
     try {
         let particular = "payment";
         let runningAmount = "runningAmount";
         let voucherNo = "voucherNo";
         let voucherType = "voucherType";
         let cashRunningAmount = "cashRunningAmount";
-        let partyId = "partyId"
+        let partyId = "partyId";
+        let database = "database";
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -598,11 +602,13 @@ export const savePaymentWithExcel11 = async (req, res) => {
                 document[heading] = cellValue;
             }
             if (document.partyId) {
+                document[database] = req.params.database
                 // console.log("id : " + document.partyId)
                 const customer = await Customer.findOne({ id: document.partyId, database: document.database })
                 if (customer) {
-                    document[partyId] = customer._id;
+                    document[partyId] = customer._id.toString();
                     // console.log("_id : " + document.partyId)
+                    // console.log(document)
                     if (document.type === "payment" && document.paymentMode !== "Cash") {
                         const rece = await Receipt.find({ paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
