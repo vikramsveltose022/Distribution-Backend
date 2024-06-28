@@ -266,3 +266,13 @@ export const ClosingSales = async (orderItem, warehouse) => {
         console.log(err)
     }
 }
+
+export const deletedPurchase = async (req, res, next) => {
+    try {
+        const purchase = await PurchaseOrder.findById(req.params.id)
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
