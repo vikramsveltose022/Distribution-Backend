@@ -270,7 +270,6 @@ export const ClosingSales = async (orderItem, warehouse) => {
 
 export const deletedPurchase = async (req, res, next) => {
     try {
-        console.log("called.............")
         const purchase = await PurchaseOrder.findById(req.params.id)
         if (!purchase) {
             return res.status(404).json({ message: "PurchaseOrder Not Found", status: false })
@@ -298,6 +297,11 @@ export const deletedPurchase = async (req, res, next) => {
             }
         }
         await deleteLedger(purchase)
+        purchase.status = "Deactive"
+        existInvoice.status = "Deactive"
+        await purchase.save()
+        await existInvoice.save()
+        return res.status(200).json({ message: "delete successfull !", status: true })
     }
     catch (err) {
         console.log(err)
@@ -311,15 +315,15 @@ export const deleteAddProductInWarehouse = async (warehouse, warehouseId) => {
         if (!user) {
             // return console.log("warehouse not found");
         }
-        const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse.productId._id.toString());
+        const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse.productId.toString());
         if (sourceProductItem) {
             sourceProductItem.currentStock -= warehouse.transferQty;
             sourceProductItem.totalPrice -= warehouse.totalPrice;
             sourceProductItem.transferQty -= warehouse.transferQty;
             if (sourceProductItem.currentStock <= 0) {
-                user.productItems = user.productItems.filter(
-                    (pItem) => pItem.productId.toString() !== warehouse.productId._id.toString());
+                user.productItems = user.productItems.filter((pItem) => pItem.productId.toString() !== warehouse.productId._id.toString());
             }
+            // console.log("warehouse : " + sourceProductItem)
             user.markModified('productItems');
             await user.save();
         } else {
@@ -329,7 +333,6 @@ export const deleteAddProductInWarehouse = async (warehouse, warehouseId) => {
         console.error(error);
     }
 };
-
 export const DeleteClosingPurchase = async (orderItem, warehouse) => {
     try {
         let cgstRate = 0;
@@ -351,6 +354,7 @@ export const DeleteClosingPurchase = async (orderItem, warehouse) => {
             stock.pBAmount -= orderItem.totalPrice;
             stock.pTaxAmount -= tax;
             stock.pTotal -= (orderItem.totalPrice + tax)
+            // console.log("stock : " + stock)
             await stock.save()
         } else {
             console.log("product item not found in stock")
@@ -361,7 +365,6 @@ export const DeleteClosingPurchase = async (orderItem, warehouse) => {
         console.log(err)
     }
 }
-
 export const deleteLedger = async (body) => {
     try {
         const ledger = await Ledger.find({ partyId: body.partyId }).sort({ sortorder: -1 })
@@ -369,7 +372,8 @@ export const deleteLedger = async (body) => {
             console.log("party id not found in a ledger")
         }
         let ledgerId = ledger[ledger.length - 1]
-        await Ledger.findByIdAndDelete(ledgerId._id)
+        // console.log(ledgerId._id)
+        await Ledger.findByIdAndDelete(ledgerId._id.toString())
     }
     catch (err) {
         console.log(err)
