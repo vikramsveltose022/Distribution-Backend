@@ -77,7 +77,7 @@ const CustomerSchema = new mongoose.Schema({
     type: Number
   },
   paymentTerm: {
-    type: Number
+    type: String
   },
   transporterDetail: {
     type: Number
