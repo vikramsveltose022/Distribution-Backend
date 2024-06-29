@@ -1,7 +1,10 @@
+import { ClosingStock } from "../model/closingStock.model.js";
 import { InvoiceList } from "../model/createInvoice.model.js";
+import { Ledger } from "../model/ledger.model.js";
 import { Product } from "../model/product.model.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
 import { User } from "../model/user.model.js";
+import { Warehouse } from "../model/warehouse.model.js";
 import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 import { generateInvoice } from "../service/invoice.js";
 import { addProductInWarehouse } from "./product.controller.js";
@@ -147,18 +150,18 @@ export const updatePurchaseOrder = async (req, res, next) => {
         for (const newOrderItem of newOrderItems) {
             // const oldOrderItem = oldOrderItems.find(item => item.productId.toString() === newOrderItem.productId.toString());
             // if (oldOrderItem) {
-                // const quantityChange = newOrderItem.qty - oldOrderItem.qty;
-                // if (quantityChange !== 0) {
-                    const product = await Product.findById({ _id: newOrderItem.productId });
-                    if (product) {
-                        //     product.Size -= quantityChange;
-                        product.basicPrice = await newOrderItem.basicPrice;
-                        product.landedCost = await newOrderItem.landedCost;
-                        await product.save();
-                    } else {
-                        console.error(`Product with ID ${newOrderItem.productId} not found`);
-                    }
-                // }
+            // const quantityChange = newOrderItem.qty - oldOrderItem.qty;
+            // if (quantityChange !== 0) {
+            const product = await Product.findById({ _id: newOrderItem.productId });
+            if (product) {
+                //     product.Size -= quantityChange;
+                product.basicPrice = await newOrderItem.basicPrice;
+                product.landedCost = await newOrderItem.landedCost;
+                await product.save();
+            } else {
+                console.error(`Product with ID ${newOrderItem.productId} not found`);
+            }
+            // }
             // }
         }
         Object.assign(order, updatedFields);
@@ -225,5 +228,117 @@ export const deletePurchaseOrder = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+}
+
+// delete purchaseOrder after status completed
+export const deletedPurchase = async (req, res, next) => {
+    try {
+        const purchase = await PurchaseOrder.findById(req.params.id)
+        if (!purchase) {
+            return res.status(404).json({ message: "PurchaseOrder Not Found", status: false })
+        }
+        const existInvoice = await InvoiceList.findOne({ orderId: req.params.id })
+        if (!existInvoice) {
+            return res.status(404).json({ message: "PurchaseOrder Not Found", status: false })
+        }
+        for (const orderItem of purchase.orderItems) {
+            const product = await Product.findOne({ _id: orderItem.productId });
+            if (product) {
+                // const current = new Date(new Date())
+                // product.purchaseDate = current
+                // product.partyId = req.body.partyId;
+                // product.purchaseStatus = true
+                // product.landedCost = orderItem.landedCost;
+                product.Opening_Stock -= orderItem.qty;
+                const warehouse = { productId: orderItem.productId, currentStock: (orderItem.qty), transferQty: (orderItem.qty), price: orderItem.price, totalPrice: orderItem.totalPrice, gstPercentage: orderItem.gstPercentage, igstTaxType: orderItem.igstTaxType, primaryUnit: orderItem.primaryUnit, secondaryUnit: orderItem.secondaryUnit, secondarySize: orderItem.secondarySize, landedCost: orderItem.landedCost }
+                await product.save();
+                await deleteAddProductInWarehouse(warehouse, product.warehouse)
+                await DeleteClosingPurchase(orderItem, product.warehouse)
+            } else {
+                console.log("product id not found")
+                // return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
+            }
+        }
+        await deleteLedger(purchase)
+        purchase.status = "Deactive"
+        existInvoice.status = "Deactive"
+        await purchase.save()
+        await existInvoice.save()
+        return res.status(200).json({ message: "delete successfull !", status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const deleteAddProductInWarehouse = async (warehouse, warehouseId) => {
+    try {
+        const user = await Warehouse.findById(warehouseId);
+        if (!user) {
+            // return console.log("warehouse not found");
+        }
+        const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse.productId.toString());
+        if (sourceProductItem) {
+            sourceProductItem.currentStock -= warehouse.transferQty;
+            sourceProductItem.totalPrice -= warehouse.totalPrice;
+            sourceProductItem.transferQty -= warehouse.transferQty;
+            if (sourceProductItem.currentStock <= 0) {
+                user.productItems = user.productItems.filter((pItem) => pItem.productId.toString() !== warehouse.productId._id.toString());
+            }
+            // console.log("warehouse : " + sourceProductItem)
+            user.markModified('productItems');
+            await user.save();
+        } else {
+            console.log("Product item not found in the warehouse");
+        }
+    } catch (error) {
+        console.error(error);
+    }
+};
+export const DeleteClosingPurchase = async (orderItem, warehouse) => {
+    try {
+        let cgstRate = 0;
+        let sgstRate = 0;
+        let igstRate = 0;
+        let tax = 0
+        const rate = parseInt(orderItem.gstPercentage) / 2;
+        if (orderItem.igstTaxType === false) {
+            cgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
+            sgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
+            tax = cgstRate + sgstRate
+        } else {
+            igstRate = (((orderItem.qty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
+            tax = igstRate
+        }
+        const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: orderItem.productId })
+        if (stock) {
+            stock.pQty -= (orderItem.qty);
+            stock.pBAmount -= orderItem.totalPrice;
+            stock.pTaxAmount -= tax;
+            stock.pTotal -= (orderItem.totalPrice + tax)
+            // console.log("stock : " + stock)
+            await stock.save()
+        } else {
+            console.log("product item not found in stock")
+        }
+        return true
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+export const deleteLedger = async (body) => {
+    try {
+        const ledger = await Ledger.find({ partyId: body.partyId }).sort({ sortorder: -1 })
+        if (ledger.length === 0) {
+            console.log("party id not found in a ledger")
+        }
+        let ledgerId = ledger[ledger.length - 1]
+        // console.log(ledgerId._id)
+        await Ledger.findByIdAndDelete(ledgerId._id.toString())
+    }
+    catch (err) {
+        console.log(err)
     }
 }

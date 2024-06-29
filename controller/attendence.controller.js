@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Attendence } from "../model/attendence.model.js";
 import { User } from "../model/user.model.js";
 import { EmployeeVerify } from "../model/verify.employee.model.js";
@@ -25,7 +26,6 @@ export const viewAttendence = async (req, res) => {
         return res.status(500).json({ status: false, error: 'Internal Server Error' });
     }
 }
-
 export const saveImage = async (req, res, next) => {
     try {
         if (req.file) {
@@ -55,5 +55,19 @@ export const viewEmployee = async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({ status: false, error: 'Internal Server Error' });
+    }
+}
+
+export const Attendance = async (req, res, next) => {
+    try {
+        const attend = await axios.get(`http://13.201.119.216:8050/api/attendanceAws/${req.params.database}`)
+        if (attend.data.status) {
+            return res.status(200).json({ Attendance: attend.data.Attendance, status: true })
+        }
+        return res.status(200).json({ message: "something went wrong", status: false })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }

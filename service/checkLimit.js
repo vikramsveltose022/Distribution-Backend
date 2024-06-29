@@ -1,4 +1,5 @@
 import { Customer } from "../model/customer.model.js";
+import { OverDueReport } from "../model/overDue.mode.js";
 import { PartyOrderLimit } from "../model/partyOrderLimit.model.js";
 import { overDue } from "./overDue.js";
 
@@ -62,6 +63,33 @@ export const UpdateCheckLimit = async (body, limit) => {
             // } else {
             //     // await overDue(body)
             // }
+        }
+        const existOver = await OverDueReport.findOne({ partyId: body, activeStatus: "Active" })
+        if (existOver) {
+            existOver.lockingAmount = limit
+            // console.log("ovr : " + existOver)
+            await existOver.save()
+        }
+    }
+    catch (err) {
+        console.log(err)
+    }
+};
+export const UpdateCheckLimitSales = async (body) => {
+    try {
+        const over = await PartyOrderLimit.findOne({ partyId: body.partyId, activeStatus: "Active" })
+        if (over) {
+            over.remainingAmount += body.grandTotal
+            over.totalAmount -= body.grandTotal
+            // console.log("partylist : " + over)
+            await over.save()
+        }
+        const existOver = await OverDueReport.findOne({ partyId: body.partyId, activeStatus: "Active" })
+        if (existOver) {
+            existOver.remainingAmount -= body.grandTotal;
+            existOver.totalOrderAmount -= body.grandTotal
+            // console.log("ovr : " + existOver)
+            await existOver.save()
         }
     }
     catch (err) {
