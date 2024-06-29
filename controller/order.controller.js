@@ -15,8 +15,13 @@ import { Customer } from "../model/customer.model.js";
 import { createInvoiceTemplate } from "../Invoice/invoice.js";
 import transporter from "../service/email.js";
 import { Warehouse } from "../model/warehouse.model.js";
-import { checkLimit } from "../service/checkLimit.js";
+import { UpdateCheckLimitSales, checkLimit } from "../service/checkLimit.js";
 import { PartyOrderLimit } from "../model/partyOrderLimit.model.js";
+import { InvoiceList } from "../model/createInvoice.model.js";
+import { Ledger } from "../model/ledger.model.js";
+import { ClosingStock } from "../model/closingStock.model.js";
+import { GoodDispatch } from "../model/goodDispatch.model.js";
+import { OverDueReport } from "../model/overDue.mode.js";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -711,3 +716,99 @@ export const ProductWiseSalesReport = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
+
+// --------------------------------------------
+export const deletedSalesOrder = async (req, res, next) => {
+    try {
+        const order = await CreateOrder.findById(req.params.id)
+        if (!order) {
+            return res.status(404).json({ error: "Not Found", status: false });
+        }
+        const existInvoice = await InvoiceList.findOne({ orderId: req.params.id })
+        if (!existInvoice) {
+            return res.status(404).json({ error: "Not Found", status: false });
+        }
+        const existGoodDispatch = await GoodDispatch.findOne({ orderId: req.params.id })
+        if (!existGoodDispatch) {
+            return res.status(404).json({ error: "Not Found", status: false });
+        }
+        for (const orderItem of order.orderItems) {
+            const product = await Product.findById({ _id: orderItem.productId });
+            if (product) {
+                // ware = product.warehouse
+                // product.salesDate = new Date()
+                const warehouse = await Warehouse.findById(product.warehouse)
+                if (warehouse) {
+                    const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
+                    pro.currentStock += (orderItem.qty);
+                    product.Opening_Stock += orderItem.qty;
+                    if (pro.currentStock < 0) {
+                        return res.status(404).json({ message: "out of stock", status: false })
+                    }
+                    await warehouse.save();
+                    await product.save()
+                    await DeleteClosingSales(orderItem, product.warehouse)
+                }
+            } else {
+                console.error(`Product with ID ${orderItem.productId} not found`);
+            }
+        }
+        await UpdateCheckLimitSales(order)
+        await deleteLedgerBalance(order)
+        order.status = "Deactive";
+        existInvoice.status = "Deactive";
+        existGoodDispatch.status = "Deactive";
+        await order.save();
+        await existInvoice.save()
+        await existGoodDispatch.save()
+        return res.status(200).json({ message: "delete successfull!", status: true })
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+}
+
+export const DeleteClosingSales = async (orderItem, warehouse) => {
+    try {
+        let cgstRate = 0;
+        let sgstRate = 0;
+        let igstRate = 0;
+        let tax = 0
+        const rate = parseInt(orderItem.gstPercentage) / 2;
+        if (orderItem.igstTaxType === false) {
+            cgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
+            sgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
+            tax = cgstRate + sgstRate
+        } else {
+            igstRate = (((orderItem.qty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
+            tax = igstRate
+        }
+        const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: orderItem.productId })
+        if (stock) {
+            stock.sQty -= (orderItem.qty);
+            stock.sBAmount -= orderItem.totalPrice;
+            stock.sTaxAmount -= tax;
+            stock.sTotal -= (orderItem.totalPrice + tax)
+            await stock.save()
+            // console.log("ClosingSales : " + stock)
+        }
+        return true
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+export const deleteLedgerBalance = async (body) => {
+    try {
+        const ledger = await Ledger.find({ partyId: body.partyId }).sort({ sortorder: -1 })
+        if (ledger.length === 0) {
+            console.log("party id not found in a ledger")
+        }
+        let ledgerId = ledger[ledger.length - 1]
+        // console.log(ledgerId._id)
+        await Ledger.findByIdAndDelete(ledgerId._id.toString())
+    }
+    catch (err) {
+        console.log(err)
+    }
+}

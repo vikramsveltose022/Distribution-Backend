@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { ProductWisePurchaseReport, deletePurchaseOrder, purchaseOrder, purchaseOrderHistory, purchaseOrderHistoryByOrderId, updatePurchaseOrder, updatePurchaseOrderStatus } from "../controller/purchageOrder.controller.js";
+import { ProductWisePurchaseReport, deletePurchaseOrder, deletedPurchase, purchaseOrder, purchaseOrderHistory, purchaseOrderHistoryByOrderId, updatePurchaseOrder, updatePurchaseOrderStatus } from "../controller/purchageOrder.controller.js";
 
 const router = express.Router();
 const upload = multer({ dest: "public/Images/" })
@@ -12,5 +12,5 @@ router.put("/update-purchase-order/:id", updatePurchaseOrder);
 router.put("/update-purchase-order-status/:id", updatePurchaseOrderStatus);
 router.post("/product-purchase-report/:database", ProductWisePurchaseReport)
 router.delete("/delete-purchase-order/:id", deletePurchaseOrder);
-
+router.delete("/deleted-purchase-order/:id",deletedPurchase)
 export default router;
