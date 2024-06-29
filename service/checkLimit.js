@@ -44,15 +44,15 @@ export const checkLimit = async (body) => {
         console.log(err)
     }
 };
-export const UpdateCheckLimit = async (body) => {
+export const UpdateCheckLimit = async (body, limit) => {
     try {
         const over = await PartyOrderLimit.findOne({ partyId: body, activeStatus: "Active" })
         if (over) {
             // const last = over[over.length - 1]
             // console.log(last)
-            const party = await Customer.findById(body)
-            over.lockingAmount = party.limit
-            over.remainingAmount = party.limit - over.totalAmount
+            // const party = await Customer.findById(body)
+            over.lockingAmount = limit
+            over.remainingAmount = limit - over.totalAmount
             await over.save()
             // if (over.remainingAmount <= 0) {
             //     party.autoBillingStatus = "locked";

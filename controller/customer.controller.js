@@ -141,7 +141,7 @@ export const UpdateCustomer = async (req, res, next) => {
             }
             const updatedCustomer = req.body;
             if (req.body.limit) {
-                await UpdateCheckLimit(customerId)
+                await UpdateCheckLimit(customerId, req.body.limit)
             }
             await Customer.findByIdAndUpdate(customerId, updatedCustomer, { new: true });
             return res.status(200).json({ message: 'Customer Updated Successfully', status: true });
