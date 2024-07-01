@@ -12,6 +12,7 @@ import { User } from "../model/user.model.js";
 import { PaymentDueReport } from "../model/payment.due.report.js";
 import { Role } from "../model/role.model.js";
 import { UpdateCheckLimit } from "../service/checkLimit.js";
+import { CustomerGroup } from "../model/customerGroup.model.js";
 dotenv.config();
 
 export const SaveCustomer = async (req, res, next) => {
@@ -282,6 +283,7 @@ export const updatePassword = async (request, response, next) => {
 export const saveExcelFile = async (req, res) => {
     try {
         let code = "code";
+        let database = "database"
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -309,6 +311,7 @@ export const saveExcelFile = async (req, res) => {
                 }
                 // document[heading] = cellValue;
             }
+            document[database] = req.params.database
             if (document.database) {
                 const existingId = await Customer.findOne({ id: document.id, database: document.database });
                 if (existingId) {
@@ -513,10 +516,110 @@ export const paymentDueReport = async (req, res) => {
     }
 }
 
+export const saveExcelFile11 = async (req, res) => {
+    try {
+        let code = "code";
+        let category = "category";
+        let database = "database";
+        const filePath = await req.file.path;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(filePath);
+        const worksheet = workbook.getWorksheet(1);
+        const headerRow = worksheet.getRow(1);
+        const headings = [];
+        headerRow.eachCell((cell) => {
+            headings.push(cell.value);
+        });
+        const insertedDocuments = [];
+        const existingParts = [];
+        const panMobile = [];
+        const existingIds = []
+        const dataNotExist = []
+        const group = [];
+        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
+            const dataRow = worksheet.getRow(rowIndex);
+            const document = {};
+            for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
+                const heading = headings[columnIndex - 1];
+                const cellValue = dataRow.getCell(columnIndex).value;
+                if (heading === 'email' && typeof cellValue === 'object' && 'text' in cellValue) {
+                    document[heading] = cellValue.text;
+                } else {
+                    document[heading] = cellValue;
+                }
+                // document[heading] = cellValue;
+            }
+            document[database] = req.params.database
+            if (document.database) {
+                const existCustomerGroup = await CustomerGroup.findOne({ id: document.category, database: document.database })
+                if (!existCustomerGroup) {
+                    group.push(document.id)
+                } else {
+                    document[category] = await existCustomerGroup._id.toString()
+
+                    const existingId = await Customer.findOne({ id: document.id, database: document.database });
+                    if (existingId) {
+                        existingIds.push(document.id)
+                    } else {
+                        if (document.panNo) {
+                            const codes = document.panNo;
+                            document[code] = codes;
+                            const existingRecord = await Customer.findOne({
+                                panNo: document.panNo, database: document.database
+                            });
+                            if (!existingRecord) {
+                                const insertedDocument = await Customer.create(document);
+                                insertedDocuments.push(insertedDocument);
+                            } else {
+                                existingParts.push(document.panNo);
+                            }
+                        } else {
+                            if (document.aadharNo) {
+                                const codes = document.aadharNo;
+                                document[code] = codes;
+                                const existingRecord = await Customer.findOne({
+                                    aadharNo: document.aadharNo, database: document.database
+                                });
+                                if (!existingRecord) {
+                                    const insertedDocument = await Customer.create(document);
+                                    insertedDocuments.push(insertedDocument);
+                                } else {
+                                    existingParts.push(document.aadharNo);
+                                }
+                            } else {
+                                // const insertedDocument = await Customer.create(document);
+                                panMobile.push(document.aadharNo);
+                            }
+                        }
+                    }
+                }
+            } else {
+                dataNotExist.push(document.firstName)
+            }
+        }
+        let message = 'Data Inserted Successfully';
+        if (existingParts.length > 0) {
+            message = `Some party already exist: ${existingParts.join(', ')}`;
+        } else if (panMobile.length > 0) {
+            message = `this pan or aadhar already exist: ${panMobile.join(', ')}`;
+        } else if (existingIds.length > 0) {
+            message = `this customer id's already exist: ${existingIds.join(', ')}`;
+        } else if (dataNotExist.length > 0) {
+            message = `this customer database not exist: ${dataNotExist.join(', ')}`;
+        } else if (group.length > 0) {
+            message = `this customer category id not exist: ${group.join(', ')}`;
+        }
+        return res.status(200).json({ message, status: true });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+}
 // ------------------------------------------------------------
 export const SaveLeadPartyExcel = async (req, res) => {
     try {
-        let leadStatusCheck = "leadStatusCheck"
+        let leadStatusCheck = "leadStatusCheck";
+        let database = "database"
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -541,6 +644,7 @@ export const SaveLeadPartyExcel = async (req, res) => {
                 }
                 // document[heading] = cellValue;
             }
+            document[database] = req.params.database
             if (document.database) {
                 document[leadStatusCheck] = true;
                 const insertedDocument = await Customer.create(document);
@@ -604,5 +708,28 @@ export const PartyWithSalesPerson = async (req, res, next) => {
     catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+
+
+
+export const DeleteCustomer11 = async (req, res, next) => {
+    try {
+        const customer = await User.find({ database: "five" })
+        if (customer.length == 0) {
+            return res.status(404).json({ error: "Not Found", status: false });
+        }
+        console.log(customer.length)
+        for (let id of customer) {
+
+            console.log(id._id)
+            await User.findByIdAndDelete(id._id)
+
+        }
+        return res.status(200).json({ message: "delete successful", status: true })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal server error", status: false });
     }
 }

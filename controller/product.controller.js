@@ -202,6 +202,7 @@ export const viewCurrentStock = async (req, res, next) => {
 
 export const saveItemWithExcel = async (req, res) => {
   try {
+    let database = "database"
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -221,6 +222,7 @@ export const saveItemWithExcel = async (req, res) => {
         const cellValue = dataRow.getCell(columnIndex).value;
         document[heading] = cellValue;
       }
+      // document[database] = req.params.database
       if (document.HSN_Code) {
         const insertedDocument = await Product.create(document);
         await addProductInWarehouse1(document, insertedDocument.warehouse, insertedDocument)

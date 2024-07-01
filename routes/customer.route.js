@@ -18,7 +18,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const uploads = multer({ dest: "public/ExcelFile/" })
 
-router.post("/party-data", uploads.single('file'), saveExcelFile)
+// router.post("/party-data", uploads.single('file'), saveExcelFile)
+router.post("/party-data/:database", uploads.single('file'), saveExcelFile)
 router.post("/update-customer-bulk-import/:database", uploads.single('file'), updateExcelFile)
 
 router.post("/save-customer", upload.any("files"), SaveCustomer);
@@ -41,6 +42,7 @@ router.post("/payment-due-report/:database", paymentDueReport)
 
 // --------------------------------------------------------------------
 router.post("/save-lead-party-bulk", uploads.single("file"), SaveLeadPartyExcel)
+// router.post("/save-lead-party-bulk/:database", uploads.single("file"), SaveLeadPartyExcel)
 router.get("/lead-party-list/:database", LeadPartyList)
 router.post("/assign-lead-party", AssignLeadParty)
 router.get("/lead-party-list/:id", LeadPartyList)

@@ -80,7 +80,7 @@ const CustomerSchema = new mongoose.Schema({
     type: String
   },
   transporterDetail: {
-    type: Number
+    type: String
   },
   assignTransporter: {
     type: []

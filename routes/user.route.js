@@ -19,10 +19,11 @@ const upload = multer({ storage: storage });
 const uploads = multer({ dest: "public/ExcelFile/" })
 
 router.put("/update-plan/:id", updatePlan)
-router.post("/import-user-data", uploads.single('file'), saveUserWithExcel)
+// router.post("/import-user-data", uploads.single('file'), saveUserWithExcel)
+router.post("/import-user-data/:database", uploads.single('file'), saveUserWithExcel)
 router.post("/update-import-user/:database", uploads.single('file'), updateUserWithExcel)
 
-router.put("/update-super-admin-role/:id",SuperAdminRoleUpdate)
+router.put("/update-super-admin-role/:id", SuperAdminRoleUpdate)
 router.post("/save-user", upload.single("file"), SaveUser)
 router.get("/view-register-user/:database", ViewRegisterUser)
 router.get("/view-user/:id", ViewUserById);
