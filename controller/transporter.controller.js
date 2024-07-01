@@ -81,6 +81,7 @@ export const UpdateTransporter = async (req, res, next) => {
 
 export const saveExcelFile = async (req, res) => {
     try {
+        let database = "database"
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -106,6 +107,7 @@ export const saveExcelFile = async (req, res) => {
                 }
                 // document[heading] = cellValue;
             }
+            // document[database] = req.params.database
             if (document.database) {
                 const existingId = await Transporter.findOne({ id: document.id, database: document.database });
                 if (existingId) {

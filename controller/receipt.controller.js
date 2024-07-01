@@ -170,6 +170,7 @@ export const saveReceiptWithExcel = async (req, res) => {
         let voucherType = "voucherType";
         let cashRunningAmount = "cashRunningAmount";
         let lockStatus = "lockStatus";
+        let database = "database"
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -190,6 +191,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                 const cellValue = dataRow.getCell(columnIndex).value;
                 document[heading] = cellValue;
             }
+            // document[database] = req.params.database
             if (document.partyId) {
                 const customer = await Customer.findById({ _id: document.partyId })
                 if (customer) {
@@ -256,6 +258,7 @@ export const savePaymentWithExcel = async (req, res) => {
         let voucherNo = "voucherNo";
         let voucherType = "voucherType";
         let cashRunningAmount = "cashRunningAmount";
+        let database = "database"
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -276,6 +279,7 @@ export const savePaymentWithExcel = async (req, res) => {
                 const cellValue = dataRow.getCell(columnIndex).value;
                 document[heading] = cellValue;
             }
+            // document[database] = req.params.database
             if (document.partyId) {
                 const customer = await Customer.findById({ _id: document.partyId })
                 if (customer) {

@@ -179,10 +179,7 @@ const otpStore = {};
 export const SignIn = async (req, res, next) => {
   try {
     const { email, password, latitude, longitude, currentAddress } = req.body;
-    let existingAccount = await User.findOne({ email }).populate({
-      path: "rolename",
-      model: "role",
-    });
+    let existingAccount = await User.findOne({ email }).populate({ path: "rolename", model: "role" }).populate({ path: "branch", model: "userBranch" });
     let existingCustomer = await Customer.findOne({ email }).populate({ path: "rolename", model: "role" })
     if (!existingAccount && !existingCustomer) {
       return res.status(400).json({ message: "Incorrect email", status: false });
@@ -348,6 +345,7 @@ export const ViewWarehouse = async (req, res, next) => {
 export const saveUserWithExcel = async (req, res) => {
   try {
     let code = "code";
+    let database = "database"
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -375,6 +373,7 @@ export const saveUserWithExcel = async (req, res) => {
         }
         // document[heading] = cellValue;
       }
+      document[database] = req.params.database
       if (document.database) {
         const existingId = await User.findOne({ id: document.id, database: document.database });
         if (existingId) {
@@ -910,7 +909,7 @@ export const saveUserWithExcel11 = async (req, res) => {
       message = `this user id already exist: ${existingIds.join(', ')}`;
     } else if (dataNotExist.length > 0) {
       message = `this user's database not exist: ${dataNotExist.join(', ')}`;
-    } else if(roles.length>0){
+    } else if (roles.length > 0) {
       message = `this user's rolename not correct: ${roles.join(', ')}`;
     }
     return res.status(200).json({ message, status: true });
