@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { AssignLeadParty, DeleteCustomer, LeadPartyList, SaveCustomer, SaveLeadPartyExcel, SignIn, SignInWithMobile, SuperAdminList, UpdateCustomer, ViewCustomer, ViewCustomerById, dueParty, forgetPassword, lockParty, otpVerify, overDueReport, paymentDueReport, saveExcelFile, updateExcelFile, updatePassword } from "../controller/customer.controller.js";
+import { AssignLeadParty, DeleteCustomer, DeleteSalesLead, LeadPartyList, SaveCustomer, SaveLeadPartyExcel, SignIn, SignInWithMobile, SuperAdminList, UpdateCustomer, ViewCustomer, ViewCustomerById, dueParty, forgetPassword, lockParty, otpVerify, overDueReport, paymentDueReport, saveExcelFile, updateExcelFile, updatePassword } from "../controller/customer.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -46,5 +46,6 @@ router.post("/save-lead-party-bulk/:database", uploads.single("file"), SaveLeadP
 router.get("/lead-party-list/:database", LeadPartyList)
 router.post("/assign-lead-party", AssignLeadParty)
 router.get("/lead-party-list/:id", LeadPartyList)
+router.get("/delete-sales-lead/:id", DeleteSalesLead);
 
 export default router;

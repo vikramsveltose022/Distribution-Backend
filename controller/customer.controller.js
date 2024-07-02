@@ -663,9 +663,58 @@ export const SaveLeadPartyExcel = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 }
+export const UpdateLeadPartyExcel = async (req, res) => {
+    try {
+        let leadStatusCheck = "leadStatusCheck";
+        let database = "database"
+        const filePath = await req.file.path;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(filePath);
+        const worksheet = workbook.getWorksheet(1);
+        const headerRow = worksheet.getRow(1);
+        const headings = [];
+        headerRow.eachCell((cell) => {
+            headings.push(cell.value);
+        });
+        const insertedDocuments = [];
+        const dataNotExist = []
+        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
+            const dataRow = worksheet.getRow(rowIndex);
+            const document = {};
+            for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
+                const heading = headings[columnIndex - 1];
+                const cellValue = dataRow.getCell(columnIndex).value;
+                if (heading === 'email' && typeof cellValue === 'object' && 'text' in cellValue) {
+                    document[heading] = cellValue.text;
+                } else {
+                    document[heading] = cellValue;
+                }
+                // document[heading] = cellValue;
+            }
+            document[database] = req.params.database
+            if (document.database) {
+                const filter = { id: document.id, database: req.params.database };
+                const options = { new: true, upsert: true };
+                const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
+                // const insertedDocument = await Customer.create(document);
+                insertedDocuments.push(insertedDocument);
+            } else {
+                dataNotExist.push(document.firstName)
+            }
+        }
+        let message = 'Data Updated Successfully';
+        if (dataNotExist.length > 0) {
+            message = `this customer database not exist: ${dataNotExist.join(', ')}`;
+        }
+        return res.status(200).json({ message, status: true });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+}
 export const LeadPartyList = async (req, res, next) => {
     try {
-        const party = await Customer.find({ database: req.params.database, leadStatus: true }).populate({ path: "created_by", model: "user" });
+        const party = await Customer.find({ database: req.params.database, leadStatusCheck: true }).populate({ path: "created_by", model: "user" });
         if (party.length == 0) {
             return res.status(404).json({ message: "Data Not Found", status: false })
         }
@@ -699,7 +748,7 @@ export const AssignLeadParty = async (req, res, next) => {
 }
 export const PartyWithSalesPerson = async (req, res, next) => {
     try {
-        const party = await Customer.find({ created_by: req.params.id }).populate({ path: "created_by", model: "user" });
+        const party = await Customer.find({ created_by: req.params.id, leadStatusCheck: true }).populate({ path: "created_by", model: "user" });
         if (!party) {
             return res.status(404).json({ message: "party not found", status: false })
         }
@@ -710,7 +759,21 @@ export const PartyWithSalesPerson = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
+export const DeleteSalesLead = async (req, res, next) => {
+    try {
+        const customer = await Customer.findById({ _id: req.params.id })
+        if (!customer) {
+            return res.status(404).json({ error: "Not Found", status: false });
+        }
+        customer.status = "Deactive";
+        await customer.save();
+        return res.status(200).json({ message: "delete successful", status: true })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal server error", status: false });
+    }
+}
 
 
 export const DeleteCustomer11 = async (req, res, next) => {
