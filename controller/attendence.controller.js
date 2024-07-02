@@ -61,9 +61,7 @@ export const viewEmployee = async (req, res) => {
 // aws api intregation...............................
 export const UserRegister = async (req, res, next) => {
     try {
-        console.log(req.body)
         const response = await axios.post("http://13.201.119.216:8050/api/register", req.body)
-        console.log("res " + response.data)
         if (response.status === 200) {
             return res.status(200).json({ User: response.data, message: "data saved successfull!", status: true })
         }
