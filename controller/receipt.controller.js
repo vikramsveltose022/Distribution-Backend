@@ -191,7 +191,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                 const cellValue = dataRow.getCell(columnIndex).value;
                 document[heading] = cellValue;
             }
-            // document[database] = req.params.database
+            document[database] = req.params.database
             if (document.partyId) {
                 const customer = await Customer.findById({ _id: document.partyId })
                 if (customer) {
@@ -279,7 +279,7 @@ export const savePaymentWithExcel = async (req, res) => {
                 const cellValue = dataRow.getCell(columnIndex).value;
                 document[heading] = cellValue;
             }
-            // document[database] = req.params.database
+            document[database] = req.params.database
             if (document.partyId) {
                 const customer = await Customer.findById({ _id: document.partyId })
                 if (customer) {

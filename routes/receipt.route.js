@@ -14,10 +14,10 @@ router.put("/update-receipt/:id", UpdateReceipt)
 
 router.post("/profit-loss-report/:database", ProfitLossReport)
 
-// router.post("/reciept-data/:database", uploads.single('file'), saveReceiptWithExcel)
-// router.post("/payment-data/:database", uploads.single('file'), savePaymentWithExcel)
-router.post("/reciept-data", uploads.single('file'), saveReceiptWithExcel)
-router.post("/payment-data", uploads.single('file'), savePaymentWithExcel)
+router.post("/reciept-data/:database", uploads.single('file'), saveReceiptWithExcel)
+router.post("/payment-data/:database", uploads.single('file'), savePaymentWithExcel)
+// router.post("/reciept-data", uploads.single('file'), saveReceiptWithExcel)
+// router.post("/payment-data", uploads.single('file'), savePaymentWithExcel)
 
 router.post("/cash-book-report/:database", CashBookReport)
 router.post("/bank-account-report/:database", BankAccountReport)

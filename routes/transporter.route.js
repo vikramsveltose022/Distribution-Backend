@@ -19,8 +19,8 @@ const upload = multer({ storage: storage });
 const uploads = multer({ dest: "public/ExcelFile/" })
 
 
-router.post("/transporter-data", uploads.single('file'), saveExcelFile)
-// router.post("/transporter-data/:database", uploads.single('file'), saveExcelFile)
+// router.post("/transporter-data", uploads.single('file'), saveExcelFile)
+router.post("/transporter-data/:database", uploads.single('file'), saveExcelFile)
 router.post("/update-import-transporter/:database", uploads.single('file'), UpdateExcelTransporter)
 
 router.post("/save-transporter", upload.single("file"), SaveTransporter);
