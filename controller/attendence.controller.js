@@ -72,19 +72,7 @@ export const UserRegister = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-// export const UserRecognition = async (req, res, next) => {
-//     try {
-//         const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body)
-//         if (response.status === 200) {
-//             return res.status(200).json({ User: response.data, message: response.data.message, status: true })
-//         }
-//         return res.status(400).json({ message: "Bad Request", status: false })
-//     }
-//     catch (err) {
-//         console.log(err)
-//         return res.status(500).json({ error: "Internal Server Error", status: false })
-//     }
-// }
+
 export const UserRecognition = async (req, res, next) => {
     try {
         const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body);
@@ -94,12 +82,21 @@ export const UserRecognition = async (req, res, next) => {
             return res.status(400).json({ message: response.data.message, status: false });
         }
     } catch (err) {
-        console.log(err)
-        return res.status(500).json({ error: err.response, status: false });
+        console.error("Error in UserRecognition:", err);
+
+        if (axios.isAxiosError(err)) {
+            if (err.response) {
+                return res.status(err.response.status || 500).json({ error: err.response.data.error, status: false });
+            } else if (err.request) {
+                return res.status(500).json({ error: "No response received from server", status: false });
+            } else {
+                return res.status(500).json({ error: err.message, status: false });
+            }
+        } else {
+            return res.status(500).json({ error: "An unexpected error occurred", status: false });
+        }
     }
-}
-
-
+};
 
 export const Attendance = async (req, res, next) => {
     try {
