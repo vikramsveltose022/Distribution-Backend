@@ -74,9 +74,10 @@ export const UserRegister = async (req, res, next) => {
 }
 export const UserRecognition = async (req, res, next) => {
     try {
+        console.log(req.body)
         const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body)
         if (response.status === 200) {
-            return res.status(200).json({ User: response.data, message: "data saved successfull!", status: true })
+            return res.status(200).json({ User: response.data, message: response.data.message, status: true })
         }
         return res.status(400).json({ message: "Bad Request", status: false })
     }
