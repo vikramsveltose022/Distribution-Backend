@@ -159,12 +159,14 @@ const CustomerSchema = new mongoose.Schema({
     type: String
   },
   leadStatus: {
-    type: Boolean,
-    default: true
+    type: String
   },
   leadStatusCheck: {
     type: Boolean,
     default: false
+  },
+  remark:{
+    type:String
   }
 
 }, { timestamps: true });
