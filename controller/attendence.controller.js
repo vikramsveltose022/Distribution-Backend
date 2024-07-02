@@ -87,13 +87,28 @@ export const UserRegister = async (req, res, next) => {
 // }
 export const UserRecognition = async (req, res, next) => {
     try {
+        if (req.body) {
+            req.body = await JSON.parse(req.body)
+        }
         const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body);
         if (response.data.status) {
+            console.log("called......")
             return res.status(200).json({ User: response.data, message: response.data.message, status: true });
         } else {
             return res.status(400).json({ message: response.data.message, status: false });
         }
     } catch (err) {
+        if (req.body) {
+            req.body = await JSON.stringify(req.body)
+        }
+        const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body);
+        if (response.data.status) {
+            console.log("yesssss......")
+            return res.status(200).json({ User: response.data, message: response.data.message, status: true });
+        } else {
+            return res.status(400).json({ message: response.data.message, status: false });
+        }
+        console.log(err)
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
