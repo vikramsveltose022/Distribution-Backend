@@ -761,12 +761,12 @@ export const PartyWithSalesPerson = async (req, res, next) => {
 }
 export const DeleteSalesLead = async (req, res, next) => {
     try {
-        const customer = await Customer.findById({ _id: req.params.id })
+        const customer = await Customer.findByIdAndDelete({ _id: req.params.id })
         if (!customer) {
             return res.status(404).json({ error: "Not Found", status: false });
         }
-        customer.status = "Deactive";
-        await customer.save();
+        // customer.status = "Deactive";
+        // await customer.save();
         return res.status(200).json({ message: "delete successful", status: true })
     }
     catch (err) {
