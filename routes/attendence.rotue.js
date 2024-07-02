@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { Attendance, saveAttendence, saveImage, viewAttendence, viewEmployee } from "../controller/attendence.controller.js";
+import { Attendance, UserRecognition, UserRegister, saveAttendence, saveImage, viewAttendence, viewEmployee } from "../controller/attendence.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -22,6 +22,8 @@ router.get("/view-attendence", viewAttendence);
 router.post("/save-image", upload.single("file"), saveImage)
 router.get("/view-employee", viewEmployee)
 
-router.get("/attendance-list/:database",Attendance)
+router.get("/attendance-list/:database", Attendance)
+router.post("/register", UserRegister)
+router.post("/recongnition", UserRecognition)
 
 export default router;

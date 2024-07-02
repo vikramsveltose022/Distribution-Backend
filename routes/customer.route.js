@@ -46,6 +46,6 @@ router.post("/save-lead-party-bulk/:database", uploads.single("file"), SaveLeadP
 router.get("/lead-party-list/:database", LeadPartyList)
 router.post("/assign-lead-party", AssignLeadParty)
 router.get("/lead-party-list/:id", LeadPartyList)
-router.get("/delete-sales-lead/:id", DeleteSalesLead);
+router.delete("/delete-sales-lead/:id", DeleteSalesLead);
 
 export default router;

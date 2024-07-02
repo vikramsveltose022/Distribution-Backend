@@ -58,6 +58,33 @@ export const viewEmployee = async (req, res) => {
     }
 }
 
+// aws api intregation...............................
+export const UserRegister = async (req, res, next) => {
+    try {
+        const response = await axios.post("http://13.201.119.216:8050/api/register", req.body)
+        if (response.data.status) {
+            return res.status(200).json({ User: response.data, message: "data saved successfull!", status: true })
+        }
+        return res.status(400).json({ message: "Bad Request", status: false })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const UserRecognition = async (req, res, next) => {
+    try {
+        const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body)
+        if (response.data.status) {
+            return res.status(200).json({ User: response.data, message: "data saved successfull!", status: true })
+        }
+        return res.status(400).json({ message: "Bad Request", status: false })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
 export const Attendance = async (req, res, next) => {
     try {
         const attend = await axios.get(`http://13.201.119.216:8050/api/attendanceAws/${req.params.database}`)
