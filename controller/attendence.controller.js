@@ -95,7 +95,7 @@ export const UserRecognition = async (req, res, next) => {
         }
     } catch (err) {
         console.log(err)
-        return res.status(500).json({ error: "Internal Server Error", status: false });
+        return res.status(500).json({ error: err.response, status: false });
     }
 }
 
