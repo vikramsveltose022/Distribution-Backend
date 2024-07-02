@@ -19,8 +19,8 @@ const upload = multer({ storage: storage });
 const uploads = multer({ dest: "public/ExcelFile/" })
 
 router.get("/get-xml", ProductXml);
-router.post("/import-item-data", uploads.single('file'), saveItemWithExcel)
-router.post("/import-item-data/database", uploads.single('file'), saveItemWithExcel)
+// router.post("/import-item-data", uploads.single('file'), saveItemWithExcel)
+router.post("/import-item-data/:database", uploads.single('file'), saveItemWithExcel)
 router.post("/update-import-product/:database", uploads.single('file'), updateItemWithExcel)
 
 router.post("/save-product", upload.array("files"), SaveProduct)
