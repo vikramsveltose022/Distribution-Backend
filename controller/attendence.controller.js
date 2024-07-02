@@ -72,20 +72,34 @@ export const UserRegister = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+// export const UserRecognition = async (req, res, next) => {
+//     try {
+//         const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body)
+//         if (response.status === 200) {
+//             return res.status(200).json({ User: response.data, message: response.data.message, status: true })
+//         }
+//         return res.status(400).json({ message: "Bad Request", status: false })
+//     }
+//     catch (err) {
+//         console.log(err)
+//         return res.status(500).json({ error: "Internal Server Error", status: false })
+//     }
+// }
 export const UserRecognition = async (req, res, next) => {
     try {
-        console.log(req.body)
-        const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body)
-        if (response.status === 200) {
-            return res.status(200).json({ User: response.data, message: response.data.message, status: true })
+        const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body);
+        if (response.data.status) {
+            return res.status(200).json({ User: response.data, message: response.data.message, status: true });
+        } else {
+            return res.status(400).json({ message: response.data.message, status: false });
         }
-        return res.status(400).json({ message: "Bad Request", status: false })
-    }
-    catch (err) {
-        console.log(err)
-        return res.status(500).json({ error: "Internal Server Error", status: false })
+    } catch (err) {
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
+
+
+
 export const Attendance = async (req, res, next) => {
     try {
         const attend = await axios.get(`http://13.201.119.216:8050/api/attendanceAws/${req.params.database}`)
