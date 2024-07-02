@@ -222,7 +222,7 @@ export const saveItemWithExcel = async (req, res) => {
         const cellValue = dataRow.getCell(columnIndex).value;
         document[heading] = cellValue;
       }
-      // document[database] = req.params.database
+      document[database] = req.params.database
       if (document.HSN_Code) {
         const insertedDocument = await Product.create(document);
         await addProductInWarehouse1(document, insertedDocument.warehouse, insertedDocument)

@@ -107,7 +107,7 @@ export const saveExcelFile = async (req, res) => {
                 }
                 // document[heading] = cellValue;
             }
-            // document[database] = req.params.database
+            document[database] = req.params.database
             if (document.database) {
                 const existingId = await Transporter.findOne({ id: document.id, database: document.database });
                 if (existingId) {
