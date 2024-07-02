@@ -63,8 +63,8 @@ export const UserRegister = async (req, res, next) => {
     try {
         console.log(req.body)
         const response = await axios.post("http://13.201.119.216:8050/api/register", req.body)
-        console.log("res " + response)
-        if (response.data.status) {
+        console.log("res " + response.data)
+        if (response.status === 200) {
             return res.status(200).json({ User: response.data, message: "data saved successfull!", status: true })
         }
         return res.status(400).json({ message: "Bad Request", status: false })
@@ -77,7 +77,7 @@ export const UserRegister = async (req, res, next) => {
 export const UserRecognition = async (req, res, next) => {
     try {
         const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body)
-        if (response.data.status) {
+        if (response.status === 200) {
             return res.status(200).json({ User: response.data, message: "data saved successfull!", status: true })
         }
         return res.status(400).json({ message: "Bad Request", status: false })
