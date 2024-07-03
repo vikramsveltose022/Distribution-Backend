@@ -83,17 +83,14 @@ export const UserRecognition = async (req, res, next) => {
         }
     } catch (err) {
         console.error("Error in UserRecognition:", err);
-
-        if (axios.isAxiosError(err)) {
-            if (err.response) {
-                return res.status(err.response.status || 500).json({ error: err.response.data.error, status: false });
-            } else if (err.request) {
-                return res.status(500).json({ error: "No response received from server", status: false });
-            } else {
-                return res.status(500).json({ error: err.message, status: false });
-            }
+        if (err.response) {
+            console.error("Error in UserRecognition:", err.response.data.error);
+            return res.status(err.response.status || 500).json({ error: err.response.data.error, status: false });
+        } else if (err.request) {
+            return res.status(500).json({ error: "No response received from server", status: false });
         } else {
-            return res.status(500).json({ error: "An unexpected error occurred", status: false });
+            console.error("Error in UserRecognition:", err.message);
+            return res.status(500).json({ error: err.message, status: false });
         }
     }
 };
