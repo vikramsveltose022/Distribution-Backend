@@ -113,16 +113,15 @@ export const CreateCollection = async (req, res, next) => {
     try {
         const response = await axios.post("http://13.201.119.216:8050/api/createcollection", req.body)
         if (response.status === 200) {
-            return res.status(200).json({ message: response.data, status: true })
+            return res.status(200).json({ message: response.data.message, status: true })
         }
         return res.status(400).json({ message: response.data, status: false })
     }
     catch (err) {
         console.log(err)
-        return res.status(500).json({ error: "Internal Server Error", status: false })
+        return res.status(500).json({ error: "Internal Server Error", status: false, successCode: err.response.status })
     }
 }
-
 export const AttendanceListById = async (req, res, next) => {
     try {
         const attend = await axios.get(`http://13.201.119.216:8050/api/attendanceAwsById/${req.params.id}`)
@@ -136,7 +135,6 @@ export const AttendanceListById = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const AttendanceList = async (req, res, next) => {
     try {
         const attend = await axios.get(`http://13.201.119.216:8050/api/localDataAttendance/${req.params.database}`)
