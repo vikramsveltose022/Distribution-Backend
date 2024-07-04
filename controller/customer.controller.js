@@ -663,55 +663,6 @@ export const SaveLeadPartyExcel = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 }
-export const UpdateLeadPartyExcel = async (req, res) => {
-    try {
-        let leadStatusCheck = "leadStatusCheck";
-        let database = "database"
-        const filePath = await req.file.path;
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(filePath);
-        const worksheet = workbook.getWorksheet(1);
-        const headerRow = worksheet.getRow(1);
-        const headings = [];
-        headerRow.eachCell((cell) => {
-            headings.push(cell.value);
-        });
-        const insertedDocuments = [];
-        const dataNotExist = []
-        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
-            const dataRow = worksheet.getRow(rowIndex);
-            const document = {};
-            for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
-                const heading = headings[columnIndex - 1];
-                const cellValue = dataRow.getCell(columnIndex).value;
-                if (heading === 'email' && typeof cellValue === 'object' && 'text' in cellValue) {
-                    document[heading] = cellValue.text;
-                } else {
-                    document[heading] = cellValue;
-                }
-                // document[heading] = cellValue;
-            }
-            document[database] = req.params.database
-            if (document.database) {
-                const filter = { id: document.id, database: req.params.database };
-                const options = { new: true, upsert: true };
-                const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
-                // const insertedDocument = await Customer.create(document);
-                insertedDocuments.push(insertedDocument);
-            } else {
-                dataNotExist.push(document.firstName)
-            }
-        }
-        let message = 'Data Updated Successfully';
-        if (dataNotExist.length > 0) {
-            message = `this customer database not exist: ${dataNotExist.join(', ')}`;
-        }
-        return res.status(200).json({ message, status: true });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error', status: false });
-    }
-}
 export const LeadPartyList = async (req, res, next) => {
     try {
         const party = await Customer.find({ database: req.params.database, leadStatusCheck: "true" }).populate({ path: "created_by", model: "user" });
@@ -804,7 +755,55 @@ export const UpdatePartyLeadStatus = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
+export const LeadPartyListById = async (req, res, next) => {
+    try {
+        const party = await Customer.findById(req.params.id).populate({ path: "created_by", model: "user" });
+        if (!party) {
+            return res.status(404).json({ message: "Data Not Found", status: false })
+        }
+        return res.status(200).json({ LeadParty: party, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const    UpdateSalesLead = async (req, res, next) => {
+    try {
+        if (req.files) {
+            let images = [];
+            req.files.map(file => {
+                if (file.fieldname === "file") {
+                    req.body.Photo = file.filename
+                }
+                else {
+                    images.push(file.filename)
+                }
+            })
+            req.body.shopPhoto = images;
+            // req.body.photo = images
+        }
+        const customerId = req.params.id;
+        const existingCustomer = await Customer.findById(customerId);
+        if (!existingCustomer) {
+            return res.status(404).json({ error: 'customer not found', status: false });
+        }
+        else {
+            if (req.body.assignTransporter) {
+                req.body.assignTransporter = JSON.parse(req.body.assignTransporter)
+            }
+            const updatedCustomer = req.body;
+            if (req.body.limit) {
+                await UpdateCheckLimit(customerId, req.body.limit)
+            }
+            await Customer.findByIdAndUpdate(customerId, updatedCustomer, { new: true });
+            return res.status(200).json({ message: 'Customer Updated Successfully', status: true });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
 
 export const DeleteCustomer11 = async (req, res, next) => {
     try {
