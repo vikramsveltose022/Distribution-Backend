@@ -82,7 +82,7 @@ export const UserRecognition = async (req, res, next) => {
             return res.status(400).json({ message: response.data.message, status: false });
         }
     } catch (err) {
-        console.error("Error in UserRecognition:", err.response.status);
+        console.error("Error in UserRecognition:", err);
         return res.status(500).json({ error: err.response.data.error, status: false, successCode: err.response.status });
     }
 };
