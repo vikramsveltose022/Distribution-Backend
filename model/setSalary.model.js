@@ -22,6 +22,9 @@ const SetSalarySchema = new mongoose.Schema({
     totalSalary: {
         type: Number
     },
+    pfAmount: {
+        type: Number
+    },
     totalWorkingDays: {
         type: Number
     },

@@ -135,6 +135,7 @@ export const Salary = async (req, res, next) => {
         let bonusAmount = 0;
         let hours;
         let salary;
+        let pfAmount = 0
         const current = new Date()
         const month = current.getMonth()
         // console.log(month)
@@ -205,13 +206,16 @@ export const Salary = async (req, res, next) => {
             const sunday = await SundayCheck()
             let totalSundayHours = sunday * hours
             const finalHours = (totalHours + ((LeaveCount + totalHoliday) * hours)) + totalSundayHours
-            console.log("finalHours " + finalHours)
-            console.log("hours " + hours)
-            console.log("salary : " + id.last_job_Salary)
+            // console.log("finalHours " + finalHours)
+            // console.log("hours " + hours)
+            // console.log("salary : " + id.last_job_Salary)
             salary = (((id.last_job_Salary / 30) / hours) * finalHours)
             // console.log(finalHours)
             // return salary
-            const totalSalary = (totalHours === 0) ? salary = 0 : salary
+            const CheckSalary = (totalHours === 0) ? salary = 0 : salary;
+            // console.log(id.pfPercentage + " " + id.firstName)
+            const totalSalary = (CheckSalary * (100 - id.pfPercentage) / 100)
+            const pfBalance = CheckSalary - totalSalary
             let latestSalary = {
                 database: id.database,
                 userId: id._id,
@@ -220,6 +224,7 @@ export const Salary = async (req, res, next) => {
                 basicSalary: id.last_job_Salary,
                 salaryMonth: month,
                 totalSalary: totalSalary,
+                pfAmount: pfBalance,
                 totalHours: totalHours,
                 totalWorkingDays: totalWorkingDays,
                 overTimeAmount: overTimeAmount,
@@ -234,6 +239,7 @@ export const Salary = async (req, res, next) => {
             overTimeAmount = 0
             totalWorkingDays = 0
             bonusAmount = 0;
+            pfAmount = 0;
         }
         return res.send(latest)
     }
