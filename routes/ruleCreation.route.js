@@ -1,5 +1,5 @@
 import express from "express"
-import { Salary, ViewSalary, deleteRule, saveRule, setSalary, updatedRule, viewRule, viewRuleById, workingHours } from "../controller/ruleCreation.controller.js";
+import { Salary, SundayCheck, ViewSalary, deleteRule, saveRule, setSalary, updatedRule, viewRule, viewRuleById, workingHours } from "../controller/ruleCreation.controller.js";
 
 const router = express.Router()
 
@@ -13,4 +13,5 @@ router.get("/salary", setSalary)
 router.get("/set/:database", Salary)
 router.get("/view-salary/:database", ViewSalary)
 router.get("/working-hours/:database/:panNo", workingHours)
+router.get("/check-sunday", SundayCheck)
 export default router;

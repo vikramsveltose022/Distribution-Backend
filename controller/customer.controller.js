@@ -646,7 +646,7 @@ export const SaveLeadPartyExcel = async (req, res) => {
             }
             document[database] = req.params.database
             if (document.database) {
-                document[leadStatusCheck] = true;
+                document[leadStatusCheck] = "true";
                 const insertedDocument = await Customer.create(document);
                 insertedDocuments.push(insertedDocument);
             } else {
@@ -714,7 +714,7 @@ export const UpdateLeadPartyExcel = async (req, res) => {
 }
 export const LeadPartyList = async (req, res, next) => {
     try {
-        const party = await Customer.find({ database: req.params.database, leadStatusCheck: true }).populate({ path: "created_by", model: "user" });
+        const party = await Customer.find({ database: req.params.database, leadStatusCheck: "true" }).populate({ path: "created_by", model: "user" });
         if (party.length == 0) {
             return res.status(404).json({ message: "Data Not Found", status: false })
         }
@@ -748,7 +748,7 @@ export const AssignLeadParty = async (req, res, next) => {
 }
 export const PartyWithSalesPerson = async (req, res, next) => {
     try {
-        const party = await Customer.find({ created_by: req.params.id, leadStatusCheck: true }).populate({ path: "created_by", model: "user" });
+        const party = await Customer.find({ created_by: req.params.id, leadStatusCheck: "true" }).populate({ path: "created_by", model: "user" });
         if (!party) {
             return res.status(404).json({ message: "party not found", status: false })
         }
