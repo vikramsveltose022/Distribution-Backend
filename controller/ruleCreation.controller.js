@@ -134,6 +134,7 @@ export const Salary = async (req, res, next) => {
         let totalWorkingDays = 0;
         let bonusAmount = 0;
         let hours;
+        let salary;
         const current = new Date()
         const month = current.getMonth()
         // console.log(month)
@@ -205,9 +206,12 @@ export const Salary = async (req, res, next) => {
             let totalSundayHours = sunday * hours
             const finalHours = (totalHours + ((LeaveCount + totalHoliday) * hours)) + totalSundayHours
             console.log("finalHours " + finalHours)
-            const salary = (((id.last_job_Salary / 30) / hours) * finalHours)
+            console.log("hours " + hours)
+            console.log("salary : " + id.last_job_Salary)
+            salary = (((id.last_job_Salary / 30) / hours) * finalHours)
             // console.log(finalHours)
             // return salary
+            const totalSalary = (totalHours === 0) ? salary = 0 : salary
             let latestSalary = {
                 database: id.database,
                 userId: id._id,
@@ -215,7 +219,7 @@ export const Salary = async (req, res, next) => {
                 panCard: id.Pan_No,
                 basicSalary: id.last_job_Salary,
                 salaryMonth: month,
-                totalSalary: salary,
+                totalSalary: totalSalary,
                 totalHours: totalHours,
                 totalWorkingDays: totalWorkingDays,
                 overTimeAmount: overTimeAmount,
