@@ -82,16 +82,8 @@ export const UserRecognition = async (req, res, next) => {
             return res.status(400).json({ message: response.data.message, status: false });
         }
     } catch (err) {
-        console.error("Error in UserRecognition:", err);
-        if (err.response) {
-            console.error("Error in UserRecognition:", err.response.data.error);
-            return res.status(err.response.status || 500).json({ error: err.response.data.error, status: false });
-        } else if (err.request) {
-            return res.status(500).json({ error: "No response received from server", status: false });
-        } else {
-            console.error("Error in UserRecognition:", err.message);
-            return res.status(500).json({ error: err.message, status: false });
-        }
+        console.error("Error in UserRecognition:", err.response.status);
+        return res.status(500).json({ error: err.response.data.error, status: false, successCode: err.response.status });
     }
 };
 
