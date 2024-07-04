@@ -133,8 +133,7 @@ export const Salary = async (req, res, next) => {
         let overTimeAmount = 0;
         let totalWorkingDays = 0;
         let bonusAmount = 0;
-        const hours = await WorkingHours.findOne({ database: req.params.database })
-        // console.log(hours.totalHours)
+        let hours;
         const current = new Date()
         const month = current.getMonth()
         // console.log(month)
@@ -142,11 +141,21 @@ export const Salary = async (req, res, next) => {
         if (holiday.length > 0) {
             totalHoliday = holiday.length
         }
-        const user = await User.find({ database: req.params.database, status: "Active" })
+        const user = await User.find({ database: req.params.database, status: "Active" }).populate({ path: "shift", model: "WorkingHour" })
         if (user.length === 0) {
             return res.status(404).json({ message: "User Not Found", status: false })
         }
         for (let id of user) {
+            // console.log(id.shift)
+            if (id.shift) {
+                const WorkingHour = await WorkingHours.findOne({ database: req.params.database, shiftName: id.shift.shiftName })
+                // console.log(WorkingHour)
+                hours = await WorkingHour.totalHours
+            } else {
+                // console.log(id.firstName)
+                continue;
+            }
+            // console.log("workingHours " + hours)
             const rule = await ApplyRule.findOne({ userId: id._id })
             if (rule) {
                 const bonus = await Bonus.findOne({ userId: id._id, months: month })
@@ -164,16 +173,13 @@ export const Salary = async (req, res, next) => {
                     }
                 }
             }
-            // if (rule) {
-            //     employee = rule.employee
-            // }
-            const data = await totalWorkingHours(id.Pan_No)
+            const data = await totalWorkingHours(id._id)
             totalWorkingDays = await data.attendanceTotal.length;
             if (data.attendanceTotal.length > 0) {
                 totalHours = data.totalMonthHours;
                 totalOverTime = data.totalOverTime
                 if (totalOverTime > 0) {
-                    overTimeAmount = ((id.last_job_Salary / 30) / hours.totalHours) * totalOverTime;
+                    overTimeAmount = ((id.last_job_Salary / 30) / hours) * totalOverTime;
                 }
             }
             // manage leave check employee
@@ -184,18 +190,22 @@ export const Salary = async (req, res, next) => {
                 { endDate: { $gte: previousMonthStart, $lte: previousMonthEnd } }]
             });
             if (leave.length === 0) {
-                console.log("not found")
+                console.log("leave not found")
             }
             for (let id of leave) {
                 // check leave all
                 const checkLeave = await LeaveHRM.findById(id.leaveType)
                 if (!checkLeave) {
-                    console.log("not found")
+                    console.log("leave manage not found")
                 }
                 const yes = (checkLeave.checkStatus === "Paid") ? LeaveCount++ : false
             }
-            const finalHours = (totalHours + ((LeaveCount + totalHoliday) * hours.totalHours))
-            const salary = (((id.last_job_Salary / 30) / hours.totalHours) * finalHours)
+            // console.log(LeaveCount + " " + totalHoliday + " " + hours + " " + totalHours)
+            const sunday = await SundayCheck()
+            let totalSundayHours = sunday * hours
+            const finalHours = (totalHours + ((LeaveCount + totalHoliday) * hours)) + totalSundayHours
+            console.log("finalHours " + finalHours)
+            const salary = (((id.last_job_Salary / 30) / hours) * finalHours)
             // console.log(finalHours)
             // return salary
             let latestSalary = {
@@ -212,7 +222,7 @@ export const Salary = async (req, res, next) => {
                 bonusAmount: bonusAmount,
                 employee: employee
             }
-            await SetSalary.create(latestSalary)
+            // await SetSalary.create(latestSalary)
             latest.push(latestSalary)
             employee = []
             totalHours = 0
@@ -230,7 +240,7 @@ export const Salary = async (req, res, next) => {
 }
 export const totalWorkingHours = async function totalWorkingHours(data) {
     try {
-        const res = await axios.get(`https://node-second.rupioo.com/attendance-calculate-employee/${data}`)
+        const res = await axios.get(`http://13.201.119.216:8050/attendance-calculate-employee/${data}`)
         return res.data
     }
     catch (err) {
@@ -267,3 +277,23 @@ export const workingHours = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+
+export const SundayCheck = async () => {
+    try {
+        const currentMonth = new Date().getMonth();
+        const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        const year = new Date().getFullYear();
+        const daysInPreviousMonth = new Date(year, previousMonth + 1, 0).getDate();
+        let sundays = 0;
+        const firstDayOfPreviousMonth = new Date(year, previousMonth, 1).getDay();
+        for (let day = firstDayOfPreviousMonth === 0 ? 1 : 2; day <= daysInPreviousMonth; day++) {
+            const date = new Date(year, previousMonth, day);
+            if (date.getDay() === 0) {
+                sundays++;
+            }
+        }
+        return sundays
+    } catch (err) {
+        console.error(err);
+    }
+};

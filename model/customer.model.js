@@ -162,11 +162,11 @@ const CustomerSchema = new mongoose.Schema({
     type: String
   },
   leadStatusCheck: {
-    type: Boolean,
-    default: false
+    type: String,
+    default: "false"
   },
-  remark:{
-    type:String
+  remark: {
+    type: String
   }
 
 }, { timestamps: true });
