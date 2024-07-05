@@ -755,11 +755,11 @@ export const SaveRemark = async (req, res, next) => {
     try {
         const party = await Customer.findById(req.params.id)
         if (!party) {
-            return res.status(404).json({ message: "party not found", status: false })
+            return res.status(404).json({ message: "Party Not Found", status: false })
         }
-        party.remark = req.body.remark
+        await party.remark.push(req.body.remark)
         await party.save()
-        return res.status(200).json({ message: "Updated Successfull!", status: true })
+        return res.status(200).json({ message: "Remark Saved Successfull!", status: true })
     }
     catch (err) {
         console.log(err)
