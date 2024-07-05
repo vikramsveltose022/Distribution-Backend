@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import axios from "axios";
+import moment from "moment";
 import path from "path"
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -21,7 +22,6 @@ import { InvoiceList } from "../model/createInvoice.model.js";
 import { Ledger } from "../model/ledger.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
 import { GoodDispatch } from "../model/goodDispatch.model.js";
-import { OverDueReport } from "../model/overDue.mode.js";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -810,5 +810,27 @@ export const deleteLedgerBalance = async (body) => {
     }
     catch (err) {
         console.log(err)
+    }
+}
+
+export const PartyPurchaseqty = async (req, res, next) => {
+    try {
+        const previousMonthStart = moment().subtract(1, 'months').startOf('month').toDate();
+        const previousMonthEnd = moment().subtract(1, 'months').endOf('month').toDate();
+        const AllProductItems = []
+        const partyOrder = await CreateOrder.find({ partyId: req.params.partyId })
+        if (partyOrder.length === 0) {
+            return res.status(404).json({ message: "Order's Not Found", status: false })
+        }
+        for (let item of partyOrder) {
+            AllProductItems.push(item.orderItems)
+        }
+        for(let id of AllProductItems){
+            
+        }
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
