@@ -813,24 +813,56 @@ export const deleteLedgerBalance = async (body) => {
     }
 }
 
-export const PartyPurchaseqty = async (req, res, next) => {
+export const PartyPurchaseqty1 = async (req, res, next) => {
     try {
         const previousMonthStart = moment().subtract(1, 'months').startOf('month').toDate();
         const previousMonthEnd = moment().subtract(1, 'months').endOf('month').toDate();
-        const AllProductItems = []
-        const partyOrder = await CreateOrder.find({ partyId: req.params.partyId })
+        let AllProductItems = []
+        let qty = 0;
+        const partyOrder = await CreateOrder.find({
+            partyId: req.params.partyId,
+            createdAt: { $gte: previousMonthStart, $lte: previousMonthEnd }
+        });
         if (partyOrder.length === 0) {
             return res.status(404).json({ message: "Order's Not Found", status: false })
         }
         for (let item of partyOrder) {
-            AllProductItems.push(item.orderItems)
+            AllProductItems = AllProductItems.concat(item.orderItems)
         }
-        for(let id of AllProductItems){
-            
+        for (let id of AllProductItems) {
+            if (id.productId.toString() === req.params.productId) {
+                qty += id.qty
+            }
         }
+        return res.status(200).json({ qty, status: true })
     }
     catch (err) {
         console.log(err)
         return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const PartyPurchaseqty = async (req, res, next) => {
+    try {
+        const previousMonthStart = moment().subtract(1, 'months').startOf('month').toDate();
+        const previousMonthEnd = moment().subtract(1, 'months').endOf('month').toDate();
+        let qty = 0;
+        const partyOrder = await CreateOrder.find({
+            partyId: req.params.partyId,
+            createdAt: { $gte: previousMonthStart, $lte: previousMonthEnd }
+        });
+        if (!partyOrder.length) {
+            return res.status(200).json({ qty, status: true });
+        }
+        for (let item of partyOrder) {
+            for (let orderItem of item.orderItems) {
+                if (orderItem.productId.toString() === req.params.productId) {
+                    qty += orderItem.qty;
+                }
+            }
+        }
+        return res.status(200).json({ qty, status: true });
+    } catch (err) {
+        console.error("Error fetching party purchase quantity:", err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }

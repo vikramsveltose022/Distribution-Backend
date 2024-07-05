@@ -664,3 +664,111 @@ export const savePaymentWithExcel111 = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 }
+export const PartySendOtp = async (req, res, next) => {
+    try {
+        req.body.status = "Deactive"
+        if (req.body.partyId) {
+            if (req.body.type === "receipt" && req.body.paymentMode !== "Cash") {
+                const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                if (rece.length > 0) {
+                    const latestReceipt = rece[rece.length - 1];
+                    req.body.runningAmount = latestReceipt.runningAmount + req.body.amount
+                    req.body.voucherType = "receipt"
+                    req.body.voucherNo = latestReceipt.voucherNo + 1
+                } else {
+                    req.body.runningAmount = req.body.amount
+                    req.body.voucherType = "receipt"
+                    req.body.voucherNo = 1
+                }
+            } else {
+                const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                if (rece.length > 0) {
+                    const latestReceipt = rece[rece.length - 1];
+                    req.body.cashRunningAmount = latestReceipt.cashRunningAmount + req.body.amount
+                    req.body.voucherType = "receipt"
+                    req.body.voucherNo = latestReceipt.voucherNo + 1
+                } else {
+                    req.body.cashRunningAmount = req.body.amount
+                    req.body.voucherType = "receipt"
+                    req.body.voucherNo = 1
+                }
+            }
+            const reciept = await Receipt.create(req.body);
+            if (reciept.type === "receipt") {
+                let particular = "receipt";
+                // await ledgerSalesForCredit(req.body, particular)
+                await ledgerPartyForCredit(req.body, particular)
+                // await ledgerPartyForDebit(req.body, particular)
+            }
+            await overDue1(req.body)
+            req.body.voucherDate = new Date(new Date())
+            req.body.lockStatus = "No"
+            await PaymentDueReport.create(req.body)
+            return reciept ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
+        } else {
+            const reciept = await Receipt.create(req.body);
+            return reciept ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const VerifyPartyPayment = async (req, res, next) => {
+    try {
+        const existingParty = await Receipt.findOne({ otp: req.body.otp })
+        if (!existingParty) {
+            return res.status(404).json({ message: "otp don't not matched..", status: false })
+        }
+        if (existingParty.partyId !== req.params.partyId) {
+            return res.status(404).json({ message: "Party Not Found", status: false })
+        }
+        existingParty.status = "Active"
+        req.body.type = existingParty.type
+        req.body.paymentMode = existingParty.paymentMode
+        req.body.amount = existingParty.amount
+        if (req.body.type === "receipt" && req.body.paymentMode !== "Cash") {
+            const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+            if (rece.length > 0) {
+                const latestReceipt = rece[rece.length - 1];
+                req.body.runningAmount = latestReceipt.runningAmount + req.body.amount
+                req.body.voucherType = "receipt"
+                req.body.voucherNo = latestReceipt.voucherNo + 1
+            } else {
+                req.body.runningAmount = req.body.amount
+                req.body.voucherType = "receipt"
+                req.body.voucherNo = 1
+            }
+        } else {
+            const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+            if (rece.length > 0) {
+                const latestReceipt = rece[rece.length - 1];
+                req.body.cashRunningAmount = latestReceipt.cashRunningAmount + req.body.amount
+                req.body.voucherType = "receipt"
+                req.body.voucherNo = latestReceipt.voucherNo + 1
+            } else {
+                req.body.cashRunningAmount = req.body.amount
+                req.body.voucherType = "receipt"
+                req.body.voucherNo = 1
+            }
+        }
+        // const reciept = await Receipt.create(req.body);
+        await existingParty.save()
+        if (req.body.type === "receipt") {
+            let particular = "receipt";
+            // await ledgerSalesForCredit(req.body, particular)
+            await ledgerPartyForCredit(req.body, particular)
+            // await ledgerPartyForDebit(req.body, particular)
+        }
+        await overDue1(req.body)
+        req.body.voucherDate = new Date(new Date())
+        req.body.lockStatus = "No"
+        await PaymentDueReport.create(req.body)
+        return res.status(200).json({ message: "data save successfull", status: true })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
