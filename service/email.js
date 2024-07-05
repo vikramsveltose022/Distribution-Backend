@@ -7,7 +7,7 @@ var transporter = nodemailer.createTransport({
     secure: true,
     auth: {
         user: 'vikramsveltose022@gmail.com',
-        pass: 'hpjswgwumxuupbsa'
+        pass: 'xlovbytqzrtimofr'
     },
 });
 export default transporter;
