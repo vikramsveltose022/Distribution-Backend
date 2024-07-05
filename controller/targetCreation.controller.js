@@ -60,8 +60,8 @@ export const SaveTargetCreation1 = async (req, res) => {
     }
 }
 
-// save party target and salesPerson
-export const SaveTargetCreation = async (req, res) => {
+// save target start assign party and salesPerson
+export const SaveTargetCreation555 = async (req, res) => {
     try {
         const party = await Customer.findById(req.body.partyId);
         const user = await User.findById(req.body.created_by);
@@ -98,6 +98,23 @@ export const SaveTargetCreation = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
+// save target start from salesPerson
+export const SaveTargetCreation = async (req, res) => {
+    try {
+        const user = await User.findById(req.body.created_by);
+        if (!user) {
+            return res.status(400).json({ message: "User Not Found", status: false });
+        }
+        req.body.database = user.database;
+        const newTarget = await TargetCreation.create(req.body);
+        await TargetAssignUser(req.body.userId, req.body.grandTotal)
+        return res.status(200).json({ message: "Target saved successfully", status: true });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 
 export const DeleteTargetCreation = async (req, res, next) => {
     try {
@@ -451,7 +468,7 @@ export const TargetAssignUser = (function () {
             } else {
                 const tar = new TargetCreation({
                     userId: user.created_by,
-                    startDate: new Date(),
+                    // startDate: new Date(),
                     database: user.database,
                     status: user.status,
                     grandTotal: newTarget.grandTotal
