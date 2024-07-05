@@ -13,7 +13,7 @@ export const saveReceipt = async (req, res, next) => {
     try {
         if (req.body.partyId) {
             if (req.body.type === "receipt" && req.body.paymentMode !== "Cash") {
-                const rece = await Receipt.find({ paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
                 if (rece.length > 0) {
                     const latestReceipt = rece[rece.length - 1];
                     req.body.runningAmount = latestReceipt.runningAmount + req.body.amount
@@ -25,7 +25,7 @@ export const saveReceipt = async (req, res, next) => {
                     req.body.voucherNo = 1
                 }
             } else {
-                const rece = await Receipt.find({ paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
                 if (rece.length > 0) {
                     const latestReceipt = rece[rece.length - 1];
                     req.body.cashRunningAmount = latestReceipt.cashRunningAmount + req.body.amount
@@ -63,7 +63,7 @@ export const savePayment = async (req, res, next) => {
     try {
         if (req.body.partyId) {
             if (req.body.type === "payment" && req.body.paymentMode !== "Cash") {
-                const rece = await Receipt.find({ paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
                 if (rece.length > 0) {
                     const latestReceipt = rece[rece.length - 1];
                     req.body.runningAmount = latestReceipt.runningAmount - req.body.amount
@@ -75,7 +75,7 @@ export const savePayment = async (req, res, next) => {
                     req.body.voucherNo = 1
                 }
             } else {
-                const rece = await Receipt.find({ paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
                 if (rece.length > 0) {
                     const latestReceipt = rece[rece.length - 1];
                     req.body.cashRunningAmount = latestReceipt.cashRunningAmount - req.body.amount
@@ -196,7 +196,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                 const customer = await Customer.findById({ _id: document.partyId })
                 if (customer) {
                     if (document.type === "receipt" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[runningAmount] = latestReceipt.runningAmount + document.amount
@@ -208,7 +208,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     } else {
-                        const rece = await Receipt.find({ paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
@@ -284,7 +284,7 @@ export const savePaymentWithExcel = async (req, res) => {
                 const customer = await Customer.findById({ _id: document.partyId })
                 if (customer) {
                     if (document.type === "payment" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[runningAmount] = latestReceipt.runningAmount - document.amount
@@ -296,7 +296,7 @@ export const savePaymentWithExcel = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     } else {
-                        const rece = await Receipt.find({ paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[cashRunningAmount] = latestReceipt.cashRunningAmount - document.amount
@@ -521,7 +521,7 @@ export const saveReceiptWithExcel111 = async (req, res) => {
                 if (customer) {
                     document[partyId] = customer._id.toString();
                     if (document.type === "receipt" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[runningAmount] = latestReceipt.runningAmount + document.amount
@@ -533,7 +533,7 @@ export const saveReceiptWithExcel111 = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     } else {
-                        const rece = await Receipt.find({ paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
@@ -614,7 +614,7 @@ export const savePaymentWithExcel111 = async (req, res) => {
                     // console.log("_id : " + document.partyId)
                     // console.log(document)
                     if (document.type === "payment" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[runningAmount] = latestReceipt.runningAmount - document.amount
@@ -626,7 +626,7 @@ export const savePaymentWithExcel111 = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     } else {
-                        const rece = await Receipt.find({ paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[cashRunningAmount] = latestReceipt.cashRunningAmount - document.amount

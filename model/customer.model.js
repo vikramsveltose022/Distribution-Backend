@@ -166,7 +166,7 @@ const CustomerSchema = new mongoose.Schema({
     default: "false"
   },
   remark: {
-    type: String
+    type: []
   }
 
 }, { timestamps: true });

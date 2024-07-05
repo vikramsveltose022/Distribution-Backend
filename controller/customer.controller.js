@@ -620,6 +620,7 @@ export const SaveLeadPartyExcel = async (req, res) => {
     try {
         let leadStatusCheck = "leadStatusCheck";
         let database = "database"
+        const existingMobileNo = []
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -646,9 +647,14 @@ export const SaveLeadPartyExcel = async (req, res) => {
             }
             document[database] = req.params.database
             if (document.database) {
-                document[leadStatusCheck] = "true";
-                const insertedDocument = await Customer.create(document);
-                insertedDocuments.push(insertedDocument);
+                const existingId = await Customer.findOne({ mobileNumber: document.mobileNumber, database: document.database });
+                if (existingId) {
+                    existingMobileNo.push(document.mobileNumber)
+                } else {
+                    document[leadStatusCheck] = "true";
+                    const insertedDocument = await Customer.create(document);
+                    insertedDocuments.push(insertedDocument);
+                }
             } else {
                 dataNotExist.push(document.firstName)
             }
@@ -656,6 +662,8 @@ export const SaveLeadPartyExcel = async (req, res) => {
         let message = 'Data Inserted Successfully';
         if (dataNotExist.length > 0) {
             message = `this customer database not exist: ${dataNotExist.join(', ')}`;
+        } else if (existingMobileNo.length > 0) {
+            message = `this mobile no already exists: ${existingMobileNo.join(', ')}`;
         }
         return res.status(200).json({ message, status: true });
     } catch (err) {
@@ -725,6 +733,24 @@ export const DeleteSalesLead = async (req, res, next) => {
         return res.status(500).json({ error: "Internal server error", status: false });
     }
 }
+export const DeleteSalesLeadMultiple = async (req, res, next) => {
+    try {
+        for (let id of req.body.salesLead) {
+            const customer = await Customer.findByIdAndDelete({ _id: id.id })
+            if (!customer) {
+                console.log("customer not found")
+                // return res.status(404).json({ error: "Not Found", status: false });
+            }
+            // customer.status = "Deactive";
+            // await customer.save();
+        }
+        return res.status(200).json({ message: "delete successful", status: true })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal server error", status: false });
+    }
+}
 export const SaveRemark = async (req, res, next) => {
     try {
         const party = await Customer.findById(req.params.id)
@@ -768,7 +794,7 @@ export const LeadPartyListById = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-export const    UpdateSalesLead = async (req, res, next) => {
+export const UpdateSalesLead = async (req, res, next) => {
     try {
         if (req.files) {
             let images = [];
