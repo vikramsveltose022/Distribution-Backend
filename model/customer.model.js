@@ -32,7 +32,7 @@ const CustomerSchema = new mongoose.Schema({
     type: String
   },
   mobileNumber: {
-    type: Number
+    type: String
   },
   passPortNo: {
     type: String
