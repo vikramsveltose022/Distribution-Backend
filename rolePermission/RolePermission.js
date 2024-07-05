@@ -132,7 +132,7 @@ export const getCustomerHierarchy = async function getCustomerHierarchy(parentId
         processedIds.add(parentId);
         const [users, customers] = await Promise.all([
             User.find({ created_by: parentId, status: 'Active' }).lean(),
-            Customer.find({ created_by: parentId, status: 'Active' }).populate({ path: "created_by", model: "user" }).populate({ path: "category", model: "customerGroup" }).populate({ path: "assignTransporter._id", model: "transporter" }).lean()
+            Customer.find({ created_by: parentId, status: 'Active' }).populate({ path: "created_by", model: "user" }).populate({ path: "assignTransporter._id", model: "transporter" }).lean()
         ]);
         let results = customers;
         const subUserIds = users.map(user => user._id);
