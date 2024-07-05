@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const ReceiptSchema = new mongoose.Schema({
-    partyId1: {
+    otp: {
         type: String
     },
     created_by: {

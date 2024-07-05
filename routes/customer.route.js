@@ -47,9 +47,9 @@ router.get("/lead-party-list/:database", LeadPartyList)
 router.post("/assign-lead-party", AssignLeadParty)
 router.get("/lead-party-list/:id", PartyWithSalesPerson)
 router.delete("/delete-sales-lead/:id", DeleteSalesLead);
-router.delete("/delete-multiple-sales-lead", DeleteSalesLeadMultiple)
+router.post("/delete-multiple-sales-lead", DeleteSalesLeadMultiple)
 router.get("/sales-lead-by-id/:id", LeadPartyListById)
 router.put("/update-sales-lead/:id", UpdateSalesLead)
-router.post("/save-remark/:id",SaveRemark)
+router.post("/save-remark/:id", SaveRemark)
 
 export default router;
