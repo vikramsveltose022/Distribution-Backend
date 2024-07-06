@@ -200,6 +200,7 @@ export const SignInWithMobile = async (req, res, next) => {
     }
 };
 
+
 export const SignIn = async (req, res, next) => {
     try {
         const { email, userName, password, latitude, longitude, currentAddress } = req.body;
