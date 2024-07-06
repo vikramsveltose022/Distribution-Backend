@@ -189,11 +189,9 @@ export const viewDashboardTab = async (req, res, next) => {
 export const deleteRole = async (req, res, next) => {
     try {
         const { database } = req.body;
-
         if (!database) {
             return res.status(400).json({ message: "Database field is required", status: false });
         }
-
         await Role.deleteMany({ database });
         return res.status(200).json({ message: "Deleted successfully!", status: true });
     } catch (err) {

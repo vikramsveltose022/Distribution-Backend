@@ -705,6 +705,21 @@ export const AssignLeadParty = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+export const deleteAssignLeadParty = async (req, res, next) => {
+    try {
+        for (let id of req.body.leadParty) {
+            const person = await Customer.findById({ _id: id.id });
+            if (person) {
+                person.created_by = undefined;
+                await person.save();
+            }
+        }
+        return res.status(200).json({ message: "Unassign successfull!", status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
 export const PartyWithSalesPerson = async (req, res, next) => {
     try {
         const party = await Customer.find({ created_by: req.params.id, leadStatusCheck: "true" }).populate({ path: "created_by", model: "user" });
