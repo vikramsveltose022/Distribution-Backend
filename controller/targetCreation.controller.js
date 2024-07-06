@@ -101,13 +101,35 @@ export const SaveTargetCreation555 = async (req, res) => {
 // save target start from salesPerson
 export const SaveTargetCreation = async (req, res) => {
     try {
-        const user = await User.findById(req.body.created_by);
+        const user = await User.findById(req.body.userId);
         if (!user) {
             return res.status(400).json({ message: "User Not Found", status: false });
         }
         req.body.database = user.database;
-        const newTarget = await TargetCreation.create(req.body);
-        await TargetAssignUser(req.body.userId, req.body.grandTotal)
+        const target = await TargetCreation.create(req.body);
+        const existingTargets = await TargetCreation.find({ userId: user.created_by }).sort({ sortorder: -1 });
+        const lastTarget = existingTargets[existingTargets.length - 1];
+        if (lastTarget) {
+            for (let product of req.body.products) {
+                const existingProduct = lastTarget.products.find(p => p.productId === product.productId);
+                if (existingProduct) {
+                    existingProduct.qtyAssign += product.qtyAssign;
+                    existingProduct.totalPrice = existingProduct.qtyAssign * existingProduct.price;
+                } else {
+                    lastTarget.products.push(product);
+                }
+            }
+            lastTarget.grandTotal += req.body.grandTotal;
+            await lastTarget.save();
+            await TargetAssignUser(user.created_by, req.body.grandTotal)
+        } else {
+            req.body.userId = user.created_by;
+            // const existingUser = await User.findById(user.created_by);
+            const newTarget = await TargetCreation.create(req.body);
+            await TargetAssignUser(user.created_by, req.body.grandTotal)
+        }
+        // const newTarget = await TargetCreation.create(req.body);
+        // await TargetAssignUser(req.body.userId, req.body.grandTotal)
         return res.status(200).json({ message: "Target saved successfully", status: true });
     } catch (error) {
         console.error(error);

@@ -8,6 +8,7 @@ import { SalesReturn } from "../model/salesReturn.model.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
 import { PurchaseReturn } from "../model/purchaseReturn.model.js";
 import { PaymentDueReport } from "../model/payment.due.report.js";
+import { OtpVerify } from "../model/otpVerify.model.js";
 
 export const saveReceipt = async (req, res, next) => {
     try {
@@ -707,6 +708,7 @@ export const PartySendOtp = async (req, res, next) => {
             req.body.voucherDate = new Date(new Date())
             req.body.lockStatus = "No"
             // await PaymentDueReport.create(req.body)
+            await OtpVerify.create(req.body)
             return reciept ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
         } else {
             const reciept = await Receipt.create(req.body);
@@ -775,3 +777,32 @@ export const VerifyPartyPayment = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+export const SaveOtp = async (req, res) => {
+    const { userId, partyId, otp } = req.body;
+    try {
+        const orderData = await OtpVerify.create(req.body)
+        if (orderData) {
+            return res.status(200).json({ message0: "data saved successfull!", status: true });
+        } else {
+            return res.status(404).json({ message: 'Bad Request', status: false });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
+export const ViewOtp = async (req, res) => {
+    const { userId, partyId } = req.body;
+    try {
+        const query = { $or: [{ userId }, { partyId }] };
+        const orderData = await OtpVerify.findOne(query)
+        if (orderData) {
+            return res.status(200).json({ otp: orderData, status: true });
+        } else {
+            return res.status(404).json({ message: 'otp not found', status: false });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
