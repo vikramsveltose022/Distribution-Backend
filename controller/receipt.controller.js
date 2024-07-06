@@ -666,6 +666,9 @@ export const savePaymentWithExcel111 = async (req, res) => {
 }
 export const PartySendOtp = async (req, res, next) => {
     try {
+        if (!req.body.otp) {
+            return res.status(400).json({ message: "otp required", status: false })
+        }
         req.body.status = "Deactive"
         if (req.body.partyId) {
             if (req.body.type === "receipt" && req.body.paymentMode !== "Cash") {
@@ -697,13 +700,13 @@ export const PartySendOtp = async (req, res, next) => {
             if (reciept.type === "receipt") {
                 let particular = "receipt";
                 // await ledgerSalesForCredit(req.body, particular)
-                await ledgerPartyForCredit(req.body, particular)
+                // await ledgerPartyForCredit(req.body, particular)
                 // await ledgerPartyForDebit(req.body, particular)
             }
-            await overDue1(req.body)
+            // await overDue1(req.body)
             req.body.voucherDate = new Date(new Date())
             req.body.lockStatus = "No"
-            await PaymentDueReport.create(req.body)
+            // await PaymentDueReport.create(req.body)
             return reciept ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
         } else {
             const reciept = await Receipt.create(req.body);

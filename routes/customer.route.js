@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { AssignLeadParty, DeleteCustomer, DeleteSalesLead, DeleteSalesLeadMultiple, LeadPartyList, LeadPartyListById, PartyWithSalesPerson, SaveCustomer, SaveLeadPartyExcel, SaveRemark, SignIn, SignInWithMobile, SuperAdminList, UpdateCustomer, UpdateSalesLead, ViewCustomer, ViewCustomerById, dueParty, forgetPassword, lockParty, otpVerify, overDueReport, paymentDueReport, saveExcelFile, updateExcelFile, updatePassword } from "../controller/customer.controller.js";
+import { AssignLeadParty, DeleteCustomer, DeleteSalesLead, DeleteSalesLeadMultiple, LeadPartyList, LeadPartyListById, PartyWithSalesPerson, SaveCustomer, SaveLeadPartyExcel, SaveRemark, SignIn, SignInWithMobile, SuperAdminList, UpdateCustomer, UpdateSalesLead, ViewCustomer, ViewCustomerById, deleteAssignLeadParty, dueParty, forgetPassword, lockParty, otpVerify, overDueReport, paymentDueReport, saveExcelFile, updateExcelFile, updatePassword } from "../controller/customer.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -45,6 +45,7 @@ router.post("/payment-due-report/:database", paymentDueReport)
 router.post("/save-lead-party-bulk/:database", uploads.single("file"), SaveLeadPartyExcel)
 router.get("/lead-party-list/:database", LeadPartyList)
 router.post("/assign-lead-party", AssignLeadParty)
+router.post("/unassign-party-lead", deleteAssignLeadParty)
 router.get("/lead-party-list/:id", PartyWithSalesPerson)
 router.delete("/delete-sales-lead/:id", DeleteSalesLead);
 router.post("/delete-multiple-sales-lead", DeleteSalesLeadMultiple)

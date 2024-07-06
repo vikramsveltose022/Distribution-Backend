@@ -87,8 +87,7 @@ export const updateAssignRole = async (req, res, next) => {
                 await role.save();
             }
         }
-        const updatedAssignRole = await AssignRole.findByIdAndUpdate(
-            req.params.id, req.body, { new: true });
+        const updatedAssignRole = await AssignRole.findByIdAndUpdate(req.params.id, req.body, { new: true });
         return updatedAssignRole ? res.status(200).json({ AssignRole: updatedAssignRole, status: true }) : res.status(404).json({ message: "AssignRole not found", status: false });
     } catch (err) {
         console.log(err);
@@ -97,16 +96,10 @@ export const updateAssignRole = async (req, res, next) => {
 };
 export const ViewAssignRoleById = async (req, res, next) => {
     try {
-        let assignRole = await AssignRole.findById({ _id: req.params.id }).sort({
-            sortorder: -1,
-        });
-        return assignRole
-            ? res.status(200).json({ AssignRole: assignRole, status: true })
-            : res.status(404).json({ error: "Not Found", status: false });
+        let assignRole = await AssignRole.findById({ _id: req.params.id }).sort({sortorder: -1, });
+        return assignRole ? res.status(200).json({ AssignRole: assignRole, status: true }): res.status(404).json({ error: "Not Found", status: false });
     } catch (err) {
         console.log(err);
-        return res
-            .status(500)
-            .json({ error: "Internal Server Error", status: false });
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
