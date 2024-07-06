@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 
 const ReceiptSchema = new mongoose.Schema({
-    otp: {
-        type: String
-    },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",

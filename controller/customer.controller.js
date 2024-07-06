@@ -17,14 +17,14 @@ dotenv.config();
 
 export const SaveCustomer = async (req, res, next) => {
     try {
-        // if (req.body.id) {
-        //     const existing = await Customer.findOne({ id: req.body.id })
-        //     if (existing) {
-        //         return res.status(404).json({ message: "id already exist", status: false })
-        //     }
-        // } else {
-        //     return res.status(400).json({ message: "id required", status: false })
-        // }
+        if (req.body.id) {
+            const existing = await Customer.findOne({ id: req.body.id })
+            if (existing) {
+                return res.status(404).json({ message: "id already exist", status: false })
+            }
+        } else {
+            return res.status(400).json({ message: "id required", status: false })
+        }
         if (req.body.panNo) {
             req.body.code = req.body.panNo
         } else {
@@ -147,6 +147,22 @@ export const UpdateCustomer = async (req, res, next) => {
             await Customer.findByIdAndUpdate(customerId, updatedCustomer, { new: true });
             return res.status(200).json({ message: 'Customer Updated Successfully', status: true });
         }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
+export const UpdateCustomer1 = async (req, res, next) => {
+    try {
+        const party = await Customer.find({ database: req.body.database, leadStatusCheck: "false" })
+        console.log(party.length)
+        // for (let id of party) {
+        //     const customer = await Customer.findById(id._id)
+        //     customer.leadStatusCheck = "false";
+        //     await customer.save()
+        // }
+        return res.status(200).json({ message: 'Customer Updated Successfully', status: true });
+
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: 'Internal Server Error', status: false });
@@ -775,21 +791,6 @@ export const SaveRemark = async (req, res, next) => {
         await party.remark.push(req.body.remark)
         await party.save()
         return res.status(200).json({ message: "Remark Saved Successfull!", status: true })
-    }
-    catch (err) {
-        console.log(err)
-        return res.status(500).json({ error: "Internal Server Error", status: false })
-    }
-}
-export const UpdatePartyLeadStatus = async (req, res, next) => {
-    try {
-        const party = await Customer.findById(req.params.id)
-        if (!party) {
-            return res.status(404).json({ message: "party not found", status: false })
-        }
-        party.leadStatus = req.body.leadStatus
-        await party.save()
-        return res.status(200).json({ message: "updated successfull!", status: true })
     }
     catch (err) {
         console.log(err)
