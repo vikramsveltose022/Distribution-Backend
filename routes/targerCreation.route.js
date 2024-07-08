@@ -1,5 +1,5 @@
 import express from "express";
-import { Achievement, DeleteTargetCreation, SaveTargetCreation, UpdateTargetCreation, ViewTargetCreation, ViewTargetCreationById, called, checkTarget, deleteProductFromTargetCreation, increasePercentage, latestAchievement, latestAchievementById, latestAchievementSalesById, targetCreationXml, updateTargetProducts, viewTarget } from "../controller/targetCreation.controller.js";
+import { Achievement, DeleteTargetCreation, SavePartyTarget, SaveTargetCreation, UpdateTargetCreation, ViewPartyTarget, ViewTargetCreation, ViewTargetCreationById, called, checkTarget, deleteProductFromTargetCreation, increasePercentage, latestAchievement, latestAchievementById, latestAchievementSalesById, targetCreationXml, updateTargetProducts, viewTarget } from "../controller/targetCreation.controller.js";
 
 const router = express.Router();
 
@@ -23,4 +23,8 @@ router.post("/target-achievement-sales-person/:id/:database", latestAchievementS
 router.post("/achievements/:id/:database", called)
 // router.post("/test", yes)
 router.post("/check/:id/:database", checkTarget)
+
+router.post("/customer-target", SavePartyTarget)
+router.get("/view-customer-target/:database", ViewPartyTarget)
+
 export default router;
