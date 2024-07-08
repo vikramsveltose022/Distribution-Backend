@@ -665,12 +665,17 @@ export const savePaymentWithExcel111 = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 }
+
 export const PartySendOtp = async (req, res, next) => {
     try {
-        if (!req.body.otp) {
-            return res.status(400).json({ message: "otp required", status: false })
-        }
-        req.body.status = "Deactive"
+        // if (!req.body.otp) {
+        //     return res.status(400).json({ message: "otp required", status: false })
+        // }
+        // const existingOtp = await OtpVerify.findOne({ otp: req.body.otp })
+        // if (!existingOtp) {
+        //     return res.status(404).json({ message: "otp don't matched..", status: false })
+        // }
+        // req.body.status = "Deactive"
         if (req.body.partyId) {
             if (req.body.type === "receipt" && req.body.paymentMode !== "Cash") {
                 const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
@@ -701,18 +706,19 @@ export const PartySendOtp = async (req, res, next) => {
             if (reciept.type === "receipt") {
                 let particular = "receipt";
                 // await ledgerSalesForCredit(req.body, particular)
-                // await ledgerPartyForCredit(req.body, particular)
+                await ledgerPartyForCredit(req.body, particular)
                 // await ledgerPartyForDebit(req.body, particular)
             }
-            // await overDue1(req.body)
+            await overDue1(req.body)
             req.body.voucherDate = new Date(new Date())
             req.body.lockStatus = "No"
-            // await PaymentDueReport.create(req.body)
+            await PaymentDueReport.create(req.body)
             await OtpVerify.create(req.body)
             return reciept ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
         } else {
-            const reciept = await Receipt.create(req.body);
-            return reciept ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
+            return res.status(404).json({ message: "PartyId Required..", status: false })
+            // const reciept = await Receipt.create(req.body);
+            // return reciept ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
         }
     }
     catch (err) {
@@ -778,7 +784,6 @@ export const VerifyPartyPayment = async (req, res, next) => {
     }
 }
 export const SaveOtp = async (req, res) => {
-    const { userId, partyId, otp } = req.body;
     try {
         const orderData = await OtpVerify.create(req.body)
         if (orderData) {
@@ -806,3 +811,19 @@ export const ViewOtp = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 };
+export const OtpVerifyForReceipt = async (req, res) => {
+    try {
+        if (!req.body.otp) {
+            return res.status(400).json({ message: "otp required", status: false })
+        }
+        const existingOtp = await OtpVerify.findOne({ otp: req.body.otp })
+        if (!existingOtp) {
+            return res.status(404).json({ message: "otp don't matched..", status: false })
+        }
+        return res.status(200).json({ message: "otp verified successfull!", status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}

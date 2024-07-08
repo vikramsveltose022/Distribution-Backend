@@ -106,7 +106,9 @@ export const SaveTargetCreation = async (req, res) => {
             return res.status(400).json({ message: "User Not Found", status: false });
         }
         req.body.database = user.database;
+        req.body.salesPersonId = "salesPerson"
         const target = await TargetCreation.create(req.body);
+        req.body.salesPersonId = undefined
         const existingTargets = await TargetCreation.find({ userId: user.created_by }).sort({ sortorder: -1 });
         const lastTarget = existingTargets[existingTargets.length - 1];
         if (lastTarget) {
@@ -348,7 +350,7 @@ export const updateTargetProducts = async (req, res, next) => {
 // -----------------------------------------------------------------------------------------
 
 // increaseTarget month wise
-export const increasePercentage = async (req, res, next) => {
+export const increasePercentage555 = async (req, res, next) => {
     try {
         const customers = await Customer.find({}).sort({ sortorder: -1 }).select("created_by");
         if (!customers.length > 0) {
@@ -412,8 +414,75 @@ export const increasePercentage = async (req, res, next) => {
         // return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
+
+export const increasePercentage = async (req, res, next) => {
+    try {
+        const customers = await User.find({}).sort({ sortorder: -1 }).select("created_by");
+        if (!customers.length > 0) {
+            return res.status(404).json({ message: "Party Not Found", status: false });
+        }
+        let finalTarget;
+        let id;
+        let total = 0;
+        for (let customer of customers) {
+            const date = new Date();
+            const targetCreation = await TargetCreation.find({ userId: customer._id, salesPersonId: "salesPerson" });
+            const target = targetCreation[targetCreation.length - 1];
+            if (!target) {
+                console.log(`TargetCreation document not found for party ${customer._id}`);
+                continue;
+            }
+            const updatedProducts = target.products.map((items) => {
+                if (items.assignPercentage.some((item) => item.month === date.getMonth() + 1)) {
+                    const updatedAssignments = items.assignPercentage.map((item) => {
+                        if (item.month === date.getMonth() + 1) {
+                            const increaseQty = items.qtyAssign * item.percentage / 100;
+                            const roundedIncreaseQty = Math.floor(increaseQty);
+                            const productQtyAssign = items.qtyAssign + roundedIncreaseQty;
+                            return {
+                                month: item.month,
+                                percentage: item.percentage,
+                                increase: productQtyAssign
+                            };
+                        }
+                        return item;
+                    });
+                    const updatedItem = {
+                        productId: items.productId,
+                        qtyAssign: updatedAssignments[0].increase,
+                        price: items.price,
+                        totalPrice: (updatedAssignments[0].increase * items.price),
+                        assignPercentage: updatedAssignments,
+                    };
+                    return updatedItem;
+                }
+                return items;
+            });
+            const grandtotal = updatedProducts.reduce((total, item) => total + (item.qtyAssign * item.price), 0);
+            const { _id, createdAt, updatedAt, ...targetWithoutId } = target.toObject();
+            const updatedTarget = new TargetCreation({
+                ...targetWithoutId,
+                grandTotal: grandtotal,
+                products: updatedProducts,
+            });
+            await updatedTarget.save();
+
+            id = customer.created_by;
+            await t1(id, grandtotal)
+        }
+        Object.assign(uniqueId, emptyObj);
+        Object.assign(uniqueUserId, emptyObj);
+        // res.json({ message: "Targets updated and saved successfully", status: true });
+
+    } catch (err) {
+        console.error(err);
+        // return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+
+
 // assing target salesPerson month's wise
-export const t1 = async function t1(createdById) {
+export const t1555 = async function t1(createdById) {
     let partyTotal = 0;
     let storedData = [];
     let finalTarget;
@@ -457,7 +526,54 @@ export const t1 = async function t1(createdById) {
     }
 };
 
-// assing user hierarchy target
+export const t1 = async function t1(createdById, total) {
+    let partyTotal = 0;
+    let storedData = [];
+    let finalTarget;
+    try {
+        const createdByIdString = createdById.toString();
+        if (!uniqueId.has(createdByIdString)) {
+            uniqueId.add(createdByIdString);
+            const newParty = await User.find({ created_by: createdById }).sort({ sortorder: -1 });
+            if (!newParty.length > 0) {
+                console.log(`party not found`);
+            }
+            for (let item of newParty) {
+                const target = await TargetCreation.find({ userId: item._id }).sort({ sortorder: -1 });
+                const lastTarget = target[target.length - 1];
+                if (lastTarget) {
+                    const dd = await salesPerson(lastTarget.products, storedData.slice());
+                    storedData = dd;
+                    // partyTotal += lastTarget.grandTotal;
+                    partyTotal += total
+                    finalTarget = lastTarget
+                }
+            }
+            // console.log(partyTotal)
+            if (finalTarget) {
+                const { _id, products, createdAt, updatedAt, ...newTargetCreation } = finalTarget.toObject();
+                const newCopyTarget = new TargetCreation({
+                    ...newTargetCreation,
+                    userId: createdById,
+                    grandTotal: partyTotal,
+                    products: storedData,
+                    salesPersonId: undefined
+                });
+                // console.log(newCopyTarget)
+                await newCopyTarget.save();
+                await increaseTargetUserClosure(newCopyTarget.userId)
+            }
+        } else {
+            console.log("Duplicate found:", createdByIdString);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    }
+};
+
+
+
+// assing user hierarchy target when targer created......
 export const TargetAssignUser = (function () {
     let initialUserId = "";
     return async function TargetUser(userId, amount) {
@@ -512,7 +628,7 @@ const salesPerson = async function salesPerson(productsData, storedData) {
         if (index !== -1) {
             storedData[index].qtyAssign += product.qtyAssign;
             storedData[index].totalPrice += product.totalPrice;
-            storedData[index].price += product.price;
+            storedData[index].price = product.price;
         } else {
             storedData.push(product);
         }
@@ -523,7 +639,7 @@ const salesPerson = async function salesPerson(productsData, storedData) {
 
 
 // assing user hierarchy target month's wise
-export const increaseTargetUserClosure = (function () {
+export const increaseTargetUserClosure555 = (function () {
     let initialUserId = "";
     let partyTotal = 0;
     let finalTarget;
@@ -577,7 +693,64 @@ export const increaseTargetUserClosure = (function () {
     };
 })();
 
-export const t2 = async function t2(userId) {
+export const increaseTargetUserClosure = (function () {
+    let initialUserId = "";
+    let partyTotal = 0;
+    let finalTarget;
+    return async function increaseTargetUser(userId) {
+        try {
+            // if (initialUserId === "") {
+            //     // Set initialUserId only during the first call
+            //     initialUserId = userId;
+            //     console.log("First call with userId: " + initialUserId);
+            // }
+            const user = await User.findById(userId);
+            if (!user) {
+                return console.log("User Not Found");
+            }
+            const checkUser = await User.findById(user.created_by).populate({ path: "rolename", model: "role" });
+            // console.log(checkUser.rolename.roleName)
+            // console.log(checkUser._id)
+            if (checkUser.rolename.roleName === "SuperAdmin") {
+                console.log("SuperAdmin detected, not saving target.");
+                return console.log("completed...");
+            }
+            // const newParty = await User.find({ created_by: user.created_by }).sort({ sortorder: -1 });
+            // if (!newParty.length > 0) {
+            //     console.log(`party not found`);
+            // }
+            // for (let item of newParty) {
+            //     const target = await TargetCreation.find({ userId: item._id }).sort({ sortorder: -1 });
+            //     const lastTarget = target[target.length - 1];
+            //     if (lastTarget) {
+            //         partyTotal += lastTarget.grandTotal;
+            //         finalTarget = lastTarget
+            //     }
+            // }
+            // if (partyTotal !== 0) {
+            //     const tar = new TargetCreation({
+            //         userId: user.created_by,
+            //         startDate: new Date(),
+            //         database: user.database,
+            //         status: user.status,
+            //         grandTotal: partyTotal
+            //     });
+            //     console.log("target" + tar)
+            //     // await tar.save();
+            // }
+            // partyTotal = 0;
+            // console.log("recursive " + userId)
+            await t2(userId)
+            await increaseTargetUser(user.created_by);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+})();
+
+
+
+export const t2555 = async function t2(userId) {
     try {
         let initialUserId = "";
         let partyTotal = 0;
@@ -637,6 +810,69 @@ export const t2 = async function t2(userId) {
         console.log(err)
     }
 }
+
+export const t2 = async function t2(userId) {
+    try {
+        let initialUserId = "";
+        let partyTotal = 0;
+        let finalTarget;
+        const createdBy = userId.toString();
+        // if (!uniqueUserId.has(createdBy)) {
+        //     uniqueUserId.add(createdBy);
+        const user = await User.findById(userId);
+        if (!user) {
+            return console.log("User Not Found");
+        }
+        const newParty = await User.find({ created_by: user.created_by }).sort({ sortorder: -1 });
+        if (!newParty.length > 0) {
+            console.log(`party not found`);
+        }
+        for (let item of newParty) {
+            const target = await TargetCreation.find({ userId: item._id }).sort({ sortorder: -1 });
+            const lastTarget = target[target.length - 1];
+            if (lastTarget) {
+                partyTotal += lastTarget.grandTotal;
+                finalTarget = lastTarget
+            }
+        }
+        if (partyTotal !== 0) {
+            const us = await TargetCreation.find({ userId: user.created_by }).sort({ sortorder: -1 })
+            const last = us[us.length - 1].createdAt;
+            const created = new Date(last)
+            const current = new Date();
+            // console.log(created.getMonth() + 1)
+            // console.log(current.getMonth() + 1)
+            if (current.getMonth() + 1 !== created.getMonth() + 1) {
+                const tar = new TargetCreation({
+                    userId: user.created_by,
+                    // startDate: new Date(),
+                    database: user.database,
+                    status: user.status,
+                    grandTotal: partyTotal
+                });
+                // console.log("target" + tar)
+                await tar.save();
+            } else {
+                const us = await TargetCreation.find({ userId: user.created_by }).sort({ sortorder: -1 })
+                const last1 = us[us.length - 1];
+                const date = last1.createdAt;
+                const created = new Date(date)
+                if (current.getMonth() + 1 === created.getMonth() + 1) {
+                    last1.grandTotal = partyTotal
+                    await last1.save();
+                } else {
+                    console.log("duplicate user")
+                }
+            }
+        }
+        // }
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+
+
 
 export const viewTarget = async (req, res, next) => {
     try {
