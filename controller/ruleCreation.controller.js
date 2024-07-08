@@ -250,7 +250,7 @@ export const Salary = async (req, res, next) => {
 }
 export const totalWorkingHours = async function totalWorkingHours(data) {
     try {
-        const res = await axios.get(`http://13.201.119.216:8050/attendance-calculate-employee/${data}`)
+        const res = await axios.get(`https://node-hrm.rupioo.com/attendance-calculate-employee/${data}`)
         return res.data
     }
     catch (err) {

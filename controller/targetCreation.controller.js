@@ -178,8 +178,7 @@ export const ViewTargetCreation = async (req, res, next) => {
         if (!adminDetail.length > 0) {
             return res.status(404).json({ error: "Target Not Found", status: false })
         }
-        let target = await TargetCreation.find({ database: database }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: 'salesPersonId', model: 'user' })
-            .populate({ path: "products.productId", model: "product" });
+        let target = await TargetCreation.find({ database: database }).sort({ sortorder: -1 }).populate({ path: 'userId', model: 'user' }).populate({ path: "products.productId", model: "product" });
         return (target.length > 0) ? res.status(200).json({ TargetCreation: target, status: true }) : res.status(404).json({ error: "Not Found", status: false });
     }
     catch (err) {
@@ -1069,7 +1068,7 @@ export const latestAchievementSalesById1 = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 };
-export const latestAchievementSalesById = async (req, res) => {
+export const latestAchievementSalesById555 = async (req, res) => {
     try {
         const userId = req.params.id;
         const user = await User.findOne({ _id: userId, database: req.params.database, status: "Active" })
@@ -1150,6 +1149,95 @@ export const latestAchievementSalesById = async (req, res) => {
             salesPerson.push({ customer, achievements })
         }
         return res.status(200).json({ salesPerson, status: true });
+    } catch (error) {
+        console.error('Error calculating achievements:', error);
+        res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
+
+export const latestAchievementSalesById = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await User.findOne({ _id: userId, database: req.params.database, status: "Active" })
+        if (!user) {
+            return res.status(404).json({ message: "Not Found", status: false });
+        }
+        // const customer = await Customer.find({ created_by: user._id, status: "Active" }).sort({ sortorder: -1 })
+        // if (customer.length === 0) {
+        //     return res.status(404).json({ message: "Not Found", status: false });
+        // }
+        let salesPerson = []
+        // for (let item of customer) {
+        // const customer = await Customer.findById({ _id: item._id, status: "Active" }).sort({ sortorder: -1 })
+        const startDate = req.body.startDate ? new Date(req.body.startDate) : null;
+        const endDate = req.body.endDate ? new Date(req.body.endDate) : null;
+
+        const targetQuery = { userId: user._id };
+        if (startDate && endDate) {
+            targetQuery.createdAt = { $gte: startDate, $lte: endDate };
+            // targetQuery.startDate = { $gte: startDate };
+            // targetQuery.endDate = { $lte: endDate };
+        }
+        const targetss = await TargetCreation.find(targetQuery).populate({ path: "userId", model: "user" }).sort({ sortorder: -1 });
+        const targets = targetss[targetss.length - 1]
+        if (targetss.length === 0) {
+            console.log("targer not found")
+            // continue;
+            // return res.status(404).json({ message: "Not Found", status: false });
+        }
+        const orders = await CreateOrder.find({ userId: targets.userId });
+        if (!orders || orders.length === 0) {
+            console.log("order not found")
+            // continue;
+            // return res.status(404).json({ message: "Order Not Found", status: false });
+        }
+        const allOrderItems = orders.flatMap(order => order.orderItems);
+        const aggregatedOrders = allOrderItems.reduce((acc, item) => {
+            const existingItem = acc.find(accItem => accItem.productId.toString() === item.productId._id.toString());
+            if (existingItem) {
+                existingItem.qty += item.qty;
+                existingItem.price += item.price;
+            } else {
+                acc.push({
+                    productId: item.productId._id.toString(),
+                    qty: item.qty,
+                    price: item.price,
+                });
+            }
+            return acc;
+        }, []);
+        const productDetailsMap = {};
+        productDetailsMap.userName = targets?.userId?.firstName
+        const productIds = aggregatedOrders.map(order => order.productId);
+        const products = await Product.find({ _id: { $in: productIds } });
+        products.forEach(product => {
+            productDetailsMap[product._id.toString()] = product;
+        });
+        const achievements = targets.products.flatMap(targetProduct => {
+            const matchingOrders = aggregatedOrders.filter(order => order.productId === targetProduct.productId);
+            if (matchingOrders.length > 0) {
+                const actualQuantity = matchingOrders.reduce((total, order) => total + order.qty, 0);
+                const actualTotalPrice = matchingOrders.reduce((total, order) => total + order.qty * order.price, 0);
+                const productDetails = productDetailsMap[targetProduct.productId.toString()] || {};
+                return {
+                    productId: productDetails,
+                    targetQuantity: targetProduct.qtyAssign,
+                    actualQuantity: actualQuantity,
+                    achievementPercentage: (actualQuantity / targetProduct.qtyAssign) * 100,
+                    productPrice: targetProduct.price,
+                    targetTotalPrice: targetProduct.totalPrice,
+                    actualTotalPrice: actualTotalPrice
+                };
+            } else {
+                return null;
+            }
+        }).filter(Boolean);
+        const overallTargetQuantity = targets.products.reduce((total, targetProduct) => total + targetProduct.qtyAssign, 0);
+        const overallActualQuantity = achievements.reduce((total, achievement) => total + achievement.actualQuantity, 0);
+        const overallAchievementPercentage = (overallActualQuantity / overallTargetQuantity) * 100;
+        salesPerson.push({ achievements })
+        // }
+        return res.status(200).json({ achievements, status: true });
     } catch (error) {
         console.error('Error calculating achievements:', error);
         res.status(500).json({ error: 'Internal Server Error', status: false });
@@ -1242,15 +1330,30 @@ export const called = async (req, res, next) => {
     try {
         const userId = req.params.id;
         const database = req.params.database;
+        const startDate = req.body.startDate ? new Date(req.body.startDate) : null;
+        const endDate = req.body.endDate ? new Date(req.body.endDate) : null;
+
         const result = await getUserHierarchyBottomToTop2(userId, database, req.body);
         const flattenedArray = flattenNestedArray(result);
+        const targetQuery = { userId: userId };
+        if (startDate && endDate) {
+            targetQuery.createdAt = { $gte: startDate, $lte: endDate };
+            // targetQuery.startDate = { $gte: startDate };
+            // targetQuery.endDate = { $lte: endDate };
+        }
+        const targetss = await TargetCreation.find(targetQuery).sort({ sortorder: -1 });
+        const targets = targetss[targetss.length - 1]
+        if (targetss.length === 0) {
+            return res.status(404).json({ message: "Target Not Found", status: false });
+        }
         const totalAchievementPrice = flattenedArray.reduce((total, price) => {
             return total + price.actualTotalPrice
         }, 0)
-        const totalTargetPrice = flattenedArray.reduce((total, price) => {
-            return total + price.targetTotalPrice
-        }, 0)
-        let TargetAchievement = { totalTargetPrice, totalAchievementPrice, overAllPercentage: ((totalAchievementPrice * 100) / totalTargetPrice).toFixed(2) }
+        // const totalTargetPrice = flattenedArray.reduce((total, price) => {
+        //     return total + price.targetTotalPrice
+        // }, 0)
+        let totalTargetPrice
+        let TargetAchievement = { totalTargetPrice: targets.grandTotal, totalAchievementPrice, overAllPercentage: ((totalAchievementPrice * 100) / targets.grandTotal).toFixed(2) }
         return res.status(200).json({ TargetAchievement, status: true });
     } catch (err) {
         console.error(err);
@@ -1270,7 +1373,7 @@ const flattenNestedArray = (arr) => {
 // 3
 const latestAchievement1 = async (body, data) => {
     try {
-        const customer = await Customer.find({ created_by: body })
+        const customer = await User.find({ created_by: body })
         let latestAchieve = []
         for (let id of customer) {
             // const targets1 = await TargetCreation.findOne({ partyId: id._id });
@@ -1279,13 +1382,13 @@ const latestAchievement1 = async (body, data) => {
             // }
             const startDate = data.startDate ? new Date(data.startDate) : null;
             const endDate = data.endDate ? new Date(data.endDate) : null;
-            const targetQuery = { partyId: id._id };
+            const targetQuery = { userId: id._id, salesPersonId: "salesPerson" };
             if (startDate && endDate) {
                 targetQuery.createdAt = { $gte: startDate, $lte: endDate };
                 // targetQuery.startDate = { $gte: startDate };
                 // targetQuery.endDate = { $lte: endDate };
             }
-            const targetss = await TargetCreation.find(targetQuery).populate({ path: "partyId", model: "customer" }).sort({ sortorder: -1 });
+            const targetss = await TargetCreation.find(targetQuery).sort({ sortorder: -1 });
             const targets = targetss[targetss.length - 1]
             if (targetss.length === 0) {
                 continue;
@@ -1295,7 +1398,7 @@ const latestAchievement1 = async (body, data) => {
             // if (!targets) {
             //     continue;
             // }
-            const orders = await CreateOrder.find({ partyId: targets.partyId });
+            const orders = await CreateOrder.find({ userId: targets.userId });
             if (!orders || orders.length === 0) {
                 continue;
             }
@@ -1360,7 +1463,6 @@ const getUserHierarchyBottomToTop2 = async function getUserHierarchyBottomToTop2
         processedIds.add(parentId);
         const users = await User.find({ created_by: parentId, database: `${database}`, status: "Active" }).lean();
         const subUserIds = users.map(user => user._id);
-
         const achievement = await latestAchievement1(parentId, body);
         const subResultsPromises = subUserIds.map(userId => getUserHierarchyBottomToTop2(userId, database, body, processedIds));
         const subResults = await Promise.all(subResultsPromises);
@@ -1561,3 +1663,33 @@ export const latestAchievement2 = async (body, id, database) => {
 
 
 // ---------------------------------------------------------------------------------------
+
+// save target customer
+export const SavePartyTarget = async (req, res) => {
+    try {
+        const party = await Customer.findById(req.body.partyId);
+        if (!party) {
+            return res.status(404).json({ message: "Customer Not Found", status: false })
+        }
+        req.body.database = party.database
+        const target = await TargetCreation.create(req.body);
+        return res.status(200).json({ message: "Target saved successfully", status: true });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+// view party target
+export const ViewPartyTarget = async (req, res, next) => {
+    try {
+        const party = await TargetCreation.find({ database: req.params.database, partyId: { $ne: null } }).populate({ path: "products.productId", model: "product" })
+        if (party.length === 0) {
+            return res.status(404).json({ message: "target not found", status: false })
+        }
+        return res.status(200).json({ TargetCreation: party, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
