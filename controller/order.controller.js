@@ -717,6 +717,29 @@ export const ProductWiseSalesReport = async (req, res, next) => {
     }
 };
 
+export const SalesOrderCalculate = async (req, res, next) => {
+    try {
+        let totalAmount = 0;
+        let lastMonthAmount = 0;
+        let averageAmount = 0;
+        const previousMonthStart = moment().subtract(1, 'months').startOf('month').toDate();
+        const previousMonthEnd = moment().subtract(1, 'months').endOf('month').toDate();
+        const order = await CreateOrder.find({ database: req.body.database, status: "Completed" })
+        if (order.length === 0) {
+            return res.status(404).json({ message: "Sales Order Not Found", status: false })
+        }
+        for (let item of order) {
+            totalAmount += item.grandTotal
+        }
+        console.log(totalAmount)
+
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+
 // --------------------------------------------
 export const deletedSalesOrder = async (req, res, next) => {
     try {
