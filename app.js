@@ -168,7 +168,7 @@ cron.schedule('0 20 * * *', () => {
 // cron.schedule('0 9 * * *', () => {
 //   viewOpeningStockWarehouse()
 // })
-cron.schedule('10 14 * * *', () => {
+cron.schedule('1 0 1 * *', () => {
   increasePercentage();
 });
 //------------------------------------------------------------------------------

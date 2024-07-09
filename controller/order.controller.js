@@ -792,7 +792,7 @@ export const DeleteClosingSales = async (orderItem, warehouse) => {
             await stock.save()
             // console.log("ClosingSales : " + stock)
         }
-        return true
+        // return true
     }
     catch (err) {
         console.log(err)
