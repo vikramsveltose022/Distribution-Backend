@@ -717,28 +717,90 @@ export const ProductWiseSalesReport = async (req, res, next) => {
     }
 };
 
-export const SalesOrderCalculate = async (req, res, next) => {
+export const SalesOrderCalculate111 = async (req, res, next) => {
     try {
-        let totalAmount = 0;
-        let lastMonthAmount = 0;
-        let averageAmount = 0;
+        let salesOrders = {
+            totalAmount: 0,
+            lastMonthAmount: 0,
+            averageAmount: 0,
+            totalPending: 0,
+            totalDelivery: 0
+        };
         const previousMonthStart = moment().subtract(1, 'months').startOf('month').toDate();
         const previousMonthEnd = moment().subtract(1, 'months').endOf('month').toDate();
-        const order = await CreateOrder.find({ database: req.body.database, status: "Completed" })
+        const order = await CreateOrder.find({ database: req.params.database }).sort({ sortorder: -1 })
         if (order.length === 0) {
             return res.status(404).json({ message: "Sales Order Not Found", status: false })
         }
+        const lastMonth = order[0].createdAt.getMonth() + 1
         for (let item of order) {
-            totalAmount += item.grandTotal
+            if (item.status === "Completed") {
+                salesOrders.totalAmount += item.grandTotal
+            }
+            if (item.status === "pending") {
+                salesOrders.totalPending++
+            }
+            if (item.status === "InProcess") {
+                salesOrders.totalDelivery++
+            }
         }
-        console.log(totalAmount)
-
+        const orders = await CreateOrder.find({
+            database: req.params.database, status: "Completed",
+            createdAt: { $gte: previousMonthStart, $lte: previousMonthEnd }
+        });
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "Sales Order Not Found", status: false })
+        }
+        for (let item of orders) {
+            salesOrders.lastMonthAmount += item.grandTotal
+        }
+        salesOrders.averageAmount = (salesOrders.totalAmount / lastMonth).toFixed(2)
+        res.status(200).json({ salesOrders, status: true })
     }
     catch (err) {
         console.log(err)
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+export const SalesOrderCalculate = async (req, res, next) => {
+    try {
+        let salesOrders = {
+            totalAmount: 0,
+            lastMonthAmount: 0,
+            averageAmount: 0,
+            totalPending: 0,
+            totalDelivery: 0
+        };
+        const previousMonthStart = moment().subtract(1, 'months').startOf('month').toDate();
+        const previousMonthEnd = moment().subtract(1, 'months').endOf('month').toDate();
+        const orders = await CreateOrder.find({ database: req.params.database }).sort({ sortorder: -1 });
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "Sales Order Not Found", status: false });
+        }
+        let completedOrdersLastMonth = [];
+        const lastMonth = orders[0].createdAt.getMonth() + 1
+        orders.forEach(order => {
+            if (order.status === "Completed") {
+                salesOrders.totalAmount += order.grandTotal;
+                if (moment(order.createdAt).isBetween(previousMonthStart, previousMonthEnd, null, '[]')) {
+                    completedOrdersLastMonth.push(order);
+                }
+            } else if (order.status === "pending") {
+                salesOrders.totalPending++;
+            } else if (order.status === "InProcess") {
+                salesOrders.totalDelivery++;
+            }
+        });
+        completedOrdersLastMonth.forEach(order => {
+            salesOrders.lastMonthAmount += order.grandTotal;
+        });
+        salesOrders.averageAmount = (salesOrders.totalAmount / lastMonth).toFixed(2);
+        return res.status(200).json({ SalesCalculation: salesOrders, status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
 
 // --------------------------------------------
 export const deletedSalesOrder = async (req, res, next) => {

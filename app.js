@@ -73,6 +73,7 @@ import cors from "cors";
 import { closingStockUpdated, increaseTargetCreation, viewOpeningStockWarehouse } from "./cron-node/cron-node-service.js";
 import { increasePercentage } from "./controller/targetCreation.controller.js";
 import customerCheckRouter from "./routes/customerCheck.route.js";
+import { ViewAllWarehouse } from "./controller/stockUpdation.controller.js";
 app.use(cors());
 dotenv.config();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -163,7 +164,8 @@ mongoose.connect(process.env.DATABASE_URL, {
 
 //------------------------------------------------------------------------------
 cron.schedule('0 20 * * *', () => {
-  closingStockUpdated();
+  ViewAllWarehouse()
+  // closingStockUpdated();
 });
 // cron.schedule('0 9 * * *', () => {
 //   viewOpeningStockWarehouse()

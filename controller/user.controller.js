@@ -6,13 +6,14 @@ import Jwt from "jsonwebtoken";
 import { getUserHierarchyDetails } from "../rolePermission/RolePermission.js";
 import { getUserWarehouseHierarchy } from "../rolePermission/permission.js";
 import { Customer } from "../model/customer.model.js";
-import transporter from "../service/email.js";
+import transporterss from "../service/email.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { ruleCreation } from "../model/ruleCreation.model.js";
 import { ApplyRule } from "../model/rule.applied.model.js";
 import { UserDetail } from "../model/userDetails.model.js";
 import { Subscription } from "../model/subscription.model.js";
 import { Role } from "../model/role.model.js";
+import mongoose from "mongoose";
 dotenv.config();
 
 
@@ -282,7 +283,7 @@ export const forgetPassword = async (request, response, next) => {
         otp +
         '</h2><p style={{ fontSize: "0.9em" }}Regards,<br />Distribution Management System</p><hr style={{ border: "none", borderTop: "1px solid #eee" }} /></div</div>',
     };
-    await transporter.sendMail(mailOptions, (error, info) => {
+    await transporterss.sendMail(mailOptions, (error, info) => {
       !error ? response.status(201).json({ user: user, message: "send otp on email", status: true }) : console.log(error) || response.json({ error: "something went wrong" });
     });
   } catch (error) {
@@ -918,3 +919,23 @@ export const saveUserWithExcel11 = async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error', status: false });
   }
 }
+
+export const customId = async (req, res, next) => {
+  try {
+    const Model = mongoose.model(req.body.model);
+    const existingData = await Model.findById(req.body.id);
+    if (!existingData) {
+      return res.status(404).json({ message: "Data Not Found", status: false });
+    }
+    const existingId = await Model.findOne({ database: existingData.database, id: req.body.userId })
+    if (existingId) {
+      return res.status(404).json({ message: "Id Already Exist", status: false });
+    }
+    existingData.id = req.body.userId;
+    await existingData.save();
+    return res.status(200).json({ message: "Data Saved Successfully!", status: true });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error", status: false });
+  }
+};

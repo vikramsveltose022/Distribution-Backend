@@ -368,12 +368,12 @@ export const updateTypeStatus = async (req, res, next) => {
     }
 };
 //--------------------------------------------------------------------------
-export const ViewAllWarehouse = async (req, res, next) => {
+export const ViewAllWarehouse = async () => {
     try {
         let array = []
         const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
         if (!ware) {
-            return res.status(404).json({ message: "Not Found", status: false })
+            // return res.status(404).json({ message: "Not Found", status: false })
         }
         for (let id of ware) {
             let userData = await Warehouse.findById({ _id: id._id }).sort({ sortorder: -1 })
@@ -397,10 +397,10 @@ export const ViewAllWarehouse = async (req, res, next) => {
         }
         // }
         await deleteModel()
-        return res.status(200).json({ message: "data saved successful", status: true });
+        // return res.status(200).json({ message: "data saved successful", status: true });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ error: "Internal Server Error", status: false });
+        // return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
 export const viewStockClosingWarehouse = async (req, res, next) => {
@@ -477,12 +477,13 @@ export const ViewOverDueStock = async (req, res, next) => {
     try {
         const currentDate = moment();
         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
-        const productsNotOrderedLastMonth = await Product.find({ status: "Active", createdAt: { $lt: startOfLastMonth.toDate() } }).populate({ path: "partyId", model: "customer" });
+        const productsNotOrderedLastMonth = await Product.find({ database: req.params.database, status: "Active", createdAt: { $lt: startOfLastMonth.toDate() } }).populate({ path: "partyId", model: "customer" });
 
         if (!productsNotOrderedLastMonth || productsNotOrderedLastMonth.length === 0) {
             return res.status(404).json({ message: "No products found", status: false });
         }
         const orderedProductsLastMonth = await CreateOrder.find({
+            database: req.params.database,
             createdAt: { $gte: startOfLastMonth.toDate() }
         }).distinct('orderItems');
         const orderedProductIdsLastMonth = orderedProductsLastMonth.map(orderItem => orderItem.productId.toString());
