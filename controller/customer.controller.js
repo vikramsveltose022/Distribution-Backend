@@ -735,7 +735,7 @@ export const deleteAssignLeadParty = async (req, res, next) => {
         console.log(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
-};
+}
 export const PartyWithSalesPerson = async (req, res, next) => {
     try {
         const party = await Customer.find({ created_by: req.params.id, leadStatusCheck: "true" }).populate({ path: "created_by", model: "user" });
@@ -845,7 +845,7 @@ export const UpdateSalesLead = async (req, res, next) => {
         console.error(err);
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
-};
+}
 
 export const DeleteCustomer11 = async (req, res, next) => {
     try {
