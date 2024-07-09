@@ -3,6 +3,9 @@ import { Warehouse } from "../model/warehouse.model.js";
 import { Factory } from "../model/factory.model.js";
 import { Stock } from "../model/stock.js";
 import { GstCalculateStock } from "../service/gstCalculate.js";
+import moment from "moment";
+import { Product } from "../model/product.model.js";
+import { CreateOrder } from "../model/createOrder.model.js";
 
 export const WarehouseXml = async (req, res) => {
     const fileUrl = "https://xmlfiles.nyc3.digitaloceanspaces.com/Warehouse.xml";
@@ -325,5 +328,86 @@ export const HSNStockSummary = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+
+export const StockCalculate = async (req, res, next) => {
+    try {
+        let WarehouseStock = {
+            OpeningStock: 0,
+            ClosingStock: 0,
+            DeadStock: 0,
+            DamageStock: 0,
+            WarehouseStock: 0
+        };
+        let warehouses = []
+        let closing = []
+        // const previousMonthStart = moment().subtract(1, 'months').startOf('month').toDate();
+        // const previousMonthEnd = moment().subtract(1, 'months').endOf('month').toDate();
+        const twoDaysAgoEnd = moment().subtract(1, 'days').endOf('day').toDate();
+        const warehouse = await Warehouse.find({ database: req.params.database }).sort({ sortorder: -1 })
+        if (warehouse.length === 0) {
+            return res.status(404).json({ message: "Sales Order Not Found", status: false })
+        }
+        const openingData = await Stock.find({
+            database: req.params.database,
+            createdAt: { $gte: twoDaysAgoEnd }
+        }).sort({ sortorder: -1 });
+        for (let item of warehouse) {
+            warehouses = warehouses.concat(item.productItems)
+        }
+        for (let item of warehouses) {
+            WarehouseStock.WarehouseStock += item.currentStock
+            WarehouseStock.DamageStock += item?.damageItem?.currentStock
+        }
+        for (let item of openingData) {
+            closing = closing.concat(item.productItems)
+        }
+        for (let item of closing) {
+            WarehouseStock.OpeningStock += item.currentStock
+            WarehouseStock.ClosingStock += item.currentStock
+        }
+        WarehouseStock.DeadStock = await ViewOverDueStock(req.params.database)
+        res.status(200).json({ WarehouseStock, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const ViewOverDueStock = async (body) => {
+    try {
+        const currentDate = moment();
+        let damageStock = 0;
+        const startOfLastMonth = currentDate.clone().subtract(30, 'days');
+        const productsNotOrderedLastMonth = await Product.find({ database: body.database, status: "Active", createdAt: { $lt: startOfLastMonth.toDate() } }).populate({ path: "partyId", model: "customer" });
+
+        if (!productsNotOrderedLastMonth || productsNotOrderedLastMonth.length === 0) {
+            // return res.status(404).json({ message: "No products found", status: false });
+        }
+        const orderedProductsLastMonth = await CreateOrder.find({
+            database: body.database,
+            createdAt: { $gte: startOfLastMonth.toDate() }
+        }).distinct('orderItems');
+        const orderedProductIdsLastMonth = orderedProductsLastMonth.map(orderItem => orderItem.productId.toString());
+        const productsToProcess = productsNotOrderedLastMonth.filter(product =>
+            !orderedProductIdsLastMonth.includes(product._id.toString())
+        );
+        const warehouseIds = productsToProcess.map(product => product.warehouse);
+        const warehouses = await Warehouse.find({ _id: { $in: warehouseIds } });
+        const allProduct = productsToProcess.map(product => {
+            const warehouse = warehouses.find(warehouse => warehouse._id.toString() === product.warehouse.toString());
+            const qty = warehouse ? warehouse.productItems.find(item => item.productId.toString() === product._id.toString()) : null;
+            damageStock += qty.currentStock || 0;
+            return {
+                product,
+                Qty: qty ? qty.currentStock : null,
+                damageStock
+            };
+        });
+        return allProduct[allProduct.length - 1].damageStock
+    } catch (err) {
+        console.error(err);
+        // return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };

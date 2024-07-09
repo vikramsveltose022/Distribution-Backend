@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { DeleteUser, DeleteUserDetail, EditProfile, GetExcelKeys, SaveUser, SaveUserDetail, SignIn, SignInWithAdmin, SuperAdminRoleUpdate, UpdateUser, UpdateUserDetail, UserList, ViewByIdUserDetail, ViewRegisterUser, ViewUser, ViewUserById, ViewUserDetail, ViewUserHRM, ViewWarehouse, assignUser, deleteAssignUser, forgetPassword, otpVerify, saveUserWithExcel, updatePassword, updatePlan, updateUserWithExcel, verifyOTP, verifyPanNo, viewApplyRules, viewApplyRulesById } from "../controller/user.controller.js";
+import { DeleteUser, DeleteUserDetail, EditProfile, GetExcelKeys, SaveUser, SaveUserDetail, SignIn, SignInWithAdmin, SuperAdminRoleUpdate, UpdateUser, UpdateUserDetail, UserList, ViewByIdUserDetail, ViewRegisterUser, ViewUser, ViewUserById, ViewUserDetail, ViewUserHRM, ViewWarehouse, assignUser, customId, deleteAssignUser, forgetPassword, otpVerify, saveUserWithExcel, updatePassword, updatePlan, updateUserWithExcel, verifyOTP, verifyPanNo, viewApplyRules, viewApplyRulesById } from "../controller/user.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -61,5 +61,7 @@ router.put("/update-user-detail/:id", upload.any("files"), UpdateUserDetail)
 
 router.post("/login-user", SignInWithAdmin);
 router.get("/user-list-hrm/:database", ViewUserHRM)
+
+router.post("/create-custom-id", customId)
 
 export default router;

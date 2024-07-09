@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-var transporter = nodemailer.createTransport({
+var transporterss = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
     port: 465,
@@ -10,4 +10,4 @@ var transporter = nodemailer.createTransport({
         pass: 'xlovbytqzrtimofr'
     },
 });
-export default transporter;
+export default transporterss;
