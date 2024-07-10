@@ -788,12 +788,14 @@ export const SaveOtp = async (req, res) => {
         if (!req.body.otp) {
             return res.status(404).json({ message: "otp required", status: false })
         }
-        const orderData = await OtpVerify.create(req.body)
-        if (orderData) {
-            return res.status(200).json({ message0: "data saved successfull!", status: true });
+        const existing = await OtpVerify.findOne({ partyId: req.body.partyId, userId: req.body.userId })
+        if (!existing) {
+            await OtpVerify.create(req.body)
         } else {
-            return res.status(404).json({ message: 'Bad Request', status: false });
+            existing.otp = req.body.otp;
+            await existing.save()
         }
+        return res.status(200).json({ message0: "data saved successfull!", status: true });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Internal Server Error', status: false });
