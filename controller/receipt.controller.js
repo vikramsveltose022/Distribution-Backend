@@ -816,10 +816,11 @@ export const OtpVerifyForReceipt = async (req, res) => {
         if (!req.body.otp) {
             return res.status(400).json({ message: "otp required", status: false })
         }
-        const existingOtp = await OtpVerify.findOne({ otp: req.body.otp })
+        const existingOtp = await OtpVerify.findOne({ partyId: req.body.partyId, otp: req.body.otp })
         if (!existingOtp) {
             return res.status(404).json({ message: "otp don't matched..", status: false })
         }
+        await OtpVerify.findOneAndDelete({ otp: req.body.otp })
         return res.status(200).json({ message: "otp verified successfull!", status: true })
     }
     catch (err) {

@@ -2,6 +2,14 @@ import { CustomerGroup } from "../model/customerGroup.model.js";
 
 export const saveCustomerGroup = async (req, res, next) => {
     try {
+        if (req.body.id) {
+            const existing = await CustomerGroup.findOne({ database: req.body.database, id: req.body.id })
+            if (existing) {
+                return res.status(404).json({ message: "id already exist", status: false })
+            }
+        } else {
+            return res.status(400).json({ message: "customer group id required", status: false })
+        }
         const customerGroup = await CustomerGroup.create(req.body);
         return customerGroup ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
     }
