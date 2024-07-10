@@ -566,7 +566,7 @@ export const saveReceiptWithExcel111 = async (req, res) => {
         }
         let message = 'Data Inserted Successfully';
         if (existingParts.length > 0) {
-            message = `Some reciept not exist party: ${existingParts.join(', ')}`;
+            message = `Some reciept not exist valid partyId: ${existingParts.join(', ')}`;
         } else if (notExistCode.length > 0) {
             message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
         }
@@ -793,6 +793,7 @@ export const SaveOtp = async (req, res) => {
             await OtpVerify.create(req.body)
         } else {
             existing.otp = req.body.otp;
+            existing.amount = req.body.amount;
             await existing.save()
         }
         return res.status(200).json({ message0: "data saved successfull!", status: true });
