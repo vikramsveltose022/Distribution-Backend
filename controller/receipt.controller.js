@@ -824,7 +824,7 @@ export const OtpVerifyForReceipt = async (req, res) => {
         }
         const existingOtp = await OtpVerify.findOne({ partyId: req.body.partyId, otp: req.body.otp })
         if (!existingOtp) {
-            return res.status(404).json({ message: "otp don't matched..", status: false })
+            return res.status(404).json({ message: "maybe partyId or otp don't correct", status: false })
         }
         await OtpVerify.findOneAndDelete({ otp: req.body.otp })
         return res.status(200).json({ message: "otp verified successfull!", status: true })
@@ -834,6 +834,17 @@ export const OtpVerifyForReceipt = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+export const ViewReceiptByPartyId = async (req, res, next) => {
+    try {
+        let receipt = await Receipt.find({ database: req.params.database, partyId: req.params.id }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
+        // const customer = await Customer.findOne({ uniqueCode: receipt.code }).populate({path:"partyId",model:"customer"});
+        // const receipts = { ...receipt.toObject(), partyId: customer };
+        return (receipt.length > 0) ? res.status(200).json({ Receipts: receipt, status: true }) : res.status(404).json({ message: "Receipt Not Found", status: false });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
 
 // --------------------------------------------------------------------
 
