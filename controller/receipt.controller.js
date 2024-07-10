@@ -785,6 +785,9 @@ export const VerifyPartyPayment = async (req, res, next) => {
 }
 export const SaveOtp = async (req, res) => {
     try {
+        if (!req.body.otp) {
+            return res.status(404).json({ message: "otp required", status: false })
+        }
         const orderData = await OtpVerify.create(req.body)
         if (orderData) {
             return res.status(200).json({ message0: "data saved successfull!", status: true });
