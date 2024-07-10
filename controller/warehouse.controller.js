@@ -331,7 +331,8 @@ export const HSNStockSummary = async (req, res, next) => {
     }
 };
 
-export const StockCalculate = async (req, res, next) => {
+//  for dashboard
+export const StockCalculate11 = async (req, res, next) => {
     try {
         let WarehouseStock = {
             OpeningStock: 0,
@@ -345,9 +346,10 @@ export const StockCalculate = async (req, res, next) => {
         // const previousMonthStart = moment().subtract(1, 'months').startOf('month').toDate();
         // const previousMonthEnd = moment().subtract(1, 'months').endOf('month').toDate();
         const twoDaysAgoEnd = moment().subtract(1, 'days').endOf('day').toDate();
+        const product = await Product.find({ database: req.params.database }).sort({ sortorder: -1 })
         const warehouse = await Warehouse.find({ database: req.params.database }).sort({ sortorder: -1 })
         if (warehouse.length === 0) {
-            return res.status(404).json({ message: "Sales Order Not Found", status: false })
+            // return res.status(404).json({ message: "Sales Order Not Found", status: false })
         }
         const openingData = await Stock.find({
             database: req.params.database,
@@ -357,16 +359,19 @@ export const StockCalculate = async (req, res, next) => {
             warehouses = warehouses.concat(item.productItems)
         }
         for (let item of warehouses) {
-            WarehouseStock.WarehouseStock += item.currentStock
+            WarehouseStock.WarehouseStock += item?.currentStock
             WarehouseStock.DamageStock += item?.damageItem?.currentStock
         }
         for (let item of openingData) {
             closing = closing.concat(item.productItems)
         }
         for (let item of closing) {
-            WarehouseStock.OpeningStock += item.currentStock
             WarehouseStock.ClosingStock += item.currentStock
         }
+        for (let item of product) {
+            WarehouseStock.OpeningStock += item.Opening_Stock
+        }
+        WarehouseStock.DamageStock = (WarehouseStock.DamageStock == NaN) ? 0 : WarehouseStock.DamageStock
         WarehouseStock.DeadStock = await ViewOverDueStock(req.params.database)
         res.status(200).json({ WarehouseStock, status: true })
     }
@@ -375,6 +380,57 @@ export const StockCalculate = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+
+export const StockCalculate = async (req, res, next) => {
+    try {
+        let WarehouseStock = {
+            OpeningStock: 0,
+            ClosingStock: 0,
+            DeadStock: 0,
+            DamageStock: 0,
+            WarehouseStock: 0
+        };
+
+        const twoDaysAgoEnd = moment().subtract(1, 'days').endOf('day').toDate();
+
+        const products = await Product.find({ database: req.params.database }).sort({ sortorder: -1 });
+        const warehouses = await Warehouse.find({ database: req.params.database }).sort({ sortorder: -1 });
+
+        if (warehouses.length === 0) {
+            return res.status(404).json({ message: "Warehouse Not Found", status: false });
+        }
+
+        const openingData = await Stock.find({
+            database: req.params.database, createdAt: { $gte: twoDaysAgoEnd }
+        }).sort({ sortorder: -1 });
+
+        warehouses.forEach(warehouse => {
+            warehouse.productItems.forEach(item => {
+                WarehouseStock.WarehouseStock += item?.currentStock || 0;
+                WarehouseStock.DamageStock += item?.damageItem?.currentStock || 0;
+            });
+        });
+
+        openingData.forEach(stock => {
+            stock.productItems.forEach(item => {
+                WarehouseStock.ClosingStock += item.currentStock || 0;
+            });
+        });
+
+        products.forEach(product => {
+            WarehouseStock.OpeningStock += product.Opening_Stock || 0;
+        });
+
+        WarehouseStock.DamageStock = isNaN(WarehouseStock.DamageStock) ? 0 : WarehouseStock.DamageStock;
+        WarehouseStock.DeadStock = await ViewOverDueStock(req.params.database);
+
+        res.status(200).json({ WarehouseStock, status: true });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+
 export const ViewOverDueStock = async (body) => {
     try {
         const currentDate = moment();

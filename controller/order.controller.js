@@ -717,6 +717,7 @@ export const ProductWiseSalesReport = async (req, res, next) => {
     }
 };
 
+//  for dashboard
 export const SalesOrderCalculate111 = async (req, res, next) => {
     try {
         let salesOrders = {
