@@ -552,7 +552,7 @@ export const ViewDeadParty = async (req, res, next) => {
         const database = req.params.database;
         const currentDate = moment();
         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
-
+        console.log(startOfLastMonth)
         const hierarchy = await Customer.find({ database: database, status: 'Active', createdAt: { $lt: startOfLastMonth } }).lean();
 
         const allOrderedParties = await CreateOrder.find({ database: database, createdAt: { $gte: startOfLastMonth.toDate() } }).lean();

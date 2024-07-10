@@ -79,7 +79,13 @@ dotenv.config();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 const publicPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "public");
+const publicPath1 = path.join(path.dirname(fileURLToPath(import.meta.url)), "controller");
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+// const publicPath = path.join(__dirname, "public");
+
 app.use(express.static(publicPath));
+app.use(express.static(publicPath1));
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
@@ -173,6 +179,18 @@ cron.schedule('0 20 * * *', () => {
 cron.schedule('1 0 1 * *', () => {
   increasePercentage();
 });
+
+app.post('/file', (req, res) => {
+  const filePath = path.join(publicPath1, req.body.fileName);
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'file', error: err, status: false });
+    }
+    res.status(200).json({ message: 'File', status: true });
+  });
+});
+
 //------------------------------------------------------------------------------
 
 app.listen(process.env.PORT, () => {

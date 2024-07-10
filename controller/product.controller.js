@@ -20,7 +20,7 @@ export const ProductXml = async (req, res) => {
 export const SaveProduct = async (req, res) => {
   try {
     //   if (req.body.id) {
-    //     const existing = await Product.findOne({ id: req.body.id })
+    //     const existing = await Product.findOne({database:req.body.database, id: req.body.id })
     //     if (existing) {
     //         return res.status(404).json({ message: "id already exist", status: false })
     //     }
@@ -74,9 +74,7 @@ export const ViewProductForPurchase = async (req, res, next) => {
 
 export const ViewProductById = async (req, res, next) => {
   try {
-    let product = await Product.findById({ _id: req.params.id }).sort({
-      sortorder: -1,
-    })
+    let product = await Product.findById({ _id: req.params.id })
     return product ? res.status(200).json({ Product: product, status: true }) : res.status(404).json({ error: "Not Found", status: false });
   } catch (err) {
     console.log(err);
@@ -234,6 +232,57 @@ export const saveItemWithExcel = async (req, res) => {
     let message = 'Data Inserted Successfully';
     if (existingParts.length > 0) {
       message = `Some product not exist hsn code: ${existingParts.join(', ')}`;
+    }
+    return res.status(200).json({ message, status: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal Server Error', status: false });
+  }
+}
+export const saveItemWithExcel11 = async (req, res) => {
+  try {
+    let database = "database";
+    let warehouse = "warehouse"
+    const filePath = await req.file.path;
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(filePath);
+    const worksheet = workbook.getWorksheet(1);
+    const headerRow = worksheet.getRow(1);
+    const headings = [];
+    headerRow.eachCell((cell) => {
+      headings.push(cell.value);
+    });
+    const insertedDocuments = [];
+    const existingParts = [];
+    const WarehouseNotExisting = []
+    for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
+      const dataRow = worksheet.getRow(rowIndex);
+      const document = {};
+      for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
+        const heading = headings[columnIndex - 1];
+        const cellValue = dataRow.getCell(columnIndex).value;
+        document[heading] = cellValue;
+      }
+      document[database] = req.params.database
+      if (document.HSN_Code) {
+        const existingWarehouse = await Warehouse.findOne({ id: document.id, database: document.database })
+        if (!existingWarehouse) {
+          WarehouseNotExisting.push(document.warehouse)
+        } else {
+          document[warehouse] = existingWarehouse._id
+          const insertedDocument = await Product.create(document);
+          await addProductInWarehouse1(document, insertedDocument.warehouse, insertedDocument)
+          insertedDocuments.push(insertedDocument);
+        }
+      } else {
+        existingParts.push(document.Product_Title)
+      }
+    }
+    let message = 'Data Inserted Successfully';
+    if (existingParts.length > 0) {
+      message = `Some product not exist hsn code: ${existingParts.join(', ')}`;
+    } else if (WarehouseNotExisting.length > 0) {
+      message = `warehouse not exist: ${existingParts.join(', ')}`;
     }
     return res.status(200).json({ message, status: true });
   } catch (err) {
@@ -456,55 +505,3 @@ export const HSNWisePurchaseReport = async (req, res, next) => {
     return res.status(500).json({ error: "Internal Server Error", status: false });
   }
 };
-
-export const saveItemWithExcel1 = async (req, res) => {
-  try {
-    let database = "database";
-    let warehouse = "warehouse"
-    const filePath = await req.file.path;
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(filePath);
-    const worksheet = workbook.getWorksheet(1);
-    const headerRow = worksheet.getRow(1);
-    const headings = [];
-    headerRow.eachCell((cell) => {
-      headings.push(cell.value);
-    });
-    const insertedDocuments = [];
-    const existingParts = [];
-    const notExistingWarehouse = []
-    for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
-      const dataRow = worksheet.getRow(rowIndex);
-      const document = {};
-      for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
-        const heading = headings[columnIndex - 1];
-        const cellValue = dataRow.getCell(columnIndex).value;
-        document[heading] = cellValue;
-      }
-      document[database] = req.params.database
-      if (document.HSN_Code) {
-        const existingWarehouse = await Warehouse.findOne({ id: document.id, database: document.database })
-        if (!existingWarehouse) {
-          notExistingWarehouse.push(document.warehouse)
-        } else {
-          document[warehouse] = existingWarehouse._id
-          const insertedDocument = await Product.create(document);
-          await addProductInWarehouse1(document, insertedDocument.warehouse, insertedDocument)
-          insertedDocuments.push(insertedDocument);
-        }
-      } else {
-        existingParts.push(document.Product_Title)
-      }
-    }
-    let message = 'Data Inserted Successfully';
-    if (existingParts.length > 0) {
-      message = `Some product not exist hsn code: ${existingParts.join(', ')}`;
-    } else if (notExistingWarehouse.length > 0) {
-      message = `warehouse not exist: ${existingParts.join(', ')}`;
-    }
-    return res.status(200).json({ message, status: true });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error', status: false });
-  }
-}

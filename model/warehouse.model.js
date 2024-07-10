@@ -82,38 +82,6 @@ const WarehouseSchema = new mongoose.Schema({
       type: Object
     }
   }],
-  damageItem: [{
-    productId: {
-      type: String
-    },
-    unitType: {
-      type: String
-    },
-    Size: {
-      type: Number
-    },
-    currentStock: {
-      type: Number
-    },
-    transferQty: {
-      type: Number
-    },
-    price: {
-      type: Number
-    },
-    totalPrice: {
-      type: Number
-    },
-    demagePercentage: {
-      type: Number
-    },
-    reason: {
-      type: String
-    },
-    typeStatus: {
-      type: String
-    }
-  }],
   grandTotal: {
     type: Number
   },
