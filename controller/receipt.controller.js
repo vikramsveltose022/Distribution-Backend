@@ -827,3 +827,92 @@ export const OtpVerifyForReceipt = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+
+// --------------------------------------------------------------------
+
+// for dashboard
+export const transactionCalculate11 = async (req, res, next) => {
+    try {
+        let transaction = {
+            BankAmount: 0,
+            CashAmount: 0,
+            marketOutstanding: 0,
+        };
+        let creditAmount = 0;
+        let debitAmount = 0;
+        let creditAmounts = 0;
+        let debitAmounts = 0;
+        const receipts = await Receipt.find({ database: req.params.database, paymentMode: "Bank", status: "Active" }).sort({ sortorder: -1 })
+        const receipt = await Receipt.find({ database: req.params.database, paymentMode: "Cash", status: "Active" }).sort({ sortorder: -1 })
+        if (receipts.length === 0) {
+            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false })
+        }
+        if (receipt.length === 0) {
+            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false })
+        }
+        receipts.forEach(item => {
+            if (item.type === "receipt") {
+                creditAmount += item.amount
+            } else if (item.type === "payment") {
+                debitAmount += item.amount
+            }
+        })
+        transaction.BankAmount = (creditAmount - debitAmount)
+        receipt.forEach(item => {
+            if (item.type === "receipt") {
+                creditAmounts += item.amount
+            } else if (item.type === "payment") {
+                debitAmounts += item.amount
+            }
+        })
+        transaction.CashAmount = (creditAmounts - debitAmounts)
+        res.status(200).json({ transaction, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: "Internal Server Error", status: false })
+    }
+}
+export const transactionCalculate = async (req, res, next) => {
+    try {
+        let transaction = {
+            BankAmount: 0,
+            CashAmount: 0,
+            marketOutstanding: 0,
+        };
+        let creditAmountBank = 0;
+        let debitAmountBank = 0;
+        let creditAmountCash = 0;
+        let debitAmountCash = 0;
+        const receipts = await Receipt.find({
+            database: req.params.database,
+            status: "Active",
+            paymentMode: { $in: ["Bank", "Cash"] }
+        }).sort({ sortorder: -1 });
+        if (receipts.length === 0) {
+            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false });
+        }
+        receipts.forEach(item => {
+            if (item.paymentMode === "Bank") {
+                if (item.type === "receipt") {
+                    creditAmountBank += item.amount;
+                } else if (item.type === "payment") {
+                    debitAmountBank += item.amount;
+                }
+            } else if (item.paymentMode === "Cash") {
+                if (item.type === "receipt") {
+                    creditAmountCash += item.amount;
+                } else if (item.type === "payment") {
+                    debitAmountCash += item.amount;
+                }
+            }
+        });
+        transaction.BankAmount = creditAmountBank - debitAmountBank;
+        transaction.CashAmount = creditAmountCash - debitAmountCash;
+
+        res.status(200).json({ transaction, status: true });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal Server Error", status: false });
+    }
+};

@@ -1,5 +1,5 @@
 import express from "express";
-import { BankAccountReport, CashBookReport, DeleteReceipt, OtpVerifyForReceipt, PartySendOtp, ProfitLossReport, SaveOtp, TaxReport, UpdateReceipt, ViewOtp, ViewReceiptById, savePayment, savePaymentWithExcel, saveReceipt, saveReceiptWithExcel, viewReceipt } from "../controller/receipt.controller.js";
+import { BankAccountReport, CashBookReport, DeleteReceipt, OtpVerifyForReceipt, PartySendOtp, ProfitLossReport, SaveOtp, TaxReport, UpdateReceipt, ViewOtp, ViewReceiptById, savePayment, savePaymentWithExcel, saveReceipt, saveReceiptWithExcel, transactionCalculate, viewReceipt } from "../controller/receipt.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -27,5 +27,7 @@ router.post("/receipt-generate", PartySendOtp)
 router.post("/otp-verify", OtpVerifyForReceipt)
 router.post("/view-otp", ViewOtp)
 router.post("/save-otp", SaveOtp)
+
+router.get("/transaction-calculate/:database", transactionCalculate)
 
 export default router;
