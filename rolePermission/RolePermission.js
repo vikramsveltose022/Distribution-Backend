@@ -212,7 +212,7 @@ export const getCreateOrderHierarchy = async function getCreateOrderHierarchy(pa
             CreateOrder.find({ userId: parentId, }).populate({
                 path: 'orderItems.productId',
                 model: 'product'
-            }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).exec()
+            }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).populate({ path: "warehouseId", model: "warehouse" }).exec()
         ]);
         let results = customers;
         const subUserIds = users.map(user => user._id);

@@ -89,9 +89,12 @@ const CompanySchema = new mongoose.Schema({
     BillNumber: {
         type: String
     },
-    termsAndCondition:
-    {
+    termsAndCondition: {
         type: String
+    },
+    orderNo: {
+        type: String,
+        default: "0"
     }
 }, { timestamps: true })
 export const CompanyDetails = mongoose.model("companyDetail", CompanySchema)

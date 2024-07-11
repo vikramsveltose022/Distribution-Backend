@@ -655,7 +655,7 @@ export const savePaymentWithExcel111 = async (req, res) => {
         }
         let message = 'Data Inserted Successfully';
         if (existingParts.length > 0) {
-            message = `Some Party not exist: ${existingParts.join(', ')}`;
+            message = `This Party Not Exist: ${existingParts.join(', ')}`;
         } else if (notExistCode.length > 0) {
             message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
         }

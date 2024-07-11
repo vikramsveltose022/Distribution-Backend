@@ -41,6 +41,15 @@ const ReceiptSchema = new mongoose.Schema({
     note: {
         type: String
     },
+    latitude: {
+        type: String
+    },
+    longitude: {
+        type: String
+    },
+    time: {
+        type: String
+    },
     status: {
         type: String,
         default: "Active"

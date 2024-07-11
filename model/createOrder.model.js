@@ -80,6 +80,9 @@ const createOrderSchema = new mongoose.Schema({
     invoiceId: {
         type: String
     },
+    orderNo: {
+        type: String
+    },
     warehouseId: {
         type: String
     },
