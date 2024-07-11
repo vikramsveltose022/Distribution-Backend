@@ -10,7 +10,7 @@ import { Order } from "../model/order.model.js";
 import { User } from "../model/user.model.js";
 import { Product } from "../model/product.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
-import { generateInvoice } from "../service/invoice.js";
+import { generateInvoice, generateOrderNo } from "../service/invoice.js";
 import { getCreateOrderHierarchy, getOrderHierarchy, getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 import { Customer } from "../model/customer.model.js";
 import { createInvoiceTemplate } from "../Invoice/invoice.js";
@@ -212,6 +212,10 @@ export const updatePlaceOrderStatus = async (req, res) => {
         return res.status(500).json({ error: error, status: false });
     }
 }
+export const tee = async (req, res) => {
+    const result = await generateOrderNo(req.params.database);
+    res.send(result)
+}
 
 export const createOrder = async (req, res, next) => {
     try {
@@ -224,6 +228,7 @@ export const createOrder = async (req, res, next) => {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
             const result = await generateInvoice(user.database);
+            const orderNo = await generateOrderNo(user.database);
             const billAmount = orderItems.reduce((total, orderItem) => {
                 return total + (orderItem.price * orderItem.qty);
             }, 0);
@@ -257,6 +262,7 @@ export const createOrder = async (req, res, next) => {
                 secondaryUnit: req.body.secondaryUnit,
                 secondarySize: req.body.secondarySize,
                 invoiceId: result,
+                orderNo: orderNo,
                 address: req.body.address,
                 MobileNo: req.body.MobileNo,
                 country: req.body.country,

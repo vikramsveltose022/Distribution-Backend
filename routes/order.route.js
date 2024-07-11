@@ -1,5 +1,5 @@
 import express from "express";
-import { OrderXml, PartyPurchaseqty, ProductWiseSalesReport, SalesOrderCalculate, SalesOrderList, autoBillingLock, checkPartyOrderLimit, createOrder, createOrderHistory, createOrderHistoryById, createOrderHistoryByPartyId, createOrderHistoryByUserId, deleteSalesOrder, deletedSalesOrder, placeOrder, placeOrderHistory, placeOrderHistoryByUserId, updateCreateOrder, updateCreateOrderStatus, updatePlaceOrder, updatePlaceOrderStatus } from "../controller/order.controller.js";
+import { OrderXml, PartyPurchaseqty, ProductWiseSalesReport, SalesOrderCalculate, SalesOrderList, autoBillingLock, checkPartyOrderLimit, createOrder, createOrderHistory, createOrderHistoryById, createOrderHistoryByPartyId, createOrderHistoryByUserId, deleteSalesOrder, deletedSalesOrder, placeOrder, placeOrderHistory, placeOrderHistoryByUserId, tee, updateCreateOrder, updateCreateOrderStatus, updatePlaceOrder, updatePlaceOrderStatus } from "../controller/order.controller.js";
 
 const router = express.Router();
 
@@ -30,5 +30,7 @@ router.get("/party-qty/:partyId/:productId", PartyPurchaseqty)
 
 // --------------------------------------------------------------
 router.get("/sales-calculated/:database", SalesOrderCalculate)
+
+router.get("/test/:database", tee)
 
 export default router;
