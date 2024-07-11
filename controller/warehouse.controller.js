@@ -390,37 +390,29 @@ export const StockCalculate = async (req, res, next) => {
             DamageStock: 0,
             WarehouseStock: 0
         };
-
         const twoDaysAgoEnd = moment().subtract(1, 'days').endOf('day').toDate();
-
         const products = await Product.find({ database: req.params.database }).sort({ sortorder: -1 });
         const warehouses = await Warehouse.find({ database: req.params.database }).sort({ sortorder: -1 });
-
         if (warehouses.length === 0) {
-            return res.status(404).json({ message: "Warehouse Not Found", status: false });
+            // return res.status(404).json({ message: "Warehouse Not Found", status: false });
         }
-
         const openingData = await Stock.find({
             database: req.params.database, createdAt: { $gte: twoDaysAgoEnd }
         }).sort({ sortorder: -1 });
-
         warehouses.forEach(warehouse => {
             warehouse.productItems.forEach(item => {
                 WarehouseStock.WarehouseStock += item?.currentStock || 0;
                 WarehouseStock.DamageStock += item?.damageItem?.currentStock || 0;
             });
         });
-
         openingData.forEach(stock => {
             stock.productItems.forEach(item => {
                 WarehouseStock.ClosingStock += item.currentStock || 0;
             });
         });
-
         products.forEach(product => {
             WarehouseStock.OpeningStock += product.Opening_Stock || 0;
         });
-
         WarehouseStock.DamageStock = isNaN(WarehouseStock.DamageStock) ? 0 : WarehouseStock.DamageStock;
         WarehouseStock.DeadStock = await ViewOverDueStock(req.params.database);
 
@@ -434,7 +426,7 @@ export const StockCalculate = async (req, res, next) => {
 export const ViewOverDueStock = async (body) => {
     try {
         const currentDate = moment();
-        let damageStock = 0;
+        let deadStock = 0;
         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
         const productsNotOrderedLastMonth = await Product.find({ database: body.database, status: "Active", createdAt: { $lt: startOfLastMonth.toDate() } }).populate({ path: "partyId", model: "customer" });
 
@@ -454,14 +446,14 @@ export const ViewOverDueStock = async (body) => {
         const allProduct = productsToProcess.map(product => {
             const warehouse = warehouses.find(warehouse => warehouse._id.toString() === product.warehouse.toString());
             const qty = warehouse ? warehouse.productItems.find(item => item.productId.toString() === product._id.toString()) : null;
-            damageStock += qty.currentStock || 0;
+            deadStock += qty.currentStock || 0;
             return {
                 product,
                 Qty: qty ? qty.currentStock : null,
-                damageStock
+                deadStock
             };
         });
-        return allProduct[allProduct.length - 1].damageStock
+        return allProduct[allProduct.length - 1].deadStock
     } catch (err) {
         console.error(err);
         // return res.status(500).json({ error: "Internal Server Error", status: false });
