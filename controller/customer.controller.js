@@ -406,6 +406,7 @@ export const saveExcelFile11 = async (req, res) => {
         const dataNotExist = []
         const group = [];
         const roles = []
+        const IdNotExisting = []
         for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
             const dataRow = worksheet.getRow(rowIndex);
             const document = {};
@@ -431,41 +432,44 @@ export const saveExcelFile11 = async (req, res) => {
                         group.push(document.id)
                     } else {
                         document[category] = await existCustomerGroup._id.toString()
-
-                        const existingId = await Customer.findOne({ id: document.id, database: document.database });
-                        if (existingId) {
-                            existingIds.push(document.id)
-                        } else {
-                            if (document.panNo) {
-                                const codes = document.panNo;
-                                document[code] = codes;
-                                const existingRecord = await Customer.findOne({
-                                    panNo: document.panNo, database: document.database
-                                });
-                                if (!existingRecord) {
-                                    const insertedDocument = await Customer.create(document);
-                                    insertedDocuments.push(insertedDocument);
-                                } else {
-                                    existingParts.push(document.panNo);
-                                }
+                        if (document.id) {
+                            const existingId = await Customer.findOne({ id: document.id, database: document.database });
+                            if (existingId) {
+                                existingIds.push(document.id)
                             } else {
-                                if (document.aadharNo) {
-                                    const codes = document.aadharNo;
+                                if (document.panNo) {
+                                    const codes = document.panNo;
                                     document[code] = codes;
                                     const existingRecord = await Customer.findOne({
-                                        aadharNo: document.aadharNo, database: document.database
+                                        panNo: document.panNo, database: document.database
                                     });
                                     if (!existingRecord) {
                                         const insertedDocument = await Customer.create(document);
                                         insertedDocuments.push(insertedDocument);
                                     } else {
-                                        existingParts.push(document.aadharNo);
+                                        existingParts.push(document.panNo);
                                     }
                                 } else {
-                                    // const insertedDocument = await Customer.create(document);
-                                    panMobile.push(document.aadharNo);
+                                    if (document.aadharNo) {
+                                        const codes = document.aadharNo;
+                                        document[code] = codes;
+                                        const existingRecord = await Customer.findOne({
+                                            aadharNo: document.aadharNo, database: document.database
+                                        });
+                                        if (!existingRecord) {
+                                            const insertedDocument = await Customer.create(document);
+                                            insertedDocuments.push(insertedDocument);
+                                        } else {
+                                            existingParts.push(document.aadharNo);
+                                        }
+                                    } else {
+                                        // const insertedDocument = await Customer.create(document);
+                                        panMobile.push(document.aadharNo);
+                                    }
                                 }
                             }
+                        } else {
+                            IdNotExisting.push(document.firstName)
                         }
                     }
                 }
@@ -485,7 +489,9 @@ export const saveExcelFile11 = async (req, res) => {
         } else if (group.length > 0) {
             message = `this customer category id not exist: ${group.join(', ')}`;
         } else if (roles.length > 0) {
-            message = `this customer role id not exist: ${group.join(', ')}`;
+            message = `this customer role id not exist: ${roles.join(', ')}`;
+        } else if (IdNotExisting.length > 0) {
+            message = `this customer id is required : ${IdNotExisting.join(', ')}`;
         }
         return res.status(200).json({ message, status: true });
     } catch (err) {

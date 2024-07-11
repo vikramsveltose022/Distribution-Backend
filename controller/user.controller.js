@@ -434,7 +434,6 @@ export const saveUserWithExcel11 = async (req, res) => {
   try {
     let code = "code";
     let database = "database";
-    let data;
     let rolename = "rolename"
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
@@ -451,6 +450,7 @@ export const saveUserWithExcel11 = async (req, res) => {
     const existingIds = [];
     const dataNotExist = []
     const roles = []
+    const IdNotExisting = []
     for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
       const dataRow = worksheet.getRow(rowIndex);
       const document = {};
@@ -470,41 +470,44 @@ export const saveUserWithExcel11 = async (req, res) => {
         if (!role) {
           roles.push(document.id)
         } else {
-          data = document._id
-          document[rolename] = data
-          const existingId = await User.findOne({ id: document.id, database: document.database });
-          if (existingId) {
-            existingIds.push(document.id)
-          } else {
-            if (document.Pan_No) {
-              document[code] = document.Pan_No;
-              const existingRecord = await User.findOne({
-                Pan_No: document.Pan_No, database: document.database
-              });
-              if (!existingRecord) {
-                const insertedDocument = await User.create(document);
-                insertedDocuments.push(insertedDocument);
-              } else {
-                existingParts.push(document.Pan_No);
-              }
+          document[rolename] = document._id.toString()
+          if (document.id) {
+            const existingId = await User.findOne({ id: document.id, database: document.database });
+            if (existingId) {
+              existingIds.push(document.id)
             } else {
-              if (document.Aadhar_No) {
-                const codes = document.Aadhar_No;
-                document[code] = codes;
+              if (document.Pan_No) {
+                document[code] = document.Pan_No;
                 const existingRecord = await User.findOne({
-                  Aadhar_No: document.Aadhar_No, database: document.database
+                  Pan_No: document.Pan_No, database: document.database
                 });
                 if (!existingRecord) {
                   const insertedDocument = await User.create(document);
                   insertedDocuments.push(insertedDocument);
                 } else {
-                  existingParts.push(document.Aadhar_No);
+                  existingParts.push(document.Pan_No);
                 }
               } else {
-                // const insertedDocument = await Customer.create(document);
-                panMobile.push(document.Aadhar_No);
+                if (document.Aadhar_No) {
+                  const codes = document.Aadhar_No;
+                  document[code] = codes;
+                  const existingRecord = await User.findOne({
+                    Aadhar_No: document.Aadhar_No, database: document.database
+                  });
+                  if (!existingRecord) {
+                    const insertedDocument = await User.create(document);
+                    insertedDocuments.push(insertedDocument);
+                  } else {
+                    existingParts.push(document.Aadhar_No);
+                  }
+                } else {
+                  // const insertedDocument = await Customer.create(document);
+                  panMobile.push(document.Aadhar_No);
+                }
               }
             }
+          } else {
+            IdNotExisting.push(document.firstName)
           }
         }
       } else {
@@ -522,6 +525,8 @@ export const saveUserWithExcel11 = async (req, res) => {
       message = `this user's database not exist: ${dataNotExist.join(', ')}`;
     } else if (roles.length > 0) {
       message = `this user's rolename not correct: ${roles.join(', ')}`;
+    } else if (IdNotExisting.length > 0) {
+      message = `this user's id is required : ${IdNotExisting.join(', ')}`;
     }
     return res.status(200).json({ message, status: true });
   } catch (err) {

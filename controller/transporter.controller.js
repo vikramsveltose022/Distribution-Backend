@@ -4,6 +4,14 @@ import { Transporter } from "../model/transporter.model.js";
 
 export const SaveTransporter = async (req, res) => {
     try {
+        if (req.body.id) {
+            const existing = await Transporter.findOne({ database: req.body.database, id: req.body.id })
+            if (existing) {
+                return res.status(404).json({ message: "id already exist", status: false })
+            }
+        } else {
+            return res.status(400).json({ message: "transporter id required", status: false })
+        }
         if (req.file) {
             req.body.image = req.file.filename;
         }
@@ -94,6 +102,7 @@ export const saveExcelFile = async (req, res) => {
         const insertedDocuments = [];
         const existingIds = []
         const dataNotExist = []
+        const IdNotExisting = []
         for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
             const dataRow = worksheet.getRow(rowIndex);
             const document = {};
@@ -109,12 +118,16 @@ export const saveExcelFile = async (req, res) => {
             }
             document[database] = req.params.database
             if (document.database) {
-                const existingId = await Transporter.findOne({ id: document.id, database: document.database });
-                if (existingId) {
-                    existingIds.push(document.id)
+                if (document.id) {
+                    const existingId = await Transporter.findOne({ id: document.id, database: document.database });
+                    if (existingId) {
+                        existingIds.push(document.id)
+                    } else {
+                        const insertedDocument = await Transporter.create(document);
+                        insertedDocuments.push(insertedDocument);
+                    }
                 } else {
-                    const insertedDocument = await Transporter.create(document);
-                    insertedDocuments.push(insertedDocument);
+                    IdNotExisting.push(document.name)
                 }
             } else {
                 dataNotExist.push(document.name)
@@ -125,6 +138,8 @@ export const saveExcelFile = async (req, res) => {
             message = `this transporter already exist: ${existingIds.join(', ')}`;
         } else if (dataNotExist.length > 0) {
             message = `this transporter database not already exist: ${dataNotExist.join(', ')}`;
+        } else if (IdNotExisting.length > 0) {
+            message = `this transporter id is required : ${IdNotExisting.join(', ')}`;
         }
         return res.status(200).json({ message, status: true });
     } catch (err) {
