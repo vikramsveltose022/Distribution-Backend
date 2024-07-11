@@ -19,14 +19,14 @@ export const ProductXml = async (req, res) => {
 };
 export const SaveProduct = async (req, res) => {
   try {
-    //   if (req.body.id) {
-    //     const existing = await Product.findOne({database:req.body.database, id: req.body.id })
-    //     if (existing) {
-    //         return res.status(404).json({ message: "id already exist", status: false })
-    //     }
-    // } else {
-    //     return res.status(400).json({ message: "id required", status: false })
-    // }
+    if (req.body.id) {
+      const existing = await Product.findOne({ database: req.body.database, id: req.body.id })
+      if (existing) {
+        return res.status(404).json({ message: "id already exist", status: false })
+      }
+    } else {
+      return res.status(400).json({ message: "product id required", status: false })
+    }
     // if (req.file) {
     //   req.body.Product_image = req.file.filename;
     // }
@@ -255,6 +255,8 @@ export const saveItemWithExcel11 = async (req, res) => {
     const insertedDocuments = [];
     const existingParts = [];
     const WarehouseNotExisting = []
+    const existingIds = []
+    const IdNotExisting = []
     for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
       const dataRow = worksheet.getRow(rowIndex);
       const document = {};
@@ -270,9 +272,18 @@ export const saveItemWithExcel11 = async (req, res) => {
           WarehouseNotExisting.push(document.warehouse)
         } else {
           document[warehouse] = existingWarehouse._id
-          const insertedDocument = await Product.create(document);
-          await addProductInWarehouse1(document, insertedDocument.warehouse, insertedDocument)
-          insertedDocuments.push(insertedDocument);
+          if (document.id) {
+            const existingId = await Product.findOne({ id: document.id, database: document.database });
+            if (existingId) {
+              existingIds.push(document.Product_Title)
+            } else {
+              const insertedDocument = await Product.create(document);
+              await addProductInWarehouse1(document, insertedDocument.warehouse, insertedDocument)
+              insertedDocuments.push(insertedDocument);
+            }
+          } else {
+            IdNotExisting.push(document.Product_Title)
+          }
         }
       } else {
         existingParts.push(document.Product_Title)
@@ -283,6 +294,10 @@ export const saveItemWithExcel11 = async (req, res) => {
       message = `Some product not exist hsn code: ${existingParts.join(', ')}`;
     } else if (WarehouseNotExisting.length > 0) {
       message = `warehouse not exist: ${existingParts.join(', ')}`;
+    } else if (existingIds.length > 0) {
+      message = `this product name  id already exist: ${existingIds.join(', ')}`;
+    } else if (IdNotExisting.length > 0) {
+      message = `this product name id is required : ${IdNotExisting.join(', ')}`;
     }
     return res.status(200).json({ message, status: true });
   } catch (err) {
