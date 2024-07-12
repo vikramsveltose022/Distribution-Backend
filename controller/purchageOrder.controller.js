@@ -1,3 +1,4 @@
+import moment from "moment";
 import { ClosingStock } from "../model/closingStock.model.js";
 import { InvoiceList } from "../model/createInvoice.model.js";
 import { Ledger } from "../model/ledger.model.js";
@@ -8,6 +9,7 @@ import { Warehouse } from "../model/warehouse.model.js";
 import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 import { generateInvoice } from "../service/invoice.js";
 import { addProductInWarehouse } from "./product.controller.js";
+import { Receipt } from "../model/receipt.model.js";
 
 export const purchaseOrder = async (req, res, next) => {
     try {
@@ -260,7 +262,7 @@ export const deletedPurchase = async (req, res, next) => {
                 // return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
             }
         }
-        await deleteLedger(purchase)
+        // await deleteLedger(purchase)
         purchase.status = "Deactive"
         existInvoice.status = "Deactive"
         await purchase.save()
@@ -342,3 +344,89 @@ export const deleteLedger = async (body) => {
         console.log(err)
     }
 }
+
+// for dashboard
+export const CreditorCalculate11 = async (req, res, next) => {
+    try {
+        let Creditor = {
+            totalPurchase: 0,
+            totalPaid: 0,
+            currentPurchase: 0,
+            currentPaid: 0,
+            outstanding: 0
+        };
+        const startOfDay = moment().startOf('day').toDate();
+        const endOfDay = moment().endOf('day').toDate();
+        const purchase = await PurchaseOrder.find({ database: req.params.database, status: "completed" }).sort({ sortorder: -1 })
+        if (purchase.length === 0) {
+            // return res.status(404).json({ message: "Purchase Order Not Found", status: false })
+        }
+        const purchaseCurrentMonth = await PurchaseOrder.find({
+            database: req.params.database,
+            status: "completed",
+            createdAt: { $gte: startOfDay, $lte: endOfDay }
+        }).sort({ sortorder: -1 });
+        if (purchaseCurrentMonth.length === 0) {
+            // return res.status(404).json({ message: "Purchase Order Not Found", status: false })
+        }
+        const receipt = await Receipt.find({ database: req.params.database, type: "payment", status: "Active" }).sort({ sortorder: -1 })
+        if (receipt.length === 0) {
+            // return res.status(404).json({ message: "Purchase Order Not Found", status: false })
+        }
+        const receipts = await Receipt.find({ database: req.params.database, type: "payment", createdAt: { $gte: startOfDay, $lte: endOfDay }, status: "Active" }).sort({ sortorder: -1 })
+        if (receipts.length === 0) {
+            // return res.status(404).json({ message: "Purchase Order Not Found", status: false })
+        }
+        purchase.forEach(item => {
+            Creditor.totalPurchase += item.grandTotal
+        })
+        purchaseCurrentMonth.forEach(item => {
+            Creditor.currentPurchase += item.grandTotal
+        })
+        receipt.forEach(item => {
+            Creditor.totalPaid += item.amount
+            // Creditor.outstanding += item?.cashRunningAmount || item?.runningAmount
+        })
+        receipts.forEach(item => {
+            Creditor.currentPaid += item.amount
+        })
+        Creditor.outstanding = Creditor.totalPurchase - Creditor.totalPaid
+        res.status(200).json({ Creditor, status: true });
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const CreditorCalculate = async (req, res, next) => {
+    try {
+        let Creditor = {
+            totalPurchase: 0,
+            totalPaid: 0,
+            currentPurchase: 0,
+            currentPaid: 0,
+            outstanding: 0
+        };
+        const startOfDay = moment().startOf('day').toDate();
+        const endOfDay = moment().endOf('day').toDate();
+        // Fetch all necessary data in parallel
+        const [purchase, purchaseCurrentMonth, receipt, receipts] = await Promise.all([
+            PurchaseOrder.find({ database: req.params.database, status: "completed" }).sort({ sortorder: -1 }),
+            PurchaseOrder.find({ database: req.params.database, status: "completed", createdAt: { $gte: startOfDay, $lte: endOfDay } }).sort({ sortorder: -1 }),
+            Receipt.find({ database: req.params.database, type: "payment", status: "Active" }).sort({ sortorder: -1 }),
+            Receipt.find({ database: req.params.database, type: "payment", createdAt: { $gte: startOfDay, $lte: endOfDay }, status: "Active" }).sort({ sortorder: -1 })
+        ]);
+
+        // Calculate totals
+        Creditor.totalPurchase = purchase.reduce((sum, item) => sum + item.grandTotal, 0);
+        Creditor.currentPurchase = purchaseCurrentMonth.reduce((sum, item) => sum + item.grandTotal, 0);
+        Creditor.totalPaid = receipt.reduce((sum, item) => sum + item.amount, 0);
+        Creditor.currentPaid = receipts.reduce((sum, item) => sum + item.amount, 0);
+        // Creditor.outstanding = Creditor.totalPurchase - Creditor.totalPaid;
+
+        res.status(200).json({ Creditor, status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};

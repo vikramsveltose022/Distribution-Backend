@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { AssignLeadParty, DeleteCustomer, DeleteSalesLead, DeleteSalesLeadMultiple, LeadPartyList, LeadPartyListById, PartyWithSalesPerson, SaveCustomer, SaveLeadPartyExcel, SaveRemark, SignIn, SignInWithMobile, SuperAdminList, UpdateCustomer, UpdateSalesLead, ViewCustomer, ViewCustomerById, deleteAssignLeadParty, dueParty, forgetPassword, lockParty, otpVerify, overDueReport, paymentDueReport, saveExcelFile, updateExcelFile, updatePassword } from "../controller/customer.controller.js";
+import { AssignLeadParty, DeleteCustomer, DeleteSalesLead, DeleteSalesLeadMultiple, LeadPartyList, LeadPartyListById, PartyWithSalesPerson, SaveCustomer, SaveLeadPartyExcel, SaveRemark, SignIn, SignInWithMobile, SuperAdminList, UpdateCustomer, UpdateSalesLead, ViewCustomer, ViewCustomerById, ViewDeadParty, deleteAssignLeadParty, dueParty, forgetPassword, lockParty, otpVerify, overDueReport, paymentDueReport, saveExcelFile, updateExcelFile, updatePassword } from "../controller/customer.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -52,5 +52,7 @@ router.post("/delete-multiple-sales-lead", DeleteSalesLeadMultiple)
 router.get("/sales-lead-by-id/:id", LeadPartyListById)
 router.put("/update-sales-lead/:id", UpdateSalesLead)
 router.post("/save-remark/:id", SaveRemark)
+
+router.get("/dead-party/:database", ViewDeadParty)
 
 export default router;
