@@ -22,6 +22,7 @@ import { InvoiceList } from "../model/createInvoice.model.js";
 import { Ledger } from "../model/ledger.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
 import { GoodDispatch } from "../model/goodDispatch.model.js";
+import { Receipt } from "../model/receipt.model.js";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -211,10 +212,6 @@ export const updatePlaceOrderStatus = async (req, res) => {
         console.error(error);
         return res.status(500).json({ error: error, status: false });
     }
-}
-export const tee = async (req, res) => {
-    const result = await generateOrderNo(req.params.database);
-    res.send(result)
 }
 
 export const createOrder = async (req, res, next) => {
@@ -809,6 +806,42 @@ export const SalesOrderCalculate = async (req, res, next) => {
     }
 };
 
+// for dashboard
+export const DebitorCalculate = async (req, res, next) => {
+    try {
+        let Debitor = {
+            totalReceipt: 0,
+            totalDue: 0,
+            currentReceipt: 0,
+            currentOutstanding: 0,
+            totalOutstanding: 0
+        };
+        let currentSales;
+        const startOfDay = moment().startOf('day').toDate();
+        const endOfDay = moment().endOf('day').toDate();
+        // Fetch all necessary data in parallel
+        const [salesOrder, salesOrderCurrentMonth, receipt, receipts] = await Promise.all([
+            CreateOrder.find({ database: req.params.database, status: "Completed" }).sort({ sortorder: -1 }),
+            CreateOrder.find({ database: req.params.database, status: "Completed", createdAt: { $gte: startOfDay, $lte: endOfDay } }).sort({ sortorder: -1 }),
+            Receipt.find({ database: req.params.database, type: "receipt", status: "Active" }).sort({ sortorder: -1 }),
+            Receipt.find({ database: req.params.database, type: "receipt", createdAt: { $gte: startOfDay, $lte: endOfDay }, status: "Active" }).sort({ sortorder: -1 })
+        ]);
+
+        // Calculate totals
+        Debitor.totalDue = salesOrder.reduce((sum, item) => sum + item.grandTotal, 0);
+        currentSales = salesOrderCurrentMonth.reduce((sum, item) => sum + item.grandTotal, 0);
+        Debitor.totalReceipt = receipt.reduce((sum, item) => sum + item.amount, 0);
+        Debitor.currentReceipt = receipts.reduce((sum, item) => sum + item.amount, 0);
+        // Debitor.totalOutstanding = Debitor.totalDue - Debitor.totalReceipt;
+        // Debitor.currentOutstanding = currentSales - Debitor.currentReceipt;
+
+        res.status(200).json({ Debitor, status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+
 // --------------------------------------------
 export const deletedSalesOrder = async (req, res, next) => {
     try {
@@ -846,7 +879,7 @@ export const deletedSalesOrder = async (req, res, next) => {
             }
         }
         await UpdateCheckLimitSales(order)
-        await deleteLedgerBalance(order)
+        // await deleteLedgerBalance(order)
         order.status = "Deactive";
         existInvoice.status = "Deactive";
         existGoodDispatch.status = "Deactive";

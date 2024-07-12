@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import moment from "moment"
 import ExcelJS from 'exceljs'
 import path from "path"
 import axios from 'axios';
@@ -13,6 +14,7 @@ import { PaymentDueReport } from "../model/payment.due.report.js";
 import { Role } from "../model/role.model.js";
 import { UpdateCheckLimit } from "../service/checkLimit.js";
 import { CustomerGroup } from "../model/customerGroup.model.js";
+import { Receipt } from "../model/receipt.model.js";
 dotenv.config();
 
 export const SaveCustomer = async (req, res, next) => {
@@ -883,3 +885,33 @@ export const DeleteCustomer11 = async (req, res, next) => {
         return res.status(500).json({ error: "Internal server error", status: false });
     }
 }
+
+// same stock-updation
+export const ViewDeadParty = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const database = req.params.database;
+        const currentDate = moment();
+        const startOfLastMonth = currentDate.clone().subtract(30, 'days');
+        const hierarchy = await Customer.find({ database: database, status: 'Active', createdAt: { $lt: startOfLastMonth } }).populate({ path: "created_by", model: "user" }).lean();
+
+        // const allOrderedParties = await CreateOrder.find({ database: database, createdAt: { $gte: startOfLastMonth.toDate() } }).lean();
+
+        const receiptMap = {};
+        await Promise.all(hierarchy.map(async (item) => {
+            const payment = await Receipt.findOne({ type: "receipt", partyId: item._id }).sort({ createdAt: -1 }).lean();
+            receiptMap[item._id] = payment ? payment.createdAt : "0";
+        }));
+
+        const result = await Promise.all(hierarchy.map(async (item) => {
+            // const party = await partyHierarchy(item.created_by, database);
+            // return { id: item, party: party, lastDays: receiptMap[item._id] };
+            return { id: item, lastDays: receiptMap[item._id] };
+        }));
+
+        return res.status(200).json({ Parties: result, status: true });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};

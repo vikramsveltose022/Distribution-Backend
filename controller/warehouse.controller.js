@@ -391,8 +391,8 @@ export const StockCalculate = async (req, res, next) => {
             WarehouseStock: 0
         };
         const twoDaysAgoEnd = moment().subtract(1, 'days').endOf('day').toDate();
-        const products = await Product.find({ database: req.params.database }).sort({ sortorder: -1 });
-        const warehouses = await Warehouse.find({ database: req.params.database }).sort({ sortorder: -1 });
+        const products = await Product.find({ database: req.params.database, status: "Active" }).sort({ sortorder: -1 });
+        const warehouses = await Warehouse.find({ database: req.params.database, status: "Active" }).sort({ sortorder: -1 });
         if (warehouses.length === 0) {
             // return res.status(404).json({ message: "Warehouse Not Found", status: false });
         }
@@ -428,8 +428,7 @@ export const ViewOverDueStock = async (body) => {
         const currentDate = moment();
         let deadStock = 0;
         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
-        const productsNotOrderedLastMonth = await Product.find({ database: body.database, status: "Active", createdAt: { $lt: startOfLastMonth.toDate() } }).populate({ path: "partyId", model: "customer" });
-
+        const productsNotOrderedLastMonth = await Product.find({ database: body, status: "Active", createdAt: { $lt: startOfLastMonth.toDate() } }).populate({ path: "partyId", model: "customer" });
         if (!productsNotOrderedLastMonth || productsNotOrderedLastMonth.length === 0) {
             // return res.status(404).json({ message: "No products found", status: false });
         }
@@ -439,14 +438,14 @@ export const ViewOverDueStock = async (body) => {
         }).distinct('orderItems');
         const orderedProductIdsLastMonth = orderedProductsLastMonth.map(orderItem => orderItem.productId.toString());
         const productsToProcess = productsNotOrderedLastMonth.filter(product =>
-            !orderedProductIdsLastMonth.includes(product._id.toString())
-        );
+            !orderedProductIdsLastMonth.includes(product._id.toString()));
         const warehouseIds = productsToProcess.map(product => product.warehouse);
         const warehouses = await Warehouse.find({ _id: { $in: warehouseIds } });
         const allProduct = productsToProcess.map(product => {
             const warehouse = warehouses.find(warehouse => warehouse._id.toString() === product.warehouse.toString());
             const qty = warehouse ? warehouse.productItems.find(item => item.productId.toString() === product._id.toString()) : null;
-            deadStock += qty.currentStock || 0;
+            console.log(qty)
+            deadStock += qty?.currentStock || 0;
             return {
                 product,
                 Qty: qty ? qty.currentStock : null,
