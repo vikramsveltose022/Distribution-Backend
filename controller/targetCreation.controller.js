@@ -5,6 +5,8 @@ import { User } from "../model/user.model.js";
 import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 import { Customer } from "../model/customer.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
+import moment from "moment";
+import { Role } from "../model/role.model.js";
 
 const uniqueId = new Set();
 const uniqueUserId = new Set()
@@ -1693,3 +1695,306 @@ export const ViewPartyTarget = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+
+// For Dashboar
+export const targetCalculation = async (req, res, next) => {
+    try {
+        let Target = {
+            currentMonthTarget: 0,
+            currentMonthAchieve: 0,
+            targerPending: 0,
+            averageTarget: 0,
+            averageAchievement: 0,
+            averagePending: 0
+        };
+        let lastMonthCount
+        // const startOfDay = moment().startOf('day').toDate();
+        // const endOfDay = moment().endOf('day').toDate();
+        const startOfDay = moment().startOf('month').toDate();
+        const endOfDay = moment().endOf('month').toDate();
+        // const target = await TargetCreation.find({ database: req.params.database, createdAt: { $gte: startOfDay, $lte: endOfDay } }).sort({ sortorder: -1 })
+        // if (target.length === 0) {
+        //     return res.status(404).json({ message: "target not found", status: false })
+        // }
+        const Achievement = await SalesPersonAchievement(req.params.database)
+        if (Achievement.length === 0) {
+            return res.status(404).json({ message: "achievement not found", status: false })
+        }
+        // target.forEach(item => {
+        //     Target.currentMonthTarget = item.grandTotal
+        // })
+        Achievement.forEach(item => {
+            Target.currentMonthAchieve += item.achievements.actualTotalPrice
+            Target.currentMonthTarget += item.achievements.targetTotalPrice
+            lastMonthCount = (1 < item.achievements.lastMonthCount) ? item.achievements.lastMonthCount : 1
+        })
+        Target.targerPending = Target.currentMonthTarget - Target.currentMonthAchieve
+        Target.averageTarget = Target.currentMonthTarget / lastMonthCount
+        Target.averageAchievement = Target.currentMonthAchieve / lastMonthCount
+        Target.averagePending = Target.averageTarget - Target.averageAchievement
+
+        res.status(200).json({ Target, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+// For Dashboard
+export const SalesPersonAchievement = async (database) => {
+    try {
+        // const { database } = req.params;
+        const role = await Role.findOne({ database, roleName: "Sales Person" });
+        if (!role) {
+            // return res.status(404).json({ message: "Role Not Found", status: false });
+        }
+        const users = await User.find({ rolename: role._id, database, status: "Active" });
+        if (users.length === 0) {
+            // return res.status(404).json({ message: "No Active Sales Person Found", status: false });
+        }
+        // const { startDate, endDate } = req.body;
+        // const start = startDate ? new Date(startDate) : null;
+        // const end = endDate ? new Date(endDate) : null;
+        const salesPersonPromises = users.map(async (user) => {
+            const targetQuery = { userId: user._id };
+            // if (start && end) {
+            //     targetQuery.createdAt = { $gte: start, $lte: end };
+            // }
+            const targetss = await TargetCreation.find(targetQuery).populate({ path: "userId", model: "user" }).sort({ sortorder: -1 });
+            if (targetss.length === 0) return null;
+            const countMonth = await TargetCreation.find({ userId: user._id })
+            const targets = targetss[targetss.length - 1];
+            const orders = await CreateOrder.find({ userId: targets.userId });
+            if (!orders || orders.length === 0) return null;
+            const allOrderItems = orders.flatMap(order => order.orderItems);
+            const aggregatedOrders = allOrderItems.reduce((acc, item) => {
+                const existingItem = acc.find(accItem => accItem.productId.toString() === item.productId._id.toString());
+                if (existingItem) {
+                    existingItem.qty += item.qty;
+                    existingItem.price += item.price;
+                } else {
+                    acc.push({
+                        productId: item.productId._id.toString(),
+                        qty: item.qty,
+                        price: item.price,
+                    });
+                }
+                return acc;
+            }, []);
+            const productIds = aggregatedOrders.map(order => order.productId);
+            const products = await Product.find({ _id: { $in: productIds } });
+            const productDetailsMap = products.reduce((acc, product) => {
+                acc[product._id.toString()] = product;
+                return acc;
+            }, {});
+            const achievements = targets.products.map(targetProduct => {
+                const matchingOrders = aggregatedOrders.filter(order => order.productId === targetProduct.productId);
+                if (matchingOrders.length > 0) {
+                    const actualQuantity = matchingOrders.reduce((total, order) => total + order.qty, 0);
+                    const actualTotalPrice = matchingOrders.reduce((total, order) => total + order.qty * order.price, 0);
+                    const productDetails = productDetailsMap[targetProduct.productId.toString()] || {};
+                    return {
+                        User: user,
+                        productId: productDetails,
+                        targetQuantity: targetProduct.qtyAssign,
+                        actualQuantity: actualQuantity,
+                        achievementPercentage: (actualQuantity / targetProduct.qtyAssign) * 100,
+                        productPrice: targetProduct.price,
+                        targetTotalPrice: targetProduct.totalPrice,
+                        actualTotalPrice: actualTotalPrice,
+                        lastMonthCount: countMonth.length
+                    };
+                }
+                return null;
+            }).filter(Boolean);
+
+            return { achievements };
+        });
+        const salesPerson = (await Promise.all(salesPersonPromises)).filter(Boolean);
+        const salesTarget = salesPerson.map(salesPerson => {
+            if (Array.isArray(salesPerson.achievements) && salesPerson.achievements.length === 1) {
+                salesPerson.achievements = salesPerson.achievements[0];
+            }
+            return salesPerson;
+        });
+        // return res.status(200).json({ salesTarget, status: true });
+        return salesTarget
+    } catch (error) {
+        console.error('Error calculating achievements:', error);
+        // res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
+
+// All SalesPerson Achievement
+export const AllSalesPersonAchievement111 = async (req, res) => {
+    try {
+        let roleId
+        const role = await Role.find({ database: req.params.database })
+        for (let id of role) {
+            if (id.roleName === "Sales Person") {
+                roleId = id._id
+            }
+        }
+        const userId = req.params.id;
+        const user = await User.find({ rolename: roleId, database: req.params.database, status: "Active" })
+        if (!user) {
+            return res.status(404).json({ message: "Not Found", status: false });
+        }
+        let salesPerson = []
+        for (let item of user) {
+            const startDate = req.body.startDate ? new Date(req.body.startDate) : null;
+            const endDate = req.body.endDate ? new Date(req.body.endDate) : null;
+            const targetQuery = { userId: item._id };
+            if (startDate && endDate) {
+                targetQuery.createdAt = { $gte: startDate, $lte: endDate };
+            }
+            const targetss = await TargetCreation.find(targetQuery).populate({ path: "userId", model: "user" }).sort({ sortorder: -1 });
+            const targets = targetss[targetss.length - 1]
+            if (targetss.length === 0) {
+                console.log("targer not found")
+                continue;
+            }
+            const orders = await CreateOrder.find({ userId: targets.userId });
+            if (!orders || orders.length === 0) {
+                console.log("order not found")
+                continue;
+            }
+            const allOrderItems = orders.flatMap(order => order.orderItems);
+            const aggregatedOrders = allOrderItems.reduce((acc, item) => {
+                const existingItem = acc.find(accItem => accItem.productId.toString() === item.productId._id.toString());
+                if (existingItem) {
+                    existingItem.qty += item.qty;
+                    existingItem.price += item.price;
+                } else {
+                    acc.push({
+                        productId: item.productId._id.toString(),
+                        qty: item.qty,
+                        price: item.price,
+                    });
+                }
+                return acc;
+            }, []);
+            const productDetailsMap = {};
+            productDetailsMap.userName = targets?.userId?.firstName
+            const productIds = aggregatedOrders.map(order => order.productId);
+            const products = await Product.find({ _id: { $in: productIds } });
+            products.forEach(product => {
+                productDetailsMap[product._id.toString()] = product;
+            });
+            const achievements = targets.products.flatMap(targetProduct => {
+                const matchingOrders = aggregatedOrders.filter(order => order.productId === targetProduct.productId);
+                if (matchingOrders.length > 0) {
+                    const actualQuantity = matchingOrders.reduce((total, order) => total + order.qty, 0);
+                    const actualTotalPrice = matchingOrders.reduce((total, order) => total + order.qty * order.price, 0);
+                    const productDetails = productDetailsMap[targetProduct.productId.toString()] || {};
+                    return {
+                        productId: productDetails,
+                        targetQuantity: targetProduct.qtyAssign,
+                        actualQuantity: actualQuantity,
+                        achievementPercentage: (actualQuantity / targetProduct.qtyAssign) * 100,
+                        productPrice: targetProduct.price,
+                        targetTotalPrice: targetProduct.totalPrice,
+                        actualTotalPrice: actualTotalPrice
+                    };
+                } else {
+                    return null;
+                }
+            }).filter(Boolean);
+            const overallTargetQuantity = targets.products.reduce((total, targetProduct) => total + targetProduct.qtyAssign, 0);
+            const overallActualQuantity = achievements.reduce((total, achievement) => total + achievement.actualQuantity, 0);
+            const overallAchievementPercentage = (overallActualQuantity / overallTargetQuantity) * 100;
+            salesPerson.push({ achievements })
+        }
+        const salesTarget = salesPerson.map(salesPerson => {
+            if (Array.isArray(salesPerson.achievements) && salesPerson.achievements.length === 1) {
+                salesPerson.achievements = salesPerson.achievements[0];
+            }
+            return salesPerson;
+        });
+        return res.status(200).json({ salesTarget, status: true });
+    } catch (error) {
+        console.error('Error calculating achievements:', error);
+        res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
+
+export const AllSalesPersonAchievement = async (req, res) => {
+    try {
+        const { database } = req.params;
+        const role = await Role.findOne({ database, roleName: "Sales Person" });
+        if (!role) {
+            return res.status(404).json({ message: "Role Not Found", status: false });
+        }
+        const users = await User.find({ rolename: role._id, database, status: "Active" });
+        if (users.length === 0) {
+            return res.status(404).json({ message: "No Active Sales Person Found", status: false });
+        }
+        const { startDate, endDate } = req.body;
+        const start = startDate ? new Date(startDate) : null;
+        const end = endDate ? new Date(endDate) : null;
+        const salesPersonPromises = users.map(async (user) => {
+            const targetQuery = { userId: user._id };
+            if (start && end) {
+                targetQuery.createdAt = { $gte: start, $lte: end };
+            }
+            const targetss = await TargetCreation.find(targetQuery).populate({ path: "userId", model: "user" }).sort({ sortorder: -1 });
+            if (targetss.length === 0) return null;
+            const targets = targetss[targetss.length - 1];
+            const orders = await CreateOrder.find({ userId: targets.userId });
+            if (!orders || orders.length === 0) return null;
+            const allOrderItems = orders.flatMap(order => order.orderItems);
+            const aggregatedOrders = allOrderItems.reduce((acc, item) => {
+                const existingItem = acc.find(accItem => accItem.productId.toString() === item.productId._id.toString());
+                if (existingItem) {
+                    existingItem.qty += item.qty;
+                    existingItem.price += item.price;
+                } else {
+                    acc.push({
+                        productId: item.productId._id.toString(),
+                        qty: item.qty,
+                        price: item.price,
+                    });
+                }
+                return acc;
+            }, []);
+            const productIds = aggregatedOrders.map(order => order.productId);
+            const products = await Product.find({ _id: { $in: productIds } });
+            const productDetailsMap = products.reduce((acc, product) => {
+                acc[product._id.toString()] = product;
+                return acc;
+            }, {});
+            const achievements = targets.products.map(targetProduct => {
+                const matchingOrders = aggregatedOrders.filter(order => order.productId === targetProduct.productId);
+                if (matchingOrders.length > 0) {
+                    const actualQuantity = matchingOrders.reduce((total, order) => total + order.qty, 0);
+                    const actualTotalPrice = matchingOrders.reduce((total, order) => total + order.qty * order.price, 0);
+                    const productDetails = productDetailsMap[targetProduct.productId.toString()] || {};
+                    return {
+                        User: user,
+                        productId: productDetails,
+                        targetQuantity: targetProduct.qtyAssign,
+                        actualQuantity: actualQuantity,
+                        achievementPercentage: (actualQuantity / targetProduct.qtyAssign) * 100,
+                        productPrice: targetProduct.price,
+                        targetTotalPrice: targetProduct.totalPrice,
+                        actualTotalPrice: actualTotalPrice
+                    };
+                }
+                return null;
+            }).filter(Boolean);
+
+            return { achievements };
+        });
+        const salesPerson = (await Promise.all(salesPersonPromises)).filter(Boolean);
+        const salesTarget = salesPerson.map(salesPerson => {
+            if (Array.isArray(salesPerson.achievements) && salesPerson.achievements.length === 1) {
+                salesPerson.achievements = salesPerson.achievements[0];
+            }
+            return salesPerson;
+        });
+        return res.status(200).json({ salesTarget, status: true });
+    } catch (error) {
+        console.error('Error calculating achievements:', error);
+        res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};

@@ -355,8 +355,10 @@ export const CreditorCalculate11 = async (req, res, next) => {
             currentPaid: 0,
             outstanding: 0
         };
-        const startOfDay = moment().startOf('day').toDate();
-        const endOfDay = moment().endOf('day').toDate();
+        // const startOfDay = moment().startOf('day').toDate();
+        // const endOfDay = moment().endOf('day').toDate();
+        const startOfDay = moment().startOf('month').toDate();
+        const endOfDay = moment().endOf('month').toDate();
         const purchase = await PurchaseOrder.find({ database: req.params.database, status: "completed" }).sort({ sortorder: -1 })
         if (purchase.length === 0) {
             // return res.status(404).json({ message: "Purchase Order Not Found", status: false })
@@ -407,8 +409,10 @@ export const CreditorCalculate = async (req, res, next) => {
             currentPaid: 0,
             outstanding: 0
         };
-        const startOfDay = moment().startOf('day').toDate();
-        const endOfDay = moment().endOf('day').toDate();
+        // const startOfDay = moment().startOf('day').toDate();
+        // const endOfDay = moment().endOf('day').toDate();
+        const startOfDay = moment().startOf('month').toDate();
+        const endOfDay = moment().endOf('month').toDate();
         // Fetch all necessary data in parallel
         const [purchase, purchaseCurrentMonth, receipt, receipts] = await Promise.all([
             PurchaseOrder.find({ database: req.params.database, status: "completed" }).sort({ sortorder: -1 }),

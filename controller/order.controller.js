@@ -809,7 +809,7 @@ export const SalesOrderCalculate = async (req, res, next) => {
 // for dashboard
 export const DebitorCalculate = async (req, res, next) => {
     try {
-        let Debitor = {
+        let Debtor = {
             totalReceipt: 0,
             totalDue: 0,
             currentReceipt: 0,
@@ -817,8 +817,10 @@ export const DebitorCalculate = async (req, res, next) => {
             totalOutstanding: 0
         };
         let currentSales;
-        const startOfDay = moment().startOf('day').toDate();
-        const endOfDay = moment().endOf('day').toDate();
+        // const startOfDay = moment().startOf('day').toDate();
+        // const endOfDay = moment().endOf('day').toDate();
+        const startOfDay = moment().startOf('month').toDate();
+        const endOfDay = moment().endOf('month').toDate();
         // Fetch all necessary data in parallel
         const [salesOrder, salesOrderCurrentMonth, receipt, receipts] = await Promise.all([
             CreateOrder.find({ database: req.params.database, status: "Completed" }).sort({ sortorder: -1 }),
@@ -828,14 +830,14 @@ export const DebitorCalculate = async (req, res, next) => {
         ]);
 
         // Calculate totals
-        Debitor.totalDue = salesOrder.reduce((sum, item) => sum + item.grandTotal, 0);
+        Debtor.totalDue = salesOrder.reduce((sum, item) => sum + item.grandTotal, 0);
         currentSales = salesOrderCurrentMonth.reduce((sum, item) => sum + item.grandTotal, 0);
-        Debitor.totalReceipt = receipt.reduce((sum, item) => sum + item.amount, 0);
-        Debitor.currentReceipt = receipts.reduce((sum, item) => sum + item.amount, 0);
-        // Debitor.totalOutstanding = Debitor.totalDue - Debitor.totalReceipt;
-        // Debitor.currentOutstanding = currentSales - Debitor.currentReceipt;
+        Debtor.totalReceipt = receipt.reduce((sum, item) => sum + item.amount, 0);
+        Debtor.currentReceipt = receipts.reduce((sum, item) => sum + item.amount, 0);
+        // Debtor.totalOutstanding = Debtor.totalDue - Debtor.totalReceipt;
+        // Debtor.currentOutstanding = currentSales - Debtor.currentReceipt;
 
-        res.status(200).json({ Debitor, status: true });
+        res.status(200).json({ Debtor, status: true });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
