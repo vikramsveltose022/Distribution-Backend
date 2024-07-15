@@ -1771,7 +1771,7 @@ export const SalesPersonAchievement = async (database) => {
                 const existingItem = acc.find(accItem => accItem.productId.toString() === item.productId._id.toString());
                 if (existingItem) {
                     existingItem.qty += item.qty;
-                    existingItem.price += item.price;
+                    existingItem.price = item.price;
                 } else {
                     acc.push({
                         productId: item.productId._id.toString(),

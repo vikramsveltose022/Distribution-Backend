@@ -28,7 +28,6 @@ import FactoryRouter from "./routes/factory.route.js";
 import StockUpdationRouter from "./routes/stockUpdation.route.js";
 import CreateInvoiceRouter from "./routes/createInvoice.route.js";
 import CashBookRouter from "./routes/cashBook.route.js";
-import ProductionRouter from "./routes/production.route.js"
 import MasterRouter from "./routes/master.route.js"
 import DepartmentRouter from "./routes/department.route.js";
 import AssignRoleRouter from "./routes/assignRoleToDepartment.route.js"
@@ -118,7 +117,6 @@ app.use("/factory", FactoryRouter);
 app.use("/stock-updation", StockUpdationRouter);
 app.use("/invoice", CreateInvoiceRouter);
 app.use("/cashbook", CashBookRouter);
-app.use("/production", ProductionRouter);
 app.use("/master", MasterRouter);
 app.use("/department", DepartmentRouter);
 app.use("/assign-role", AssignRoleRouter);

@@ -1,9 +1,7 @@
 import express from "express";
-import { DebitorCalculate, OrderXml, PartyPurchaseqty, ProductWiseSalesReport, SalesOrderCalculate, SalesOrderList, autoBillingLock, checkPartyOrderLimit, createOrder, createOrderHistory, createOrderHistoryById, createOrderHistoryByPartyId, createOrderHistoryByUserId, deleteSalesOrder, deletedSalesOrder, placeOrder, placeOrderHistory, placeOrderHistoryByUserId, updateCreateOrder, updateCreateOrderStatus, updatePlaceOrder, updatePlaceOrderStatus } from "../controller/order.controller.js";
+import { DebitorCalculate, PartyPurchaseqty, ProductWiseSalesReport, SalesOrderCalculate, SalesOrderList, autoBillingLock, checkPartyOrderLimit, createOrder, createOrderHistory, createOrderHistoryById, createOrderHistoryByPartyId, createOrderHistoryByUserId, deleteSalesOrder, deletedSalesOrder, placeOrder, placeOrderHistory, placeOrderHistoryByUserId, updateCreateOrder, updateCreateOrderStatus, updatePlaceOrder, updatePlaceOrderStatus } from "../controller/order.controller.js";
 
 const router = express.Router();
-
-router.get("/get-xml", OrderXml);
 
 router.post("/save-place-order", placeOrder);
 router.get("/view-place-order/:id", placeOrderHistory);
