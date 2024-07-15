@@ -9,6 +9,7 @@ import { WorkingHours } from "../model/workingHours.model.js";
 import { SetSalary } from "../model/setSalary.model.js";
 import { ApplyRule } from "../model/rule.applied.model.js";
 import moment from "moment";
+import { Job } from "../model/CreateJob.model.js";
 
 export const saveRule = async (req, res, next) => {
     try {
@@ -307,3 +308,40 @@ export const SundayCheck = async () => {
         console.error(err);
     }
 };
+
+// For Dashboard
+export const HRMCalculate = async (req, res, next) => {
+    try {
+        let hrm = {
+            TotalAbsend: 0,
+            TotalPresent: 0,
+            TotalSalaryPaid: 0,
+            CurrentSalary: 0,
+            Vacancy: 0,
+            Designation: 0
+        };
+        const startOfDay = moment().startOf('month').toDate();
+        const endOfDay = moment().endOf('month').toDate();
+        const jobs = await Job.find({ database: req.params.database, status: "Active" })
+        if (jobs.length === 0) {
+            // return res.status(404).json({ message: "Job Not Found", status: false })
+        }
+        const salary = await SetSalary.find({ database: req.params.database, status: "Active", createdAt: { $gte: startOfDay, $lte: endOfDay } })
+        if (salary.length === 0) {
+            // return res.status(404).json({ message: "Job Not Found", status: false })
+        }
+        const salarys = await SetSalary.find({ database: req.params.database, status: "Active" })
+        if (salarys.length === 0) {
+            // return res.status(404).json({ message: "Job Not Found", status: false })
+        }
+        hrm.TotalSalaryPaid = salarys.reduce((total, item) => total + item.basicSalary, 0)
+        hrm.CurrentSalary = salary.reduce((total, item) => total + item.basicSalary, 0)
+        hrm.Vacancy = jobs.reduce((total, item) => total + item.numberOfPositions, 0)
+        hrm.Designation = jobs.length;
+        res.status(200).json({ hrm, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}

@@ -93,11 +93,11 @@ const ProductSchema = new mongoose.Schema({
     Purchase_Rate: {
         type: Number
     },
-    basicPrice:{
-        type:Number
+    basicPrice: {
+        type: Number
     },
-    landedCost:{
-        type:Number
+    landedCost: {
+        type: Number
     }
 }, { timestamps: true })
 export const Product = mongoose.model('product', ProductSchema);
