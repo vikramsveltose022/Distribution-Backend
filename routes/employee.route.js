@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-router.post("/save-employee", upload.any("files"), saveEmployeeDetails);
+router.post("/save-employee", upload.single("image"), saveEmployeeDetails);
 router.get("/view-employee", viewEmployeeDetail)
 
 export default router;

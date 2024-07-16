@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { DeleteProduct, HSNWisePurchaseReport, HSNWiseSalesReport, ProductXml, SaveProduct, StockAlert, UpdateProduct, ViewProduct, ViewProductById, ViewProductForPurchase, saveItemWithExcel, updateItemWithExcel, viewCurrentStock } from "../controller/product.controller.js";
+import { DeleteProduct, HSNWisePurchaseReport, HSNWiseSalesReport, ProductXml, SaveProduct, StockAlert, UpdateProduct, UpdateProductSalesRate, ViewProduct, ViewProductById, ViewProductForPurchase, saveItemWithExcel, updateItemWithExcel, viewCurrentStock } from "../controller/product.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -36,5 +36,7 @@ router.get("/view-current-stock/:id/:productId", viewCurrentStock)
 
 router.post("/hsn-sales-summary/:database", HSNWiseSalesReport)
 router.post("/hsn-purchase-summary/:database", HSNWisePurchaseReport)
+
+router.put("/product-price-update/:id", UpdateProductSalesRate)
 
 export default router;
