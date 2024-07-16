@@ -2,72 +2,48 @@ import mongoose from "mongoose";
 
 const employeeSchema = new mongoose.Schema({
     created_by: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        type: String
     },
     database: {
         type: String
     },
-    name: {
+    Image: {
         type: String
     },
-    mobileNo: {
-        type: Number
-    },
-    dob: {
+    Name: {
         type: String
     },
-    gender: {
+    DOB: {
         type: String
     },
-    email: {
+    Address: {
         type: String
     },
-    password: {
+    Email: {
         type: String
     },
-    address: {
+    Password: {
         type: String
     },
-    branch: {
+    Contact: {
         type: String
     },
-    department: {
+    Designation: {
         type: String
     },
-    designation: {
+    AadharNo: {
         type: String
     },
-    joiningDate: {
+    PanNo: {
         type: String
     },
-    certificate: {
+    ReferalName: {
         type: String
     },
-    resume: {
+    ReferalContactNo: {
         type: String
     },
-    photo: {
-        type: String
-    },
-    accountHolderName: {
-        type: String
-    },
-    accountNumber: {
-        type: Number
-    },
-    bankName: {
-        type: String
-    },
-    bankIdentifierCode: {
-        type: String
-    },
-    branchLocation: {
-        type: String
-    },
-    taxPayerId: {
-        type: String
-    }
+
 }, { timestamps: true });
 
 export const Employee = mongoose.model("employee", employeeSchema);

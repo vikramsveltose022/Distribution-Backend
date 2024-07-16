@@ -520,3 +520,21 @@ export const HSNWisePurchaseReport = async (req, res, next) => {
     return res.status(500).json({ error: "Internal Server Error", status: false });
   }
 };
+
+export const UpdateProductSalesRate = async (req, res, next) => {
+  try {
+    const productId = req.params.id;
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
+      return res.status(404).json({ error: "Product Not Found", status: false });
+    } else {
+      existingProduct.SalesRate = req.body.SalesRate;
+      existingProduct.Product_MRP = req.body.Product_MRP;
+      existingProduct.save()
+      return res.status(200).json({ message: "Product Updated Successfully", status: true });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal Server Error", status: false });
+  }
+};
