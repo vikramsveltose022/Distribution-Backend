@@ -69,7 +69,7 @@ export const SaveUser = async (req, res, next) => {
 };
 export const ViewRegisterUser = async (req, res, next) => {
   try {
-    let user = await User.find({ database: req.params.database, status: "Active" }).populate({ path: "branch", model: "userBranch" })
+    let user = await User.find({ database: req.params.database, status: "Active" }).populate({ path: "branch", model: "userBranch" }).populate({ path: "rolename", model: "role" })
     if (user.length === 0) {
       return res.status(404).json({ message: "user not found", status: false })
     }
