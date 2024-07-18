@@ -83,6 +83,9 @@ const CreateInvoiceSchema = new mongoose.Schema({
     orderId: {
         type: String
     },
+    orderNo: {
+        type: String
+    },
     date: {
         type: Date,
         default: Date.now,

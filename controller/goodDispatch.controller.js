@@ -10,17 +10,7 @@ import { Warehouse } from "../model/warehouse.model.js";
 import { Product } from "../model/product.model.js";
 import { InvoiceList } from "../model/createInvoice.model.js";
 
-export const GoodDispathcXml = async (req, res) => {
-    const fileUrl = "https://xmlfiles.nyc3.digitaloceanspaces.com/GoodDispatch.xml";
-    try {
-        const response = await axios.get(fileUrl);
-        const data = response.data;
-        return res.status(200).json({ data, status: true });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send("Error reading the file");
-    }
-};
+
 export const saveGoodDispatch = async (req, res) => {
     try {
         let ware

@@ -95,6 +95,9 @@ const GoodDispatchSchema = new mongoose.Schema({
     orderId: {
         type: String
     },
+    orderNo: {
+        type: String
+    },
     invoiceId: {
         type: String
     },

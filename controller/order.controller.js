@@ -213,6 +213,11 @@ export const createOrder = async (req, res, next) => {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
             const result = await generateInvoice(user.database);
+            if (50000 >= req.body.grandTotal) {
+                req.body.challanNo = result
+            } else {
+                req.body.invoiceId = result
+            }
             const orderNo = await generateOrderNo(user.database);
             const billAmount = orderItems.reduce((total, orderItem) => {
                 return total + (orderItem.price * orderItem.qty);
@@ -237,43 +242,49 @@ export const createOrder = async (req, res, next) => {
                     console.error(`Product with ID ${orderItem.productId} not found`);
                 }
             }
-            const order = new CreateOrder({
-                userId: party.created_by,
-                database: user.database,
-                fullName: req.body.fullName,
-                partyId: req.body.partyId,
-                warehouseId: ware,
-                primaryUnit: req.body.primaryUnit,
-                secondaryUnit: req.body.secondaryUnit,
-                secondarySize: req.body.secondarySize,
-                invoiceId: result,
-                orderNo: orderNo,
-                address: req.body.address,
-                MobileNo: req.body.MobileNo,
-                country: req.body.country,
-                state: req.body.state,
-                city: req.body.city,
-                landMark: req.body.landMark,
-                pincode: req.body.pincode,
-                grandTotal: req.body.grandTotal,
-                discount: req.body.discount,
-                shippingCost: req.body.shippingCost,
-                taxAmount: req.body.taxAmount,
-                latitude: req.body.latitude,
-                longitude: req.body.longitude,
-                currentAddress: req.body.currentAddress,
-                status: req.body.status,
-                orderItems: orderItems,
-                gstDetails: req.body.gstDetails,
-                roundOff: req.body.roundOff,
-                amount: req.body.amount,
-                sgstTotal: req.body.sgstTotal,
-                cgstTotal: req.body.cgstTotal,
-                igstTaxType: req.body.igstTaxType,
-                igstTotal: req.body.igstTotal,
-                discountAmount: req.body.discountAmount
-            });
-            const savedOrder = await order.save();
+            req.body.userId = party.created_by
+            req.body.database = user.database
+            req.body.orderNo = orderNo
+            req.body.orderItems = orderItems
+            req.body.warehouseId = ware
+            const savedOrder = CreateOrder.create(req.body)
+            // const order = new CreateOrder({
+            //     userId: party.created_by,
+            //     database: user.database,
+            //     fullName: req.body.fullName,
+            //     partyId: req.body.partyId,
+            //     warehouseId: ware,
+            //     primaryUnit: req.body.primaryUnit,
+            //     secondaryUnit: req.body.secondaryUnit,
+            //     secondarySize: req.body.secondarySize,
+            //     invoiceId: result,
+            //     orderNo: orderNo,
+            //     address: req.body.address,
+            //     MobileNo: req.body.MobileNo,
+            //     country: req.body.country,
+            //     state: req.body.state,
+            //     city: req.body.city,
+            //     landMark: req.body.landMark,
+            //     pincode: req.body.pincode,
+            //     grandTotal: req.body.grandTotal,
+            //     discount: req.body.discount,
+            //     shippingCost: req.body.shippingCost,
+            //     taxAmount: req.body.taxAmount,
+            //     latitude: req.body.latitude,
+            //     longitude: req.body.longitude,
+            //     currentAddress: req.body.currentAddress,
+            //     status: req.body.status,
+            //     orderItems: orderItems,
+            //     gstDetails: req.body.gstDetails,
+            //     roundOff: req.body.roundOff,
+            //     amount: req.body.amount,
+            //     sgstTotal: req.body.sgstTotal,
+            //     cgstTotal: req.body.cgstTotal,
+            //     igstTaxType: req.body.igstTaxType,
+            //     igstTotal: req.body.igstTotal,
+            //     discountAmount: req.body.discountAmount
+            // });
+            // const savedOrder = await order.save();
             req.body.database = user.database;
             req.body.totalAmount = req.body.grandTotal;
             req.body.orderId = savedOrder._id;
@@ -406,68 +417,19 @@ export const createOrderHistoryByPartyId = async (req, res, next) => {
     }
 };
 
-export const updateCreateOrderStatus1 = async (req, res) => {
+export const OrdertoDispatch = async (req, res) => {
     try {
         const orderId = req.params.id;
-        const { status } = req.body;
-        const order = await CreateOrder.findById({ _id: orderId }).populate({ path: "userId", model: "user" }).populate({ path: "orderItems.productId", model: "product" });
+        const order = await CreateOrder.findById({ _id: orderId })
         if (!order) {
-            return res.status(404).json({ message: 'sales order not found' });
+            return res.status(404).json({ message: 'Sales Order Not Found', status: false });
         }
-        order.status = status;
+        order.status = "Dispatch"
         await order.save();
-        const invoice = {
-            fullName: order.fullName,
-            invoiceId: order.invoiceId,
-            address: order.address,
-            MobileNo: order.MobileNo,
-            grandTotal: order.grandTotal,
-            country: order.country,
-            state: order.state,
-            city: order.city,
-            pincode: order.pincode,
-            landMark: order.landMark,
-            discount: order.discount,
-            shippingCost: order.shippingCost,
-            taxAmount: order.taxAmount,
-            date: order.date,
-            orderItems: order.orderItems
-        }
-        const pdfFilePath = path.resolve(__dirname, 'invoice.pdf');
-        await pdf.create(createInvoiceTemplate(invoice), {}).toFile(pdfFilePath, (err) => {
-            if (err) {
-                console.log(err);
-            }
-        })
-        // pathToAttachment = await path.join(__dirname, './invoice.pdf')
-        const attachment = await fs.readFileSync(pdfFilePath).toString("base64")
-
-        await transporter.sendMail({
-            from: process.env.EMAIL,
-            to: req.body.email,
-            subject: 'Pdf Generate document',
-            html: `
-        Testing Pdf Generate document, Thanks.`,
-            attachments: [
-                {
-                    content: attachment,
-                    filename: 'invoice.pdf',
-                    contentType: 'application/pdf',
-                    path: pdfFilePath
-                }
-            ]
-        }, function (error, info) {
-            if (error) {
-                console.log(error);
-            }
-            else {
-                res.send("Mail has been sended to your email. Check your mail")
-            }
-        })
-        return res.status(200).json({ Order: order, status: true });
+        return res.status(200).json({ message: "Order Dispatch Seccessfull!", Order: order, status: true });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: error, status: false });
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
 
@@ -541,19 +503,19 @@ export const SalesOrderList = async (req, res, next) => {
         if (!adminDetail.length > 0) {
             return res.status(404).json({ error: "Product Not Found", status: false })
         }
-        const orders = await Order.find({ database: database }).populate({
-            path: 'orderItems.productId',
-            model: 'product'
-        }).populate({ path: "partyId", model: "customer" }).exec();
+        // const orders = await Order.find({ database: database }).populate({
+        //     path: 'orderItems.productId',
+        //     model: 'product'
+        // }).populate({ path: "partyId", model: "customer" }).exec();
         const createOrder = await CreateOrder.find({ database: database }).populate({
             path: 'orderItems.productId',
             model: 'product'
         }).populate({ path: "partyId", model: "customer" }).exec();
-        if ((!orders || orders.length === 0) && (!createOrder || createOrder.length === 0)) {
+        if ((!createOrder || createOrder.length === 0)) {
             return res.status(404).json({ message: "No orders found", status: false });
         }
-        const ordersDetails = await orders.concat(createOrder)
-        return res.status(200).json({ orderHistory: ordersDetails, status: true });
+        // const ordersDetails = await orders.concat(createOrder)
+        return res.status(200).json({ orderHistory: createOrder, status: true });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
