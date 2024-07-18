@@ -943,3 +943,5 @@ export const PartyPurchaseqty = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
+
+// status: { $in: ["Active", "Pending"] }

@@ -444,7 +444,6 @@ export const ViewOverDueStock = async (body) => {
         const allProduct = productsToProcess.map(product => {
             const warehouse = warehouses.find(warehouse => warehouse._id.toString() === product.warehouse.toString());
             const qty = warehouse ? warehouse.productItems.find(item => item.productId.toString() === product._id.toString()) : null;
-            console.log(qty)
             deadStock += qty?.currentStock || 0;
             return {
                 product,
