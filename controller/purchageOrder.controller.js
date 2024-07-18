@@ -80,7 +80,7 @@ export const purchaseOrderHistory = async (req, res, next) => {
         // if (!adminDetail.length > 0) {
         //     return res.status(404).json({ error: "Product Not Found", status: false })
         // }
-        const purchaseOrder = await PurchaseOrder.find({ database: database }).populate({
+        const purchaseOrder = await PurchaseOrder.find({ database: database, status: { $in: ["pending", "Dispatch", "completed", "InProcess", "Cancelled"] } }).populate({
             path: 'orderItems.productId',
             model: 'product'
         }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).exec();
