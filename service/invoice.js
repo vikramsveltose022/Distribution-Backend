@@ -20,3 +20,14 @@ export const generateOrderNo = async (database) => {
 
     return generatedOrderNo;
 };
+
+// export const challanNo = async (database) => {
+//     const currentYear = new Date().getFullYear()
+//     const companyDetail = await CompanyDetails.findOne({ database: database });
+//     const invoice = companyDetail.dummy + 1;
+//     const generatedInvoice = `${companyDetail.Prefix}${currentYear}`;
+//     companyDetail.dummy = invoice;
+//     await companyDetail.save()
+
+//     return generatedInvoice;
+// };

@@ -149,8 +149,8 @@ export const Salary = async (req, res, next) => {
             return res.status(404).json({ message: "User Not Found", status: false })
         }
         for (let id of user) {
-            // console.log(id.shift)
             if (id.shift) {
+                // console.log(id.shift.shiftName)
                 const WorkingHour = await WorkingHours.findOne({ database: req.params.database, shiftName: id.shift.shiftName })
                 // console.log(WorkingHour)
                 hours = await WorkingHour.totalHours
@@ -206,13 +206,15 @@ export const Salary = async (req, res, next) => {
             // console.log(LeaveCount + " " + totalHoliday + " " + hours + " " + totalHours)
             const sunday = await SundayCheck()
             let totalSundayHours = sunday * hours
+            // console.log("totalSunday " + totalSundayHours)
             const finalHours = (totalHours + ((LeaveCount + totalHoliday) * hours)) + totalSundayHours
             // console.log("finalHours " + finalHours)
+            // console.log(id.pfPercentage + " " + id.firstName)
+            // console.log("-----------------------------")
             // console.log("hours " + hours)
             // console.log("salary : " + id.last_job_Salary)
             salary = (((id.last_job_Salary / 30) / hours) * finalHours)
             // console.log(finalHours)
-            // return salary
             const CheckSalary = (totalHours === 0) ? salary = 0 : salary;
             // console.log(id.pfPercentage + " " + id.firstName)
             const totalSalary = (CheckSalary * (100 - id.pfPercentage) / 100)
@@ -227,12 +229,14 @@ export const Salary = async (req, res, next) => {
                 totalSalary: totalSalary,
                 pfAmount: pfBalance,
                 totalHours: totalHours,
+                DayHours: hours,
+                totalSundayHours: totalSundayHours,
                 totalWorkingDays: totalWorkingDays,
                 overTimeAmount: overTimeAmount,
                 bonusAmount: bonusAmount,
                 employee: employee
             }
-            await SetSalary.create(latestSalary)
+            // await SetSalary.create(latestSalary)
             latest.push(latestSalary)
             employee = []
             totalHours = 0

@@ -13,6 +13,20 @@ import { ClosingStock } from "../model/closingStock.model.js";
 
 export const SaveInvoiceList = async (req, res, next) => {
     try {
+        if (req.files) {
+            let image = null;
+            let images = null;
+            req.files.map(file => {
+                if (file.fieldname === "invoice") {
+                    image = file.filename;
+                }
+                else {
+                    images = file.filename
+                }
+            })
+            req.body.FetchSalesInvoice = image;
+            req.body.CNUpload = images
+        }
         let ware
         let particular = "SalesInvoice"
         const orderId = req.params.id;
@@ -22,31 +36,34 @@ export const SaveInvoiceList = async (req, res, next) => {
         }
         const { partyId } = createOrder;
         const party = await Customer.findById({ _id: partyId })
-        const due = await OverDueReport.findOne({ partyId: partyId, activeStatus: "Active" })
-        if (due) {
-            const lastOrderDate = due?.createdAt
-            const currentDate = new Date();
-            const timeDifference = currentDate - lastOrderDate;
-            const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
-            // if (days >= party.lockInTime && due.remainingAmount > 0) {
-            //     party.autoBillingStatus = "locked";
-            //     due.dueStatus = "overDue"
-            //     await due.save()
-            //     await party.save()
-            //     return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
-            // } else if (due?.remainingAmount > 0 && due?.lockingAmount <= due?.remainingAmount) {
-            //     party.autoBillingStatus = "locked";
-            //     due.dueStatus = "overDue";
-            //     await due.save()
-            //     await party.save()
-            //     return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
-            // }
+        if (party.paymentTerm !== "Cash") {
+            const due = await OverDueReport.findOne({ partyId: partyId, activeStatus: "Active" })
+            if (due) {
+                const lastOrderDate = due?.createdAt
+                const currentDate = new Date();
+                const timeDifference = currentDate - lastOrderDate;
+                const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
+                // if (days >= party.lockInTime && due.remainingAmount > 0) {
+                //     party.autoBillingStatus = "locked";
+                //     due.dueStatus = "overDue"
+                //     await due.save()
+                //     await party.save()
+                //     return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
+                // } else if (due?.remainingAmount > 0 && due?.lockingAmount <= due?.remainingAmount) {
+                //     party.autoBillingStatus = "locked";
+                //     due.dueStatus = "overDue";
+                //     await due.save()
+                //     await party.save()
+                //     return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
+                // }
+            }
         }
-        const existingInvoice = await InvoiceList.findOne({ orderId });
+        // const existingInvoice = await InvoiceList.findOne({ orderId });
+        const existingInvoice = await CreateOrder.findOne({ orderId, invoiceStatus: true });
         if (existingInvoice) {
             return res.status(400).json({ message: "Invoice already created for this order", status: false });
         }
-        for (const orderItem of req.body.orderItems) {
+        for (const orderItem of createOrder.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId._id });
             if (product) {
                 ware = product.warehouse
@@ -67,25 +84,40 @@ export const SaveInvoiceList = async (req, res, next) => {
                 console.error(`Product with ID ${orderItem.productId._id} not found`);
             }
         }
-        req.body.warehouseId = ware
-        req.body.orderId = orderId
-        req.body.invoiceType = "sales"
-        req.body.invoiceStatus = true
-        const invoiceList = await InvoiceList.create(req.body);
+        if (req.body.discountDetails) {
+            createOrder.discountDetails = JSON.parse(req.body.discountDetails)
+        } else if (req.body.chargesDetails) {
+            createOrder.chargesDetails = JSON.parse(req.body.chargesDetails)
+        }
+        // req.body.warehouseId = ware
+        // req.body.orderId = orderId
+        // req.body.invoiceType = "sales"
+        // req.body.invoiceStatus = true
+        createOrder.warehouseId = ware
+        createOrder.orderId = orderId
+        createOrder.invoiceType = "sales"
+        createOrder.invoiceStatus = true
+
+        // const invoiceList = await InvoiceList.create(req.body);
         createOrder.transporter = req.body.transporter
         createOrder.vehicleNo = req.body.vehicleNo
-        createOrder.invoiceStatus = true
+        createOrder.ARNStatus = req.body.ARNStatus
+        createOrder.ARN = req.body.ARN
         createOrder.overAllDiscountPer = req.body.overAllDiscountPer
         createOrder.overAllCharges = req.body.overAllCharges
-        createOrder.discountDetails = req.body.discountDetails
-        createOrder.chargesDetails = req.body.chargesDetails
-        await createOrder.save()
-        if (invoiceList) {
+
+
+        createOrder.CNUpload = req.body.CNUpload
+        createOrder.FetchSalesInvoice = req.body.FetchSalesInvoice
+        createOrder.CNDetails = req.body.CNDetails
+        createOrder.AssignDeliveryBoy = req.body.AssignDeliveryBoy
+        const updated = await createOrder.save()
+        if (updated) {
             // await ledgerSalesForDebit(req.body, particular)
-            await ledgerPartyForDebit(req.body, particular)
+            await ledgerPartyForDebit(updated, particular)
             // await ledgerPartyForCredit(req.body, particular)
         }
-        return res.status(201).json({ message: "InvoiceList created successfully", Invoice: invoiceList, status: true, data: invoiceList });
+        return res.status(201).json({ message: "InvoiceList created successfully", Invoice: updated, status: true, data: updated });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });

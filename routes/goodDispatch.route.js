@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { GoodDispathcXml, deleteGoodDispatch, saveGoodDispatch, sendOtp, updateGoodDispatch, updateOrderStatusByDeliveryBoy, viewGoodDispatch, viewGoodDispatchById, viewOrderForDeliveryBoy } from "../controller/goodDispatch.controller.js";
+import { deleteGoodDispatch, saveGoodDispatch, sendOtp, updateGoodDispatch, updateOrderStatusByDeliveryBoy, viewGoodDispatch, viewGoodDispatchById, viewOrderForDeliveryBoy } from "../controller/goodDispatch.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -17,7 +17,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-router.get("/get-xml", GoodDispathcXml)
 router.post("/save-good-dispatch", upload.any("files"), saveGoodDispatch)
 router.get("/view-good-dispatch/:id/:database", viewGoodDispatch);
 router.get("/view-good-dispatch-by-id/:id", viewGoodDispatchById);

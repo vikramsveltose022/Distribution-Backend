@@ -147,7 +147,8 @@ const CustomerSchema = new mongoose.Schema({
     type: Number
   },
   autoBillingStatus: {
-    type: String
+    type: String,
+    default: "open"
   },
   latitude: {
     type: String

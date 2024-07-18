@@ -66,6 +66,18 @@ const orderItemsSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 const createOrderSchema = new mongoose.Schema({
+    CNUpload: {
+        type: String
+    },
+    FetchSalesInvoice: {
+        type: String
+    },
+    CNDetails: {
+        type: String
+    },
+    AssignDeliveryBoy: {
+        type: String
+    },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user"
@@ -295,7 +307,16 @@ const createOrderSchema = new mongoose.Schema({
     invoiceStatus: {
         type: Boolean,
         default: false
-    }
+    },
+    invoiceType: {
+        type: String
+    },
+    challanNo: {
+        type: String
+    },
+    AssignDeliveryBoy: {
+        type: String
+    },
 }, { timestamps: true })
 
 export const CreateOrder = mongoose.model("createOrder", createOrderSchema)
