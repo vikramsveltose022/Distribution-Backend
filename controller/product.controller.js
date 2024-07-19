@@ -521,6 +521,25 @@ export const HSNWisePurchaseReport = async (req, res, next) => {
   }
 };
 
+export const UpdateProductSalesRateMultiple = async (req, res, next) => {
+  try {
+    for (let item of req.body.Products) {
+      const existingProduct = await Product.findById(item.id);
+      if (!existingProduct) {
+        continue
+        // return res.status(404).json({ error: "Product Not Found", status: false });
+      } else {
+        existingProduct.SalesRate = item.SalesRate;
+        existingProduct.Product_MRP = item.Product_MRP;
+        await existingProduct.save()
+      }
+    }
+    return res.status(200).json({ message: "Product Updated Successfully", status: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal Server Error", status: false });
+  }
+};
 export const UpdateProductSalesRate = async (req, res, next) => {
   try {
     const productId = req.params.id;
