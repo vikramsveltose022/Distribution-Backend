@@ -70,8 +70,7 @@ export const SaveInvoiceList = async (req, res, next) => {
                 product.salesDate = new Date(new Date())
                 const warehouse = await Warehouse.findById(product.warehouse)
                 if (warehouse) {
-                    console.log("fffff " + orderItem.productId)
-                    const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId._id)
+                    const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
                     pro.currentStock -= (orderItem.qty);
                     if (pro.currentStock < 0) {
                         return res.status(404).json({ message: "out of stock", status: false })
