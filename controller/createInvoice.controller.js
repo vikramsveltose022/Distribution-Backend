@@ -13,20 +13,20 @@ import { ClosingStock } from "../model/closingStock.model.js";
 
 export const SaveInvoiceList = async (req, res, next) => {
     try {
-        if (req.files) {
-            let image = null;
-            let images = null;
-            req.files.map(file => {
-                if (file.fieldname === "invoice") {
-                    image = file.filename;
-                }
-                else {
-                    images = file.filename
-                }
-            })
-            req.body.FetchSalesInvoice = image;
-            req.body.CNUpload = images
-        }
+        // if (req.files) {
+        //     let image = null;
+        //     let images = null;
+        //     req.files.map(file => {
+        //         if (file.fieldname === "invoice") {
+        //             image = file.filename;
+        //         }
+        //         else {
+        //             images = file.filename
+        //         }
+        //     })
+        //     req.body.FetchSalesInvoice = image;
+        //     req.body.CNUpload = images
+        // }
         let ware
         let particular = "SalesInvoice"
         const orderId = req.params.id;
@@ -84,9 +84,7 @@ export const SaveInvoiceList = async (req, res, next) => {
                 console.error(`Product with ID ${orderItem.productId._id} not found`);
             }
         }
-        if (req.body.discountDetails) {
-            createOrder.discountDetails = JSON.parse(req.body.discountDetails)
-        }
+        createOrder.discountDetails = req.body.discountDetails
         createOrder.chargesDetails = req.body.chargesDetails
         // req.body.warehouseId = ware
         // req.body.orderId = orderId
