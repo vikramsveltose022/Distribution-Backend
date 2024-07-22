@@ -55,7 +55,7 @@ export const createOrder = async (req, res, next) => {
                     product.salesDate = new Date()
                     const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
-                        const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
+                        const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                         pro.currentStock -= (orderItem.qty);
                         product.Opening_Stock -= orderItem.qty;
                         if (pro.currentStock < 0) {
@@ -198,14 +198,13 @@ export const OrdertoDispatch = async (req, res) => {
         for (const orderItem of order.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId });
             if (product) {
-                // ware = product.warehouse
                 product.salesDate = new Date(new Date())
                 const warehouse = await Warehouse.findById(product.warehouse)
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     pro.currentStock -= (orderItem.qty);
                     if (pro.currentStock < 0) {
-                        return res.status(404).json({ message: "out of stock", status: false })
+                        return res.status(404).json({ message: "Product Out Of Stock", status: false })
                     }
                     pro.pendingStock += (orderItem.qty)
                     // await warehouse.save();
