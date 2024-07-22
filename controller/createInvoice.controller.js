@@ -94,7 +94,7 @@ export const SaveInvoiceList = async (req, res, next) => {
         createOrder.orderId = orderId
         createOrder.invoiceType = "sales"
         createOrder.invoiceStatus = true
-
+        createOrder.status = req.body.status
         // const invoiceList = await InvoiceList.create(req.body);
         createOrder.transporter = req.body.transporter
         createOrder.vehicleNo = req.body.vehicleNo
