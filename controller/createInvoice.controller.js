@@ -63,7 +63,7 @@ export const SaveInvoiceList = async (req, res, next) => {
         if (existingInvoice) {
             return res.status(400).json({ message: "Invoice already created for this order", status: false });
         }
-        for (const orderItem of createOrder.orderItems) {
+        for (const orderItem of req.body.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId._id });
             if (product) {
                 ware = product.warehouse
@@ -86,6 +86,7 @@ export const SaveInvoiceList = async (req, res, next) => {
         }
         createOrder.discountDetails = req.body.discountDetails
         createOrder.chargesDetails = req.body.chargesDetails
+        createOrder.orderItems = req.body.orderItems
         // req.body.warehouseId = ware
         // req.body.orderId = orderId
         // req.body.invoiceType = "sales"
