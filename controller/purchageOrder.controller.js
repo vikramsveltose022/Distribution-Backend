@@ -237,10 +237,10 @@ export const deletedPurchase = async (req, res, next) => {
         if (!purchase) {
             return res.status(404).json({ message: "PurchaseOrder Not Found", status: false })
         }
-        const existInvoice = await InvoiceList.findOne({ orderId: req.params.id })
-        if (!existInvoice) {
-            return res.status(404).json({ message: "PurchaseOrder Not Found", status: false })
-        }
+        // const existInvoice = await InvoiceList.findOne({ orderId: req.params.id })
+        // if (!existInvoice) {
+            // return res.status(404).json({ message: "PurchaseOrder Not Found", status: false })
+        // }
         for (const orderItem of purchase.orderItems) {
             const product = await Product.findOne({ _id: orderItem.productId });
             if (product) {
@@ -255,16 +255,16 @@ export const deletedPurchase = async (req, res, next) => {
                 await deleteAddProductInWarehouse(warehouse, product.warehouse)
                 await DeleteClosingPurchase(orderItem, product.warehouse)
             } else {
-                console.log("product id not found")
+                console.log("Product Id Not Found")
                 // return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
             }
         }
         // await deleteLedger(purchase)
         purchase.status = "Deactive"
-        existInvoice.status = "Deactive"
+        // existInvoice.status = "Deactive"
         await purchase.save()
-        await existInvoice.save()
-        return res.status(200).json({ message: "delete successfull !", status: true })
+        // await existInvoice.save()
+        return res.status(200).json({ message: "delete successfull!", status: true })
     }
     catch (err) {
         console.log(err)

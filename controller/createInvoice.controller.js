@@ -102,11 +102,9 @@ export const SaveInvoiceList = async (req, res, next) => {
         createOrder.ARN = req.body.ARN
         createOrder.overAllDiscountPer = req.body.overAllDiscountPer
         createOrder.overAllCharges = req.body.overAllCharges
-
-
-        createOrder.CNUpload = req.body.CNUpload
-        createOrder.FetchSalesInvoice = req.body.FetchSalesInvoice
-        createOrder.CNDetails = req.body.CNDetails
+        // createOrder.CNUpload = req.body.CNUpload
+        // createOrder.FetchSalesInvoice = req.body.FetchSalesInvoice
+        // createOrder.CNDetails = req.body.CNDetails
         createOrder.AssignDeliveryBoy = req.body.AssignDeliveryBoy
         const updated = await createOrder.save()
         if (updated) {
@@ -206,6 +204,48 @@ export const SavePurchaseInvoice = async (req, res, next) => {
             // await ledgerSalesForCredit(req.body, particular)
             await ledgerPartyForCredit(req.body, particular)
             // await ledgerPartyForDebit(req.body, particular)
+        }
+        return res.status(201).json({ message: "InvoiceList created successfully", Invoice: invoiceList, status: true });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+export const SavePurchaseInvoice1 = async (req, res, next) => {
+    try {
+        let particular = "PurchaseInvoice"
+        const orderId = req.params.id;
+        const purchase = await PurchaseOrder.findById(orderId);
+        if (!purchase) {
+            return res.status(404).json({ message: "Purchase Order Not Found", status: false });
+        }
+        const existingInvoice = await PurchaseOrder.findOne({ _id: orderId, invoiceStatus: true });
+        if (existingInvoice) {
+            return res.status(400).json({ message: "Invoice already created for this order", status: false });
+        }
+        for (const orderItem of purchase.orderItems) {
+            const product = await Product.findOne({ _id: orderItem.productId });
+            if (product) {
+                const current = new Date(new Date())
+                product.purchaseDate = current
+                product.partyId = purchase.partyId;
+                product.purchaseStatus = true
+                product.Opening_Stock += orderItem.qty;
+                const warehouse = { productId: orderItem.productId, currentStock: (orderItem.qty), transferQty: (orderItem.qty), price: orderItem.price, totalPrice: orderItem.totalPrice, gstPercentage: orderItem.gstPercentage, igstTaxType: orderItem.igstTaxType, primaryUnit: orderItem.primaryUnit, secondaryUnit: orderItem.secondaryUnit, secondarySize: orderItem.secondarySize, landedCost: orderItem.landedCost }
+                await product.save();
+                await addProductInWarehouse(warehouse, product.warehouse)
+                await ClosingPurchase(orderItem, product.warehouse)
+            } else {
+                return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
+            }
+        }
+        purchase.orderId = orderId
+        purchase.invoiceType = "purchase"
+        purchase.invoiceStatus = true
+        purchase.status = req.body.status;
+        const invoiceList = await purchase.save()
+        if (invoiceList) {
+            await ledgerPartyForCredit(invoiceList, particular)
         }
         return res.status(201).json({ message: "InvoiceList created successfully", Invoice: invoiceList, status: true });
     } catch (err) {
