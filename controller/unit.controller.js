@@ -4,18 +4,6 @@ import { getUnitHierarchy, getUserHierarchy } from "../rolePermission/permission
 import { User } from "../model/user.model.js";
 import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 
-export const UnitXml = async (req, res) => {
-    const fileUrl = "https://xmlfiles.nyc3.digitaloceanspaces.com/CreateUnit.xml";
-    try {
-        const response = await axios.get(fileUrl);
-        const data = response.data;
-        return res.status(200).json({ data, status: true });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send("Error reading the file");
-    }
-};
-
 export const SaveUnit = async (req, res) => {
     try {
         const user = await User.findById({ _id: req.body.created_by })

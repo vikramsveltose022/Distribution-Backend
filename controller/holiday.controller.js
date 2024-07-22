@@ -60,7 +60,6 @@ export const updatedHoliday = async (req, res, next) => {
     }
 }
 
-
 export const saveWorkingHours = async (req, res, next) => {
     try {
         // const check = await WorkingHours.findOne({ database: req.body.database })
@@ -74,7 +73,6 @@ export const saveWorkingHours = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const deleteWorkingHours = async (req, res, next) => {
     try {
         const check = await WorkingHours.findByIdAndDelete(req.params.id)
@@ -88,7 +86,6 @@ export const deleteWorkingHours = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const updatedWorkingHours = async (req, res, next) => {
     try {
         const check = await WorkingHours.findById(req.params.id)

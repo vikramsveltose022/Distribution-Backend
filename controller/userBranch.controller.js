@@ -1,4 +1,5 @@
 import { UserBranch } from "../model/userBranch.model.js"
+
 export const SaveBranch = async (req, res, next) => {
     try {
         const savedBranch = await UserBranch.create(req.body)
@@ -8,7 +9,6 @@ export const SaveBranch = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const ViewBranch = async (req, res, next) => {
     try {
         const database = req.params.database
@@ -19,7 +19,6 @@ export const ViewBranch = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const ViewByIdBranch = async (req, res, next) => {
     try {
         const id = req.params.id;
@@ -30,7 +29,6 @@ export const ViewByIdBranch = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const DeleteBranch = async (req, res, next) => {
     try {
         const id = req.params.id;
@@ -41,7 +39,6 @@ export const DeleteBranch = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const UpdateBranch = async (req, res, next) => {
     try {
         const id = req.params.id;

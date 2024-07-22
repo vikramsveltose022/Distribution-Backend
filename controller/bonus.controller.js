@@ -88,7 +88,6 @@ export const viewBonusById = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const getBonus = async (req, res, next) => {
     try {
         const check = await Bonus.find({ userId: req.params.id })

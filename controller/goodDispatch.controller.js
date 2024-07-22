@@ -181,16 +181,13 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
         const orders = await CreateOrder.findOne({ _id: orderId });
         const goodDispatch = await GoodDispatch.findById(goodDispatchId);
 
-        if (!invoice && !orders && !goodDispatch) {
-            return res.status(404).json({ message: "Order not found", status: false });
+        if (!orders) {
+            return res.status(404).json({ message: "Order Not Found", status: false });
         }
         if (user.otpVerify !== otp) {
             return res.status(400).json({ message: "Incorrect OTP", status: false });
         }
-        const commonUpdate = {
-            status,
-            paymentMode,
-        };
+        const commonUpdate = { status, paymentMode, };
         if (reason) {
             commonUpdate.reason = reason;
         }
@@ -198,13 +195,36 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             Object.assign(orders, commonUpdate);
             await orders.save();
         }
-        if (invoice) {
-            Object.assign(invoice, commonUpdate);
-            await invoice.save();
-        }
-        if (goodDispatch) {
-            goodDispatch.status = status;
-            await goodDispatch.save();
+        // if (invoice) {
+        //     Object.assign(invoice, commonUpdate);
+        //     await invoice.save();
+        // }
+        // if (goodDispatch) {
+        //     goodDispatch.status = status;
+        //     await goodDispatch.save();
+        // }
+        if (status === "Cancelled") {
+            for (const orderItem of orders.orderItems) {
+                const product = await Product.findById({ _id: orderItem.productId });
+                if (product) {
+                    // ware = product.warehouse
+                    // product.salesDate = new Date()
+                    const warehouse = await Warehouse.findById(product.warehouse)
+                    if (warehouse) {
+                        const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
+                        pro.currentStock += (orderItem.qty);
+                        product.Opening_Stock += orderItem.qty;
+                        if (pro.currentStock < 0) {
+                            return res.status(404).json({ message: "out of stock", status: false })
+                        }
+                        pro.pendingStock -= (orderItem.qty)
+                        // await warehouse.save();
+                        // await product.save()
+                    }
+                } else {
+                    console.error(`Product with ID ${orderItem.productId} not found`);
+                }
+            }
         }
         return res.status(200).json({ message: "Status updated successfully", status: true });
     } catch (error) {

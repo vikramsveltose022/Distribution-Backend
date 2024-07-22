@@ -284,22 +284,9 @@ const createOrderSchema = new mongoose.Schema({
             }
         }
     ],
-    chargesDetails: [
-        {
-            chargedAmount: {
-                type: Number
-            },
-            percentage: {
-                type: Number
-            },
-            title: {
-                type: String
-            },
-            chargedType: {
-                type: String
-            }
-        }
-    ],
+    chargesDetails: {
+        type: Number
+    },
     ARNStatus: {
         type: Boolean,
         default: false

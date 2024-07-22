@@ -2,32 +2,6 @@ import { AssignRole } from "../model/assignRoleToDepartment.model.js";
 import { Role } from "../model/role.model.js";
 import { User } from "../model/user.model.js";
 
-export const saveAssignRole1 = async (req, res, next) => {
-    try {
-        const { roles } = req.body;
-        if (req.body.roles) {
-            for (let id of roles) {
-                const roles = await Role.findById({ _id: id.roleId })
-                roles.assign = 1;
-                await roles.save()
-            }
-        }
-        const checkDepartment = await AssignRole.findOne({ departmentName: req.body.departmentName })
-        if (checkDepartment) {
-            await checkDepartment.roles.push(req.body.roles)
-            const department = await checkDepartment.save()
-            return res.status(200).json({ Department: department, status: true })
-        } else {
-            const department = await AssignRole.create(req.body);
-            return res.status(200).json({ Department: department, status: true })
-        }
-    }
-    catch (err) {
-        console.log(err);
-        return res.status(500).json({ error: "Internal Server Error", status: false })
-    }
-}
-
 
 export const saveAssignRole = async (req, res, next) => {
     try {
@@ -77,7 +51,6 @@ export const userList = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const updateAssignRole = async (req, res, next) => {
     try {
         if (req.body.deleteRole && req.body.deleteRole.length > 0) {
@@ -96,8 +69,8 @@ export const updateAssignRole = async (req, res, next) => {
 };
 export const ViewAssignRoleById = async (req, res, next) => {
     try {
-        let assignRole = await AssignRole.findById({ _id: req.params.id }).sort({sortorder: -1, });
-        return assignRole ? res.status(200).json({ AssignRole: assignRole, status: true }): res.status(404).json({ error: "Not Found", status: false });
+        let assignRole = await AssignRole.findById({ _id: req.params.id }).sort({ sortorder: -1, });
+        return assignRole ? res.status(200).json({ AssignRole: assignRole, status: true }) : res.status(404).json({ error: "Not Found", status: false });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
