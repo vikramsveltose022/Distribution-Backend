@@ -14,7 +14,6 @@ export const saveEmployeeDetails = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const viewEmployeeDetail = async (req, res, next) => {
     try {
         const employee = await Employee.find({}).sort({ sortorder: -1 })

@@ -1,9 +1,8 @@
 import express from "express";
-import { Achievement, AllSalesPersonAchievement, DeleteTargetCreation, SavePartyTarget, SaveTargetCreation, UpdateTargetCreation, ViewPartyTarget, ViewTargetCreation, ViewTargetCreationById, called, checkTarget, deleteProductFromTargetCreation, increasePercentage, latestAchievement, latestAchievementById, latestAchievementSalesById, targetCalculation, targetCreationXml, updateTargetProducts, viewTarget } from "../controller/targetCreation.controller.js";
+import { Achievement, AllSalesPersonAchievement, DeleteTargetCreation, SavePartyTarget, SaveTargetCreation, UpdateTargetCreation, ViewPartyTarget, ViewTargetCreation, ViewTargetCreationById, called, checkTarget, deleteProductFromTargetCreation, increasePercentage, latestAchievement, latestAchievementById, latestAchievementSalesById, targetCalculation, updateTargetProducts, viewTarget } from "../controller/targetCreation.controller.js";
 
 const router = express.Router();
 
-router.get("/get-xml", targetCreationXml)
 router.post("/save-target-creation", SaveTargetCreation);
 router.get("/view-target-creation/:id/:database", ViewTargetCreation);
 router.delete("/delete-target-creation/:id", DeleteTargetCreation);
@@ -27,6 +26,6 @@ router.post("/check/:id/:database", checkTarget)
 router.post("/customer-target", SavePartyTarget)
 router.get("/view-customer-target/:database", ViewPartyTarget)
 
-router.get("/target-calculate/:database",targetCalculation)
+router.get("/target-calculate/:database", targetCalculation)
 router.get("/all-salesperson-achievement/:database", AllSalesPersonAchievement)
 export default router;

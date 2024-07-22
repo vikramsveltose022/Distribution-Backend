@@ -37,38 +37,11 @@ export const cashBookOrder = async (req, res, next) => {
                     console.error(`Product with ID ${orderItem.productId} not found`);
                 }
             }
-            const order = new CashBook({
-                userId: user.created_by,
-                database: user.database,
-                fullName: req.body.fullName,
-                partyId: req.body.partyId,
-                warehouseId: ware,
-                address: req.body.address,
-                MobileNo: req.body.MobileNo,
-                country: req.body.country,
-                state: req.body.state,
-                city: req.body.city,
-                landMark: req.body.landMark,
-                pincode: req.body.pincode,
-                grandTotal: req.body.grandTotal,
-                discount: req.body.discount,
-                shippingCost: req.body.shippingCost,
-                taxAmount: req.body.taxAmount,
-                latitude: req.body.latitude,
-                longitude: req.body.longitude,
-                currentAddress: req.body.currentAddress,
-                status: req.body.status,
-                orderItems: orderItems,
-                gstDetails: req.body.gstDetails,
-                roundOff: req.body.roundOff,
-                amount: req.body.amount,
-                sgstTotal: req.body.sgstTotal,
-                cgstTotal: req.body.cgstTotal,
-                igstTaxType: req.body.igstTaxType,
-                igstTotal: req.body.igstTotal,
-                discountAmount: req.body.discountAmount
-            });
-            const savedOrder = await order.save();
+            req.body.userId = user.created_by
+            req.body.database = user.database
+            req.body.orderItems = orderItems
+            req.body.warehouseId = ware       
+            const savedOrder = await CashBook.create(req.body)
             req.body.userId = user.created_by
             if (savedOrder) {
                 await ledgerSalesForDebit(req.body, particular)

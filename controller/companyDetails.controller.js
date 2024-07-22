@@ -54,8 +54,6 @@ export const viewCompanyDetails = async (req, res, next) => {
   try {
     const userId = req.params.id;
     const database = req.params.database
-    // const adminDetails = await getCompanyDetailHierarchyBottomToTop(userId, database)
-    // const adminDetail = adminDetails[adminDetails.length - 1];
     const adminDetail = await CompanyDetails.findOne({ database: database })
     return adminDetail ? res.status(200).json({ CompanyDetail: adminDetail, status: true }) : res.status(400).json({ message: "Not Found", status: false });
   } catch (err) {

@@ -13,18 +13,6 @@ const uniqueUserId = new Set()
 const emptyObj = {};
 
 
-export const targetCreationXml = async (req, res) => {
-    const fileUrl = "https://xmlfiles.nyc3.digitaloceanspaces.com/TargetCreation.xml";
-    try {
-        const response = await axios.get(fileUrl);
-        const data = response.data;
-        return res.status(200).json({ data, status: true });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send("Error reading the file");
-    }
-};
-
 export const SaveTargetCreation1 = async (req, res) => {
     try {
         const party = await Customer.findById({ _id: req.body.partyId })
@@ -61,7 +49,6 @@ export const SaveTargetCreation1 = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }
-
 // save target start assign party and salesPerson
 export const SaveTargetCreation555 = async (req, res) => {
     try {

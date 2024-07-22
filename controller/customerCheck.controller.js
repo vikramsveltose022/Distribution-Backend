@@ -33,7 +33,6 @@ export const checkSignIn = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-
 export const checkVerifyPanNo = async (req, res) => {
     try {
         const { Pan_No, database } = req.body;
@@ -53,8 +52,6 @@ export const checkVerifyPanNo = async (req, res) => {
         return res.status(500).json({ status: false, error: 'Internal Server Error' });
     }
 }
-
-
 export const checkSignUp = async (req, res) => {
     const { name, Pan_No, database, latitude, longitude, basicSalary, uuid, url, image } = req.body;
     if (!name) {
@@ -94,9 +91,6 @@ export const checkSignUp = async (req, res) => {
 
     res.status(201).send("User registered successfully!");
 };
-
-
-
 const attendance = async (use, data) => {
     try {
         let lateTime = "";
@@ -204,10 +198,6 @@ const attendance = async (use, data) => {
         console.error(error);
     }
 };
-
-
-
-
 export const checkMarkAttendence = async (req, res) => {
     try {
         const registeredUser = await User.findOne({ _id: req.body.id }).maxTimeMS(30000);

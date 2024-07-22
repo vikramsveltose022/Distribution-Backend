@@ -23,7 +23,6 @@ export const SalesReturnXml = async (req, res) => {
         return res.status(500).send("Error reading the file");
     }
 };
-
 export const viewSalesReturn = async (req, res, next) => {
     try {
         const userId = req.params.id;
@@ -139,7 +138,6 @@ export const saveSalesReturnOrder = async (req, res) => {
         return res.status(500).json({ error: error, status: false });
     }
 };
-
 export const viewSalesReturnCreateOrder = async (req, res, next) => {
     try {
         const userId = req.params.id;

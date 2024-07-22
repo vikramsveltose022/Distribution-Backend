@@ -72,7 +72,6 @@ export const UserRegister = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const UserRecognition = async (req, res, next) => {
     try {
         const response = await axios.post("http://13.201.119.216:8050/api/recognize", req.body);
@@ -86,7 +85,6 @@ export const UserRecognition = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false, successCode: err.response.status });
     }
 };
-
 export const Attendance = async (req, res, next) => {
     try {
         const attend = await axios.get(`http://13.201.119.216:8050/api/attendanceAws/${req.params.database}`)
@@ -100,7 +98,6 @@ export const Attendance = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-
 export const CreateCollection = async (req, res, next) => {
     try {
         const response = await axios.post("http://13.201.119.216:8050/api/createcollection", req.body)

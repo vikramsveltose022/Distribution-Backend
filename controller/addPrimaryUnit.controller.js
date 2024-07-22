@@ -32,31 +32,3 @@ export const ViewPrimaryUnit = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
-
-// export const Calculate = async (req, res) => {
-//     try {
-//         const { percentage, orderItems } = req.body
-
-//         orderItems.forEach((item) => {
-//             item.percentagePrice = (item.price * percentage) / 100;
-//         });
-//         const totalIncludingPercentage = orderItems.reduce((total, item) => {
-//             return total + (item.percentagePrice) * item.qty;
-//         }, 0);
-//         const response = orderItems.map((item) => ({
-//             productId: item.productId,
-//             price: item.price,
-//             qty: item.qty,
-//             chargedAmount: (item.percentagePrice) * item.qty,
-//         }));
-
-//         return res.json({
-//             percentage,
-//             totalIncludingPercentage,
-//             orderItemsCharges: response,
-//         });
-//     } catch (error) {
-//         console.error(error);
-//         return res.status(500).json({ message: 'Internal Server Error' });
-//     }
-// }

@@ -9,7 +9,6 @@ export const saveSkillTestQuestion = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
-
 export const submitTest = async (req, res) => {
     const employeeAnswers = req.body;
     try {
@@ -37,7 +36,6 @@ export const submitTest = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
-
 export const viewTestQuestion = async (req, res, next) => {
     try {
         const test = await SkillTest.find({ status: "Active", database: req.params.database }).sort({ sortorder: -1 })

@@ -86,9 +86,8 @@ export const SaveInvoiceList = async (req, res, next) => {
         }
         if (req.body.discountDetails) {
             createOrder.discountDetails = JSON.parse(req.body.discountDetails)
-        } else if (req.body.chargesDetails) {
-            createOrder.chargesDetails = JSON.parse(req.body.chargesDetails)
         }
+        createOrder.chargesDetails = req.body.chargesDetails
         // req.body.warehouseId = ware
         // req.body.orderId = orderId
         // req.body.invoiceType = "sales"
