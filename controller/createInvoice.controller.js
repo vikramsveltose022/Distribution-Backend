@@ -9,6 +9,7 @@ import { Product } from "../model/product.model.js";
 import { addProductInWarehouse } from "./product.controller.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
+import { create } from "html-pdf";
 
 
 export const SaveInvoiceList = async (req, res, next) => {
@@ -63,7 +64,7 @@ export const SaveInvoiceList = async (req, res, next) => {
         if (existingInvoice) {
             return res.status(400).json({ message: "Invoice already created for this order", status: false });
         }
-        for (const orderItem of req.body.orderItems) {
+        for (const orderItem of createOrder.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId._id });
             if (product) {
                 ware = product.warehouse
@@ -87,6 +88,13 @@ export const SaveInvoiceList = async (req, res, next) => {
         createOrder.discountDetails = req.body.discountDetails
         createOrder.chargesDetails = req.body.chargesDetails
         createOrder.orderItems = req.body.orderItems
+        createOrder.amount = req.body.amount
+        createOrder.igstTotal = req.body.igstTotal
+        createOrder.sgstTotal = req.body.sgstTotal
+        createOrder.cgstTotal = req.body.cgstTotal
+        createOrder.roundOff = req.body.roundOff
+        createOrder.grandTotal = req.body.grandTotal
+
         // req.body.warehouseId = ware
         // req.body.orderId = orderId
         // req.body.invoiceType = "sales"
