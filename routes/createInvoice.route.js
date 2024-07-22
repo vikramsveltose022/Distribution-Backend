@@ -16,7 +16,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-router.post("/save-invoice/:id", upload.any("files"), SaveInvoiceList);
+// router.post("/save-invoice/:id", upload.any("files"), SaveInvoiceList);
+router.post("/save-invoice/:id", SaveInvoiceList);
 router.get("/view-invoice/:id/:database", viewInvoiceList);
 router.put("/update-invoice/:id", UpdatedInvoice)
 router.put("/update-status/:id", updateOrderInvoiceStatus)
