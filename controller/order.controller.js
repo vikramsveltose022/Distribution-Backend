@@ -202,7 +202,7 @@ export const OrdertoDispatch = async (req, res) => {
                 product.salesDate = new Date(new Date())
                 const warehouse = await Warehouse.findById(product.warehouse)
                 if (warehouse) {
-                    const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId._id)
+                    const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     pro.currentStock -= (orderItem.qty);
                     if (pro.currentStock < 0) {
                         return res.status(404).json({ message: "out of stock", status: false })
@@ -539,14 +539,14 @@ export const deletedSalesOrder = async (req, res, next) => {
         if (!order) {
             return res.status(404).json({ error: "Not Found", status: false });
         }
-        const existInvoice = await InvoiceList.findOne({ orderId: req.params.id })
-        if (!existInvoice) {
-            return res.status(404).json({ error: "Not Found", status: false });
-        }
-        const existGoodDispatch = await GoodDispatch.findOne({ orderId: req.params.id })
-        if (!existGoodDispatch) {
-            return res.status(404).json({ error: "Not Found", status: false });
-        }
+        // const existInvoice = await InvoiceList.findOne({ orderId: req.params.id })
+        // if (!existInvoice) {
+        //     return res.status(404).json({ error: "Not Found", status: false });
+        // }
+        // const existGoodDispatch = await GoodDispatch.findOne({ orderId: req.params.id })
+        // if (!existGoodDispatch) {
+        //     return res.status(404).json({ error: "Not Found", status: false });
+        // }
         for (const orderItem of order.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId });
             if (product) {
@@ -558,24 +558,24 @@ export const deletedSalesOrder = async (req, res, next) => {
                     pro.currentStock += (orderItem.qty);
                     product.Opening_Stock += orderItem.qty;
                     if (pro.currentStock < 0) {
-                        return res.status(404).json({ message: "out of stock", status: false })
+                        return res.status(404).json({ message: "Product Out Of Stock", status: false })
                     }
                     await warehouse.save();
                     await product.save()
                     await DeleteClosingSales(orderItem, product.warehouse)
                 }
             } else {
-                console.error(`Product with ID ${orderItem.productId} not found`);
+                console.error(`Product With ID ${orderItem.productId} Not Found`);
             }
         }
         await UpdateCheckLimitSales(order)
         // await deleteLedgerBalance(order)
         order.status = "Deactive";
-        existInvoice.status = "Deactive";
-        existGoodDispatch.status = "Deactive";
+        // existInvoice.status = "Deactive";
+        // existGoodDispatch.status = "Deactive";
         await order.save();
-        await existInvoice.save()
-        await existGoodDispatch.save()
+        // await existInvoice.save()
+        // await existGoodDispatch.save()
         return res.status(200).json({ message: "delete successfull!", status: true })
     } catch (err) {
         console.log(err);
