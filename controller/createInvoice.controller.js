@@ -9,6 +9,7 @@ import { Product } from "../model/product.model.js";
 import { addProductInWarehouse } from "./product.controller.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
+import { create } from "html-pdf";
 
 
 export const SaveInvoiceList = async (req, res, next) => {
@@ -87,6 +88,13 @@ export const SaveInvoiceList = async (req, res, next) => {
         createOrder.discountDetails = req.body.discountDetails
         createOrder.chargesDetails = req.body.chargesDetails
         createOrder.orderItems = req.body.orderItems
+        createOrder.amount = req.body.amount
+        createOrder.igstTotal = req.body.igstTotal
+        createOrder.sgstTotal = req.body.sgstTotal
+        createOrder.cgstTotal = req.body.cgstTotal
+        createOrder.roundOff = req.body.roundOff
+        createOrder.grandTotal = req.body.grandTotal
+
         // req.body.warehouseId = ware
         // req.body.orderId = orderId
         // req.body.invoiceType = "sales"
