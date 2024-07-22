@@ -209,7 +209,7 @@ export const getCreateOrderHierarchy = async function getCreateOrderHierarchy(pa
         processedIds.add(parentId);
         const [users, customers] = await Promise.all([
             User.find({ created_by: parentId, status: 'Active' }).lean(),
-            CreateOrder.find({ userId: parentId, status: { $in: ["pending", "Dispatch", "Completed", "InProcess", "Cancelled"] } }).populate({
+            CreateOrder.find({ userId: parentId, status: { $in: ["pending", "Dispatch", "Completed", "InProcess", "Cancelled", "Pending for Delivery", "Out For Delivery", "Delivered"] } }).populate({
                 path: 'orderItems.productId',
                 model: 'product'
             }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).populate({ path: "warehouseId", model: "warehouse" }).exec()
