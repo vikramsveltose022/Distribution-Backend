@@ -868,7 +868,6 @@ export const viewTarget = async (req, res, next) => {
         const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
         const currentMonthEnd = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
         const user = await User.find({ created_by: req.params.id, status: "Active" }).sort({ sortorder: -1 }).select("_id");
-        console.log(user)
         if (user.length > 0) {
             for (let id of user) {
                 const user = await TargetCreation.find({ userId: id._id, createdAt: { $gte: currentMonthStart, $lt: currentMonthEnd } }).populate({ path: "userId", model: "user" })
@@ -1172,13 +1171,13 @@ export const latestAchievementSalesById = async (req, res) => {
         if (targetss.length === 0) {
             console.log("targer not found")
             // continue;
-            // return res.status(404).json({ message: "Not Found", status: false });
+            return res.status(404).json({ message: "Target Not Found", status: false });
         }
         const orders = await CreateOrder.find({ userId: targets.userId });
         if (!orders || orders.length === 0) {
             console.log("order not found")
             // continue;
-            // return res.status(404).json({ message: "Order Not Found", status: false });
+            return res.status(404).json({ message: "Order Not Found", status: false });
         }
         const allOrderItems = orders.flatMap(order => order.orderItems);
         const aggregatedOrders = allOrderItems.reduce((acc, item) => {
@@ -1671,7 +1670,7 @@ export const SavePartyTarget = async (req, res) => {
 // view party target
 export const ViewPartyTarget = async (req, res, next) => {
     try {
-        const party = await TargetCreation.find({ database: req.params.database, partyId: { $ne: null } }).populate({ path: "products.productId", model: "product" })
+        const party = await TargetCreation.find({ database: req.params.database, partyId: { $ne: null } }).populate({ path: "partyId", model: "customer" }).populate({ path: "products.productId", model: "product" })
         if (party.length === 0) {
             return res.status(404).json({ message: "target not found", status: false })
         }

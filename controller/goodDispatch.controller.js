@@ -139,7 +139,7 @@ export const viewOrderForDeliveryBoy = async (req, res, next) => {
         // if (!adminDetail.length > 0) {
         //     return res.status(404).json({ error: "Product Not Found", status: false })
         // }
-        let goodDispatch = await GoodDispatch.find({ database: database }).sort({ sortorder: -1 }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).populate({ path: "orderId", model: "createOrder" }).populate({ path: "warehouseId", model: "warehouse" })
+        let goodDispatch = await CreateOrder.find({ database: database }).sort({ sortorder: -1 }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).populate({ path: "orderId", model: "createOrder" }).populate({ path: "warehouseId", model: "warehouse" })
         return (goodDispatch.length > 0) ? res.status(200).json({ OrderList: goodDispatch, status: true }) : res.status(404).json({ error: "Not Found", status: false })
     }
     catch (err) {
@@ -173,21 +173,33 @@ export const sendOtp = async (req, res) => {
 }
 export const updateOrderStatusByDeliveryBoy = async (req, res) => {
     try {
-        const goodDispatchId = req.params.id;
+        if (req.files) {
+            let image = null;
+            let images = null;
+            req.files.map(file => {
+                if (file.fieldname === "invoice") {
+                    image = file.filename;
+                }
+                else {
+                    images = file.filename
+                }
+            })
+            req.body.FetchSalesInvoice = image;
+            req.body.CNUpload = images
+        }
+        let CNUpload = req.body.CNUpload
+        let FetchSalesInvoice = req.body.FetchSalesInvoice
+        let CNDetails = req.body.CNDetails
         const { status, otp, partyId, orderId, reason, paymentMode } = req.body;
-
         const user = await Customer.findById(partyId);
-        const invoice = await InvoiceList.findOne({ orderId: orderId });
         const orders = await CreateOrder.findOne({ _id: orderId });
-        const goodDispatch = await GoodDispatch.findById(goodDispatchId);
-
         if (!orders) {
             return res.status(404).json({ message: "Order Not Found", status: false });
         }
         if (user.otpVerify !== otp) {
             return res.status(400).json({ message: "Incorrect OTP", status: false });
         }
-        const commonUpdate = { status, paymentMode, };
+        const commonUpdate = { status, paymentMode, CNUpload, FetchSalesInvoice, CNDetails };
         if (reason) {
             commonUpdate.reason = reason;
         }
@@ -195,31 +207,21 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             Object.assign(orders, commonUpdate);
             await orders.save();
         }
-        // if (invoice) {
-        //     Object.assign(invoice, commonUpdate);
-        //     await invoice.save();
-        // }
-        // if (goodDispatch) {
-        //     goodDispatch.status = status;
-        //     await goodDispatch.save();
-        // }
         if (status === "Cancelled") {
             for (const orderItem of orders.orderItems) {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
-                    // ware = product.warehouse
-                    // product.salesDate = new Date()
                     const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
                         const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
                         pro.currentStock += (orderItem.qty);
                         product.Opening_Stock += orderItem.qty;
                         if (pro.currentStock < 0) {
-                            return res.status(404).json({ message: "out of stock", status: false })
+                            return res.status(404).json({ message: "Product Out Of Stock", status: false })
                         }
                         pro.pendingStock -= (orderItem.qty)
-                        // await warehouse.save();
-                        // await product.save()
+                        await warehouse.save();
+                        await product.save()
                     }
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
@@ -227,8 +229,8 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             }
         }
         return res.status(200).json({ message: "Status updated successfully", status: true });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error, status: false });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };

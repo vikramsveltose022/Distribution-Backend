@@ -16,10 +16,8 @@ import transporter from "../service/email.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { UpdateCheckLimitSales, checkLimit } from "../service/checkLimit.js";
 import { PartyOrderLimit } from "../model/partyOrderLimit.model.js";
-import { InvoiceList } from "../model/createInvoice.model.js";
 import { Ledger } from "../model/ledger.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
-import { GoodDispatch } from "../model/goodDispatch.model.js";
 import { Receipt } from "../model/receipt.model.js";
 import { ClosingSales } from "./createInvoice.controller.js";
 dotenv.config();
@@ -59,7 +57,7 @@ export const createOrder = async (req, res, next) => {
                         pro.currentStock -= (orderItem.qty);
                         product.Opening_Stock -= orderItem.qty;
                         if (pro.currentStock < 0) {
-                            return res.status(404).json({ message: "out of stock", status: false })
+                            return res.status(404).json({ message: "Product Out Of Stock", status: false })
                         }
                         pro.pendingStock += (orderItem.qty)
                         await warehouse.save();
@@ -83,7 +81,7 @@ export const createOrder = async (req, res, next) => {
         }
     } catch (err) {
         console.log(err);
-        return res.status(500).json({ error: err });
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
 export const createOrderHistoryByUserId = async (req, res, next) => {

@@ -402,7 +402,7 @@ export const StockCalculate = async (req, res, next) => {
         warehouses.forEach(warehouse => {
             warehouse.productItems.forEach(item => {
                 WarehouseStock.WarehouseStock += item?.currentStock || 0;
-                WarehouseStock.DamageStock += item?.damageItem?.currentStock || 0;
+                WarehouseStock.DamageStock += item?.damageItem?.transferQty || 0;
             });
         });
         openingData.forEach(stock => {
@@ -432,26 +432,29 @@ export const ViewOverDueStock = async (body) => {
         if (!productsNotOrderedLastMonth || productsNotOrderedLastMonth.length === 0) {
             // return res.status(404).json({ message: "No products found", status: false });
         }
-        const orderedProductsLastMonth = await CreateOrder.find({
-            database: body.database,
-            createdAt: { $gte: startOfLastMonth.toDate() }
-        }).distinct('orderItems');
-        const orderedProductIdsLastMonth = orderedProductsLastMonth.map(orderItem => orderItem.productId.toString());
-        const productsToProcess = productsNotOrderedLastMonth.filter(product =>
-            !orderedProductIdsLastMonth.includes(product._id.toString()));
-        const warehouseIds = productsToProcess.map(product => product.warehouse);
-        const warehouses = await Warehouse.find({ _id: { $in: warehouseIds } });
-        const allProduct = productsToProcess.map(product => {
-            const warehouse = warehouses.find(warehouse => warehouse._id.toString() === product.warehouse.toString());
-            const qty = warehouse ? warehouse.productItems.find(item => item.productId.toString() === product._id.toString()) : null;
-            deadStock += qty?.currentStock || 0;
-            return {
-                product,
-                Qty: qty ? qty.currentStock : null,
-                deadStock
-            };
-        });
-        return allProduct[allProduct.length - 1].deadStock
+        const orderedProductsLastMonth = await CreateOrder.find({ database: body.database, createdAt: { $gte: startOfLastMonth.toDate() } }).distinct('orderItems');
+        if (orderedProductsLastMonth.length > 0) {
+            const orderedProductIdsLastMonth = orderedProductsLastMonth.map(orderItem => orderItem.productId.toString());
+            const productsToProcess = productsNotOrderedLastMonth.filter(product =>
+                !orderedProductIdsLastMonth.includes(product._id.toString()));
+            const warehouseIds = productsToProcess.map(product => product.warehouse);
+            const warehouses = await Warehouse.find({ _id: { $in: warehouseIds } });
+            const allProduct = productsToProcess.map(product => {
+                const warehouse = warehouses.find(warehouse => warehouse._id.toString() === product.warehouse.toString());
+                const qty = warehouse ? warehouse.productItems.find(item => item.productId.toString() === product._id.toString()) : null;
+                console.log(qty.currentStock)
+                deadStock += qty?.currentStock || 0;
+                console.log(deadStock)
+                return {
+                    product,
+                    Qty: qty ? qty.currentStock : null,
+                    deadStock
+                };
+            });
+            return allProduct[allProduct.length - 1].deadStock
+        } else {
+            return 0
+        }
     } catch (err) {
         console.error(err);
         // return res.status(500).json({ error: "Internal Server Error", status: false });
