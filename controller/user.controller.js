@@ -343,7 +343,7 @@ export const ViewWarehouse = async (req, res, next) => {
   }
 };
 
-export const saveUserWithExcel = async (req, res) => {
+export const saveUserWithExcel11 = async (req, res) => {
   try {
     let code = "code";
     let database = "database"
@@ -430,7 +430,7 @@ export const saveUserWithExcel = async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error', status: false });
   }
 }
-export const saveUserWithExcel11 = async (req, res) => {
+export const saveUserWithExcel = async (req, res) => {
   try {
     let code = "code";
     let database = "database";

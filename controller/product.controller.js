@@ -198,7 +198,7 @@ export const viewCurrentStock = async (req, res, next) => {
   }
 };
 
-export const saveItemWithExcel = async (req, res) => {
+export const saveItemWithExcel11 = async (req, res) => {
   try {
     let database = "database"
     const filePath = await req.file.path;
@@ -239,7 +239,7 @@ export const saveItemWithExcel = async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error', status: false });
   }
 }
-export const saveItemWithExcel11 = async (req, res) => {
+export const saveItemWithExcel = async (req, res) => {
   try {
     let database = "database";
     let warehouse = "warehouse"
