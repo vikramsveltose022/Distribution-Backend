@@ -162,7 +162,7 @@ export const UpdateReceipt = async (req, res, next) => {
     }
 };
 
-export const saveReceiptWithExcel = async (req, res) => {
+export const saveReceiptWithExcel111 = async (req, res) => {
     try {
         let particular = "receipt";
         let runningAmount = "runningAmount";
@@ -252,7 +252,7 @@ export const saveReceiptWithExcel = async (req, res) => {
     }
 }
 
-export const savePaymentWithExcel = async (req, res) => {
+export const savePaymentWithExcel111 = async (req, res) => {
     try {
         let particular = "payment";
         let runningAmount = "runningAmount";
@@ -485,7 +485,7 @@ export const TaxReport = async (req, res, next) => {
 }
 
 
-export const saveReceiptWithExcel111 = async (req, res) => {
+export const saveReceiptWithExcel = async (req, res) => {
     try {
         let particular = "receipt";
         let runningAmount = "runningAmount";
@@ -577,7 +577,7 @@ export const saveReceiptWithExcel111 = async (req, res) => {
     }
 }
 
-export const savePaymentWithExcel111 = async (req, res) => {
+export const savePaymentWithExcel = async (req, res) => {
     try {
         let particular = "payment";
         let runningAmount = "runningAmount";
