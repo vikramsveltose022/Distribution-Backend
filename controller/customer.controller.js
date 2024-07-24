@@ -298,7 +298,7 @@ export const updatePassword = async (request, response, next) => {
     }
 };
 
-export const saveExcelFile = async (req, res) => {
+export const saveExcelFile11 = async (req, res) => {
     try {
         let code = "code";
         let database = "database"
@@ -386,7 +386,7 @@ export const saveExcelFile = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 }
-export const saveExcelFile11 = async (req, res) => {
+export const saveExcelFile = async (req, res) => {
     try {
         let code = "code";
         let category = "category";
