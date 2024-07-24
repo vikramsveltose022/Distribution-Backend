@@ -84,7 +84,7 @@ export const purchaseOrderHistory = async (req, res, next) => {
         return purchaseOrder ? res.status(200).json({ orderHistory: purchaseOrder, status: true }) : res.status(404).json({ message: "Purchase Order Not Found", status: false })
     } catch (err) {
         console.log(err);
-        return res.status(500).json({ error: err, status: false });
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
 // export const updatePurchaseOrderStatus = async (req, res) => {
@@ -239,7 +239,7 @@ export const deletedPurchase = async (req, res, next) => {
         }
         // const existInvoice = await InvoiceList.findOne({ orderId: req.params.id })
         // if (!existInvoice) {
-            // return res.status(404).json({ message: "PurchaseOrder Not Found", status: false })
+        // return res.status(404).json({ message: "PurchaseOrder Not Found", status: false })
         // }
         for (const orderItem of purchase.orderItems) {
             const product = await Product.findOne({ _id: orderItem.productId });

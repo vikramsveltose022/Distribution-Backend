@@ -430,7 +430,7 @@ export const SalesOrderCalculate111 = async (req, res, next) => {
             if (item.status === "pending") {
                 salesOrders.totalPending++
             }
-            if (item.status === "InProcess") {
+            if (item.status === "Pending for Delivery") {
                 salesOrders.totalDelivery++
             }
         }
@@ -477,7 +477,7 @@ export const SalesOrderCalculate = async (req, res, next) => {
                 }
             } else if (order.status === "pending") {
                 salesOrders.totalPending++;
-            } else if (order.status === "InProcess") {
+            } else if (order.status === "Pending for Delivery") {
                 salesOrders.totalDelivery++;
             }
         });
