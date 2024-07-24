@@ -177,7 +177,7 @@ export const UpdatedInvoice = async (req, res, next) => {
     }
 };
 
-export const SavePurchaseInvoice = async (req, res, next) => {
+export const SavePurchaseInvoice1 = async (req, res, next) => {
     try {
         let particular = "PurchaseInvoice"
         const orderId = req.params.id;
@@ -220,7 +220,7 @@ export const SavePurchaseInvoice = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-export const SavePurchaseInvoice1 = async (req, res, next) => {
+export const SavePurchaseInvoice = async (req, res, next) => {
     try {
         let particular = "PurchaseInvoice"
         const orderId = req.params.id;
