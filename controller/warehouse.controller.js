@@ -6,6 +6,7 @@ import { GstCalculateStock } from "../service/gstCalculate.js";
 import moment from "moment";
 import { Product } from "../model/product.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
+import { Role } from "../model/role.model.js";
 
 export const WarehouseXml = async (req, res) => {
     const fileUrl = "https://xmlfiles.nyc3.digitaloceanspaces.com/Warehouse.xml";
@@ -460,3 +461,52 @@ export const ViewOverDueStock = async (body) => {
         // return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
+
+// export const savedd = async (req, res, next) => {
+//     try {
+//         const rolesss = []
+//         const role = await Role.find({ database: "" })
+//         if (role.length === 0) {
+//             return res.status(404).json({ message: "Not Found", status: false })
+//         }
+//         // console.log(role.length)
+//         for (let item of role) {
+//             const [roleId, rolename] = item.roleName.split(" ")
+//             console.log(roleId)
+//             item.id = roleId
+//             const roleupdated = await item.save()
+//             rolesss.push(roleupdated)
+//         }
+//         res.status(200).json({ role: rolesss, status: true })
+//     }
+//     catch (err) {
+//         console.log(err)
+//         return res.status(500).json({ error: "Internal Server Error", status: false })
+//     }
+// }
+export const savedd = async (req, res, next) => {
+    try {
+        const rolesss = []
+        const role = await Role.find({ database: "" })
+        const roles = await Role.find({ database: req.params.database })
+        if (role.length === 0 && roles.length === 0) {
+            return res.status(404).json({ message: "Not Found", status: false })
+        }
+        // console.log(role.length)
+        for (let item of role) {
+            for (let i of roles) {
+                if (i.roleName === item.roleName) {
+                    console.log(item.id)
+                    i.id = item.id
+                    const roleupdated = await i.save()
+                    rolesss.push(roleupdated)
+                }
+            }
+        }
+        res.status(200).json({ role: rolesss, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
