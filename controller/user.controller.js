@@ -14,6 +14,8 @@ import { UserDetail } from "../model/userDetails.model.js";
 import { Subscription } from "../model/subscription.model.js";
 import { Role } from "../model/role.model.js";
 import mongoose from "mongoose";
+import { WorkingHours } from "../model/workingHours.model.js";
+import { UserBranch } from "../model/userBranch.model.js";
 dotenv.config();
 
 
@@ -148,7 +150,7 @@ export const UpdateUser = async (req, res, next) => {
         req.body.setRule = JSON.parse(req.body.setRule)
       }
       if (req.body.subscriptionPlan) {
-        const sub = await Subscription.findById(req.body.subscriptionPlan)
+        const sub = await Subscription.findById({ _id: req.body.subscriptionPlan })
         if (sub) {
           // const { _id, ...subWithoutId } = sub.toObject();
           const date = new Date();
@@ -434,7 +436,9 @@ export const saveUserWithExcel = async (req, res) => {
   try {
     let code = "code";
     let database = "database";
-    let rolename = "rolename"
+    let rolename = "rolename";
+    let shift = "shift";
+    let branch = "branch"
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -448,9 +452,11 @@ export const saveUserWithExcel = async (req, res) => {
     const existingParts = [];
     const panMobile = [];
     const existingIds = [];
-    const dataNotExist = []
-    const roles = []
-    const IdNotExisting = []
+    const dataNotExist = [];
+    const roles = [];
+    const shiftss = [];
+    const branchss = [];
+    const IdNotExisting = [];
     for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
       const dataRow = worksheet.getRow(rowIndex);
       const document = {};
@@ -470,44 +476,56 @@ export const saveUserWithExcel = async (req, res) => {
         if (!role) {
           roles.push(document.id)
         } else {
-          document[rolename] = document._id.toString()
-          if (document.id) {
-            const existingId = await User.findOne({ id: document.id, database: document.database });
-            if (existingId) {
-              existingIds.push(document.id)
+          const shifts = await WorkingHours.findOne({ id: document.shift, database: document.database })
+          if (!shifts) {
+            shiftss.push(document.id)
+          } else {
+            const branchs = await UserBranch.findOne({ id: document.branch, database: document.database })
+            if (!branchs) {
+              branchss.push(document.id)
             } else {
-              if (document.Pan_No) {
-                document[code] = document.Pan_No;
-                const existingRecord = await User.findOne({
-                  Pan_No: document.Pan_No, database: document.database
-                });
-                if (!existingRecord) {
-                  const insertedDocument = await User.create(document);
-                  insertedDocuments.push(insertedDocument);
+              document[rolename] = role._id.toString()
+              document[shift] = shifts._id.toString()
+              document[branch] = branchs._id.toString()
+              if (document.id) {
+                const existingId = await User.findOne({ id: document.id, database: document.database });
+                if (existingId) {
+                  existingIds.push(document.id)
                 } else {
-                  existingParts.push(document.Pan_No);
+                  if (document.Pan_No) {
+                    document[code] = document.Pan_No;
+                    const existingRecord = await User.findOne({
+                      Pan_No: document.Pan_No, database: document.database
+                    });
+                    if (!existingRecord) {
+                      const insertedDocument = await User.create(document);
+                      insertedDocuments.push(insertedDocument);
+                    } else {
+                      existingParts.push(document.Pan_No);
+                    }
+                  } else {
+                    if (document.Aadhar_No) {
+                      const codes = document.Aadhar_No;
+                      document[code] = codes;
+                      const existingRecord = await User.findOne({
+                        Aadhar_No: document.Aadhar_No, database: document.database
+                      });
+                      if (!existingRecord) {
+                        const insertedDocument = await User.create(document);
+                        insertedDocuments.push(insertedDocument);
+                      } else {
+                        existingParts.push(document.Aadhar_No);
+                      }
+                    } else {
+                      // const insertedDocument = await Customer.create(document);
+                      panMobile.push(document.Aadhar_No);
+                    }
+                  }
                 }
               } else {
-                if (document.Aadhar_No) {
-                  const codes = document.Aadhar_No;
-                  document[code] = codes;
-                  const existingRecord = await User.findOne({
-                    Aadhar_No: document.Aadhar_No, database: document.database
-                  });
-                  if (!existingRecord) {
-                    const insertedDocument = await User.create(document);
-                    insertedDocuments.push(insertedDocument);
-                  } else {
-                    existingParts.push(document.Aadhar_No);
-                  }
-                } else {
-                  // const insertedDocument = await Customer.create(document);
-                  panMobile.push(document.Aadhar_No);
-                }
+                IdNotExisting.push(document.firstName)
               }
             }
-          } else {
-            IdNotExisting.push(document.firstName)
           }
         }
       } else {
@@ -527,6 +545,10 @@ export const saveUserWithExcel = async (req, res) => {
       message = `this user's rolename not correct: ${roles.join(', ')}`;
     } else if (IdNotExisting.length > 0) {
       message = `this user's id is required : ${IdNotExisting.join(', ')}`;
+    } else if (shiftss.length > 0) {
+      message = `this user's shift id is required : ${shiftss.join(', ')}`;
+    } else if (branchss.length > 0) {
+      message = `this user's branch id is required : ${branchss.join(', ')}`;
     }
     return res.status(200).json({ message, status: true });
   } catch (err) {

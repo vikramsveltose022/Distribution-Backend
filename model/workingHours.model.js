@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 
 const WorkingHoursSchema = new mongoose.Schema({
+    id: {
+        type: String
+    },
     database: {
         type: String
     },
