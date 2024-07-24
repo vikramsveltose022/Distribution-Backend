@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 
 const roleSchema = mongoose.Schema({
+    id: {
+        type: String
+    },
     roleId: {
         type: String
     },
