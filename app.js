@@ -36,7 +36,6 @@ import TransporterRouter from "./routes/transporter.route.js";
 import LedgerRouter from "./routes/ledger.route.js";
 import ReceiptRouter from "./routes/receipt.route.js";
 import AttendenceRouter from "./routes/attendence.rotue.js";
-import WarehouseProductItems from "./routes/warehouseProductItem.route.js";
 import OtherChargesRouter from "./routes/otherCharges.route.js"
 import BankRouter from "./routes/bankDetail.route.js"
 import QuotationRoute from "./routes/quotation.route.js"
@@ -48,7 +47,6 @@ import InterviewRouter from "./routes/interview.route.js"
 import EmployeeRouter from "./routes/employee.route.js";
 import JobCategoryRouter from "./routes/jobCategory.route.js";
 import OfferLetterRouter from "./routes/offerLetter.route.js";
-import SalaryRouter from "./routes/salary.route.js";
 import SkillTestRouter from "./routes/skill.test.route.js";
 import AttendanceHRMRouter from "./routes/attendanceHRM.route.js";
 import LeaveHRMRouter from "./routes/leaveHRM.route.js";
@@ -136,9 +134,7 @@ app.use("/interview", InterviewRouter)
 app.use("/employee", EmployeeRouter)
 app.use("/job-category-branch", JobCategoryRouter)
 app.use("/offer-letter", OfferLetterRouter)
-app.use("/salary", SalaryRouter)
 app.use("/skill-test", SkillTestRouter)
-app.use("/product-item", WarehouseProductItems)
 app.use("/hrm-attendance", AttendanceHRMRouter)
 app.use("/hrm-leave", LeaveHRMRouter)
 app.use("/indicator", IndicatorRouter)

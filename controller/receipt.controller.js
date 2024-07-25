@@ -848,7 +848,7 @@ export const ViewReceiptByPartyId = async (req, res, next) => {
 
 // --------------------------------------------------------------------
 
-// for dashboard
+// For DashBoard
 export const transactionCalculate11 = async (req, res, next) => {
     try {
         let transaction = {

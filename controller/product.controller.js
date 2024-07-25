@@ -1,22 +1,9 @@
 import ExcelJS from "exceljs"
-import axios from "axios";
 import { Product } from "../model/product.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
-import { Unit } from "../model/unit.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
 
-export const ProductXml = async (req, res) => {
-  const fileUrl = "https://xmlfiles.nyc3.digitaloceanspaces.com/conProduct.xml";
-  try {
-    const response = await axios.get(fileUrl);
-    const data = response.data;
-    return res.status(200).json({ data, status: true });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).send("Error reading the file");
-  }
-};
 export const SaveProduct = async (req, res) => {
   try {
     if (req.body.id) {
@@ -27,15 +14,11 @@ export const SaveProduct = async (req, res) => {
     } else {
       return res.status(400).json({ message: "product id required", status: false })
     }
-    // if (req.file) {
-    //   req.body.Product_image = req.file.filename;
-    // }
     if (req.files) {
       let images = [];
       req.files.map((file) => {
         images.push(file.filename);
       });
-      // req.body.thumbnail = thumb;
       req.body.Product_image = images;
     }
     const product = await Product.create(req.body);
@@ -50,11 +33,7 @@ export const ViewProduct = async (req, res, next) => {
   try {
     const userId = req.params.id;
     const database = req.params.database;
-    // const adminDetail = await getUserHierarchyBottomToTop(userId, database)
-    // if (!adminDetail.length > 0) {
-    //   return res.status(404).json({ error: "Product Not Found", status: false })
-    // }
-    const product = await Product.find({ database: database, status: 'Active', purchaseStatus: true }).sort({ sortorder: -1 }).populate({ path: "warehouse", model: "warehouse" });
+    const product = await Product.find({ database: database, status: 'Active' }).sort({ sortorder: -1 }).populate({ path: "warehouse", model: "warehouse" });
     return res.status(200).json({ Product: product, status: true })
   } catch (err) {
     console.log(err);
@@ -71,7 +50,6 @@ export const ViewProductForPurchase = async (req, res, next) => {
     return res.status(500).json({ error: "Internal Server Error", status: false });
   }
 };
-
 export const ViewProductById = async (req, res, next) => {
   try {
     let product = await Product.findById({ _id: req.params.id })
@@ -97,15 +75,11 @@ export const DeleteProduct = async (req, res, next) => {
 };
 export const UpdateProduct = async (req, res, next) => {
   try {
-    // if (req.file) {
-    //   req.body.Product_image = req.file.filename;
-    // }
     if (req.files) {
       let images = [];
       req.files.map((file) => {
         images.push(file.filename);
       });
-      // req.body.thumbnail = thumb;
       req.body.Product_image = images;
     }
     const productId = req.params.id;

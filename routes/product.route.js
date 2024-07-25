@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { DeleteProduct, HSNWisePurchaseReport, HSNWiseSalesReport, ProductXml, SaveProduct, StockAlert, UpdateProduct, UpdateProductSalesRate, UpdateProductSalesRateMultiple, ViewProduct, ViewProductById, ViewProductForPurchase, saveItemWithExcel, updateItemWithExcel, viewCurrentStock } from "../controller/product.controller.js";
+import { DeleteProduct, HSNWisePurchaseReport, HSNWiseSalesReport, SaveProduct, StockAlert, UpdateProduct, UpdateProductSalesRate, UpdateProductSalesRateMultiple, ViewProduct, ViewProductById, ViewProductForPurchase, saveItemWithExcel, updateItemWithExcel, viewCurrentStock } from "../controller/product.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -18,25 +18,18 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const uploads = multer({ dest: "public/ExcelFile/" })
 
-router.get("/get-xml", ProductXml);
-// router.post("/import-item-data", uploads.single('file'), saveItemWithExcel)
 router.post("/import-item-data/:database", uploads.single('file'), saveItemWithExcel)
 router.post("/update-import-product/:database", uploads.single('file'), updateItemWithExcel)
-
 router.post("/save-product", upload.array("files"), SaveProduct)
 router.get("/view-product/:id/:database", ViewProduct)
 router.get("/view-product-purchase/:database", ViewProductForPurchase)
 router.get("/view-product-by-id/:id", ViewProductById)
 router.delete("/delete-product/:id", DeleteProduct)
 router.put("/update-product/:id", upload.array("files"), UpdateProduct);
-
-
 router.get("/view-stock-alert/:database", StockAlert);
 router.get("/view-current-stock/:id/:productId", viewCurrentStock)
-
 router.post("/hsn-sales-summary/:database", HSNWiseSalesReport)
 router.post("/hsn-purchase-summary/:database", HSNWisePurchaseReport)
-
 router.put("/product-price-update/:id", UpdateProductSalesRate)
 router.put("/product-price-updated", UpdateProductSalesRateMultiple)
 
