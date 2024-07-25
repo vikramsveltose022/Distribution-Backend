@@ -236,7 +236,7 @@ export const Salary = async (req, res, next) => {
                 bonusAmount: bonusAmount,
                 employee: employee
             }
-            // await SetSalary.create(latestSalary)
+            await SetSalary.create(latestSalary)
             latest.push(latestSalary)
             employee = []
             totalHours = 0

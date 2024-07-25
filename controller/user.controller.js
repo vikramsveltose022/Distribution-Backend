@@ -536,7 +536,7 @@ export const saveUserWithExcel = async (req, res) => {
     if (existingParts.length > 0) {
       message = `some user already exist: ${existingParts.join(', ')}`;
     } else if (panMobile.length > 0) {
-      message = `this pan or adharCard already exist: ${panMobile.join(', ')}`;
+      message = `Pan Or Aadhar Not Exist : ${panMobile.join(', ')}`;
     } else if (existingIds.length > 0) {
       message = `this user id already exist: ${existingIds.join(', ')}`;
     } else if (dataNotExist.length > 0) {

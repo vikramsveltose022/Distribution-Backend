@@ -87,27 +87,6 @@ export const purchaseOrderHistory = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-// export const updatePurchaseOrderStatus = async (req, res) => {
-//     try {
-//         const orderId = req.params.id;
-//         const { status, paymentMode } = req.body;
-//         const order = await PurchaseOrder.findById({ _id: orderId });
-//         if (!order) {
-//             return res.status(404).json({ message: 'Purchase order not found' });
-//         }
-//         if (status) {
-//             order.status = status;
-//         }
-//         if (paymentMode) {
-//             order.paymentMode = paymentMode
-//         }
-//         await order.save();
-//         return res.status(200).json({ Order: order, status: true });
-//     } catch (error) {
-//         console.error(error);
-//         return res.status(500).json({ error: error, status: false });
-//     }
-// }
 export const updatePurchaseOrderStatus = async (req, res) => {
     try {
         const orderId = req.params.id;
@@ -342,7 +321,7 @@ export const deleteLedger = async (body) => {
     }
 }
 
-// for dashboard
+// For DashBoard
 export const CreditorCalculate11 = async (req, res, next) => {
     try {
         let Creditor = {
