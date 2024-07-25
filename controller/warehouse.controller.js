@@ -8,17 +8,6 @@ import { Product } from "../model/product.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { Role } from "../model/role.model.js";
 
-export const WarehouseXml = async (req, res) => {
-    const fileUrl = "https://xmlfiles.nyc3.digitaloceanspaces.com/Warehouse.xml";
-    try {
-        const response = await axios.get(fileUrl);
-        const data = response.data;
-        return res.status(200).json({ data, status: true });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send("Error reading the file");
-    }
-};
 
 export const SaveWarehouse = async (req, res, next) => {
     try {
@@ -332,7 +321,7 @@ export const HSNStockSummary = async (req, res, next) => {
     }
 };
 
-//  for dashboard
+//  For DashBoard
 export const StockCalculate11 = async (req, res, next) => {
     try {
         let WarehouseStock = {

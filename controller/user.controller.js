@@ -98,7 +98,7 @@ export const SuperAdminRoleUpdate = async (req, res, next) => {
 }
 export const ViewUserById = async (req, res, next) => {
   try {
-    let user = await User.findById({ _id: req.params.id, status: "Active" }).populate({ path: "subscriptionPlan", model: "subscription" })
+    let user = await User.findById({ _id: req.params.id, status: "Active" }).populate({ path: "subscriptionPlan", model: "subscription" }).populate({ path: "created_by", model: "user" }).populate({ path: "rolename", model: "role" }).populate({ path: "branch", model: "userBranch" }).populate({ path: "shift", model: "WorkingHour" })
     return res.status(200).json({ User: user, status: true });
   } catch (err) {
     console.error(err);
@@ -493,7 +493,7 @@ export const saveUserWithExcel = async (req, res) => {
                   existingIds.push(document.id)
                 } else {
                   if (document.Pan_No) {
-                    document[code] = document.Pan_No;
+                    // document[code] = document.Pan_No;
                     const existingRecord = await User.findOne({
                       Pan_No: document.Pan_No, database: document.database
                     });
@@ -505,8 +505,8 @@ export const saveUserWithExcel = async (req, res) => {
                     }
                   } else {
                     if (document.Aadhar_No) {
-                      const codes = document.Aadhar_No;
-                      document[code] = codes;
+                      // const codes = document.Aadhar_No;
+                      // document[code] = codes;
                       const existingRecord = await User.findOne({
                         Aadhar_No: document.Aadhar_No, database: document.database
                       });
