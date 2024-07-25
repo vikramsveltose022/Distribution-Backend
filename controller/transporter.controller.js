@@ -40,7 +40,7 @@ export const ViewTransporter = async (req, res, next) => {
 }
 export const ViewTransposrterById = async (req, res, next) => {
     try {
-        let transporter = await Transporter.find({ _id: req.params.id, status: "Active" }).sort({ sortorder: -1 })
+        let transporter = await Transporter.findById({ _id: req.params.id, status: "Active" }).populate({ path: "rolename", model: "role" })
         return transporter ? res.status(200).json({ Transporter: transporter, status: true }) : res.status(404).json({ error: "Not Found", status: false })
     }
     catch (err) {
