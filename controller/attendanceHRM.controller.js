@@ -34,7 +34,7 @@ export const deleteAttendance = async (req, res, next) => {
     try {
         const attendance = await HRMAttendance.findById(req.params.id)
         if (!attendance) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         attendance.status = "Deactive"
         await attendance.save();

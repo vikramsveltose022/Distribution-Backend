@@ -11,7 +11,7 @@ export const saveIncentive = async (req, res, next) => {
 }
 export const viewIncentive = async (req, res, next) => {
     try {
-        const incentive = await Incentive.find({ status: "Active", database: req.params.database }).populate({ path: "employeeName", model: "user" }).populate({path:"rule",model:"rule"}).sort({ sortorder: -1 })
+        const incentive = await Incentive.find({ status: "Active", database: req.params.database }).populate({ path: "employeeName", model: "user" }).populate({ path: "rule", model: "rule" }).sort({ sortorder: -1 })
         return (incentive.length > 0) ? res.status(200).json({ Incentive: incentive, status: true }) : res.status(404).json({ message: "Not Found", status: false })
 
     } catch (err) {
@@ -21,7 +21,7 @@ export const viewIncentive = async (req, res, next) => {
 }
 export const viewIncentiveById = async (req, res, next) => {
     try {
-        const incentive = await Incentive.findById(req.params.id).populate({ path: "employeeName", model: "user" }).populate({path:"rule",model:"rule"})
+        const incentive = await Incentive.findById(req.params.id).populate({ path: "employeeName", model: "user" }).populate({ path: "rule", model: "rule" })
         return incentive ? res.status(200).json({ Incentive: incentive, status: true }) : res.status(400).json({ message: "something went wrong", status: false })
     }
     catch (err) {
@@ -33,7 +33,7 @@ export const deleteIncentive = async (req, res, next) => {
     try {
         const incentive = await Incentive.findById(req.params.id)
         if (!incentive) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         incentive.status = "Deactive"
         await incentive.save();

@@ -32,7 +32,7 @@ export const deleteResignation = async (req, res, next) => {
     try {
         const resignation = await Resignation.findById(req.params.id)
         if (!resignation) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         resignation.status = "Deactive"
         await resignation.save();

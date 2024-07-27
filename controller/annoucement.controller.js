@@ -33,7 +33,7 @@ export const deleteAnnoucement = async (req, res, next) => {
     try {
         const annoucement = await Annoucement.findById(req.params.id)
         if (!annoucement) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         annoucement.status = "Deactive"
         await annoucement.save();

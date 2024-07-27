@@ -33,7 +33,7 @@ export const deleteAppraisal = async (req, res, next) => {
     try {
         const appraisal = await Appraisal.findById(req.params.id)
         if (!appraisal) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         appraisal.status = "Deactive"
         await appraisal.save();

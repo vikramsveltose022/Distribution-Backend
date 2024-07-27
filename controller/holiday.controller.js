@@ -35,7 +35,7 @@ export const deleteHoliday = async (req, res, next) => {
     try {
         const holiday = await Holiday.findByIdAndDelete(req.params.id)
         if (!holiday) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         return res.status(200).json({ message: "delete successfull", status: true })
     }
@@ -77,7 +77,7 @@ export const deleteWorkingHours = async (req, res, next) => {
     try {
         const check = await WorkingHours.findByIdAndDelete(req.params.id)
         if (!check) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         return res.status(200).json({ message: "delete successfull", status: true })
 

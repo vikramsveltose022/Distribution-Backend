@@ -32,7 +32,7 @@ export const deleteOtherCharges = async (req, res, next) => {
     try {
         const otherCharges = await OtherCharges.findById(req.params.id)
         if (!otherCharges) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         otherCharges.status = "Deactive"
         await otherCharges.save();

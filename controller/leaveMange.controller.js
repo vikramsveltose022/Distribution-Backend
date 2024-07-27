@@ -34,7 +34,7 @@ export const deleteLeave = async (req, res, next) => {
     try {
         const manage = await LeaveManage.findByIdAndDelete(req.params.id)
         if (!manage) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         return res.status(200).json({ message: "delete successfull", status: true })
     }

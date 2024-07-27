@@ -33,7 +33,7 @@ export const deleteTermination = async (req, res, next) => {
     try {
         const termination = await Termination.findById(req.params.id)
         if (!termination) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         termination.status = "Deactive"
         await termination.save();

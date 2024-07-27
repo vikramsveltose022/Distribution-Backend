@@ -2,8 +2,10 @@ import mongoose from "mongoose";
 
 const ReceiptSchema = new mongoose.Schema({
     created_by: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        type: String
+    },
+    userId: {
+        type: String
     },
     database: {
         type: String

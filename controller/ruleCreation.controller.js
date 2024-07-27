@@ -45,7 +45,7 @@ export const deleteRule = async (req, res, next) => {
     try {
         const rule = await ruleCreation.findById(req.params.id)
         if (!rule) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         rule.status = "Deactive"
         await rule.save();
@@ -139,6 +139,8 @@ export const Salary = async (req, res, next) => {
         let pfAmount = 0
         const current = new Date()
         const month = current.getMonth()
+        const year = current.getFullYear()
+        // console.log(year)
         // console.log(month)
         const holiday = await Holiday.find({ month: month.toString() })
         if (holiday.length > 0) {
@@ -161,11 +163,12 @@ export const Salary = async (req, res, next) => {
             // console.log("workingHours " + hours)
             const rule = await ApplyRule.findOne({ userId: id._id })
             if (rule) {
-                const bonus = await Bonus.findOne({ userId: id._id, months: month })
+                const bonus = await Bonus.findOne({ userId: id._id, months: month, years: year })
                 if (!bonus) {
-                    console.log("Bonus Not Found")
+                    // console.log("Bonus Not Found")
                 }
                 for (let data of rule.employee) {
+                    // one-time ,, daily
                     if (data.period === "monthly") {
                         employee.push(data)
                     }
@@ -193,13 +196,13 @@ export const Salary = async (req, res, next) => {
                 { endDate: { $gte: previousMonthStart, $lte: previousMonthEnd } }]
             });
             if (leave.length === 0) {
-                console.log("leave not found")
+                // console.log("leave not found")
             }
             for (let id of leave) {
                 // check leave all
                 const checkLeave = await LeaveHRM.findById(id.leaveType)
                 if (!checkLeave) {
-                    console.log("leave manage not found")
+                    // console.log("leave manage not found")
                 }
                 const yes = (checkLeave.checkStatus === "Paid") ? LeaveCount++ : false
             }
@@ -226,7 +229,7 @@ export const Salary = async (req, res, next) => {
                 panCard: id.Pan_No,
                 basicSalary: id.last_job_Salary,
                 salaryMonth: month,
-                totalSalary: totalSalary,
+                totalSalary: CheckSalary,
                 pfAmount: pfBalance,
                 totalHours: totalHours,
                 DayHours: hours,
@@ -338,6 +341,13 @@ export const HRMCalculate = async (req, res, next) => {
         if (salarys.length === 0) {
             // return res.status(404).json({ message: "Job Not Found", status: false })
         }
+        // const ress = await axios.get(`https://node-hrm.rupioo.com/api/count-attendanceAws/${req.params.database}`)
+        // if (ress.data.status) {
+        //     for (let item of ress.data.attendanceList) {
+        //         hrm.TotalAbsend += item.AbsentDays
+        //         hrm.TotalPresent += item.PresentDays
+        //     }
+        // }
         hrm.TotalSalaryPaid = salarys.reduce((total, item) => total + item.basicSalary, 0)
         hrm.CurrentSalary = salary.reduce((total, item) => total + item.basicSalary, 0)
         hrm.Vacancy = jobs.reduce((total, item) => total + item.numberOfPositions, 0)
