@@ -35,7 +35,7 @@ export const deleteComplaint = async (req, res, next) => {
     try {
         const complaint = await Complaint.findById(req.params.id)
         if (!complaint) {
-            return res.status(404).json({ message: "Complaint Not Fount", status: false })
+            return res.status(404).json({ message: "Complaint Not Found", status: false })
         }
         complaint.status = "Deactive"
         await complaint.save();

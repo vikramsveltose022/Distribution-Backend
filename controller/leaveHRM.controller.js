@@ -34,7 +34,7 @@ export const deleteLeave = async (req, res, next) => {
     try {
         const leave = await LeaveHRM.findById(req.params.id)
         if (!leave) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         leave.status = "Deactive"
         await leave.save();

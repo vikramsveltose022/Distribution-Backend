@@ -33,7 +33,7 @@ export const deleteWarning = async (req, res, next) => {
     try {
         const warning = await Warning.findById(req.params.id)
         if (!warning) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         warning.status = "Deactive"
         await warning.save();

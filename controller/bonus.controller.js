@@ -49,7 +49,7 @@ export const deleteBonus = async (req, res, next) => {
     try {
         const bonus = await Bonus.findById(req.params.id)
         if (!bonus) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         bonus.status = "Deactive"
         await bonus.save();

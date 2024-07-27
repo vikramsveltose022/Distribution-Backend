@@ -34,7 +34,7 @@ export const deleteOfferLetter = async (req, res, next) => {
     try {
         const offer = await OfferLetter.findById(req.params.id)
         if (!offer) {
-            return res.status(404).json({ message: "Not Fount", status: false })
+            return res.status(404).json({ message: "Not Found", status: false })
         }
         offer.status = "Deactive"
         await offer.save();
