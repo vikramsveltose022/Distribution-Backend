@@ -182,7 +182,7 @@ const otpStore = {};
 
 export const SignIn = async (req, res, next) => {
   try {
-    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otp = Math.floor(1000 + Math.random() * 9000);
     const { email, password, latitude, longitude, currentAddress } = req.body;
     let existingAccount = await User.findOne({ email }).populate({ path: "rolename", model: "role" }).populate({ path: "branch", model: "userBranch" });
     let existingCustomer = await Customer.findOne({ email }).populate({ path: "rolename", model: "role" })
