@@ -43,7 +43,7 @@ export const saveReceipt22 = async (req, res, next) => {
             if (reciept.type === "receipt") {
                 let particular = "receipt";
                 // await ledgerSalesForCredit(req.body, particular)
-                await ledgerPartyForCredit(req.body, particular)
+                await ledgerPartyForCredit(reciept, particular)
                 // await ledgerPartyForDebit(req.body, particular)
             }
             await overDue1(req.body)
@@ -92,7 +92,7 @@ export const saveReceipt = async (req, res, next) => {
             const reciept = await Receipt.create(req.body);
             if (reciept.type === "receipt") {
                 let particular = "receipt";
-                await ledgerPartyForCredit(req.body, particular)
+                await ledgerPartyForCredit(reciept, particular)
             }
             await overDue1(req.body)
             req.body.voucherDate = new Date(new Date())
@@ -131,7 +131,7 @@ export const saveReceipt = async (req, res, next) => {
             const reciept = await Receipt.create(req.body);
             if (reciept.type === "receipt") {
                 let particular = "receipt";
-                await ledgerUserForCredit(req.body, particular)
+                await ledgerUserForCredit(reciept, particular)
             }
             // await overDue1(req.body)
             // req.body.voucherDate = new Date(new Date())
@@ -177,7 +177,7 @@ export const savePayment22 = async (req, res, next) => {
             if (reciept.type === "payment") {
                 let particular = "payment";
                 // await ledgerSalesForDebit(req.body, particular)
-                await ledgerPartyForDebit(req.body, particular)
+                await ledgerPartyForDebit(reciept, particular)
                 // await ledgerPartyForCredit(req.body, particular)
             }
             // await overDue1(req.body)
@@ -223,7 +223,7 @@ export const savePayment = async (req, res, next) => {
             const reciept = await Receipt.create(req.body);
             if (reciept.type === "payment") {
                 let particular = "payment";
-                await ledgerPartyForDebit(req.body, particular)
+                await ledgerPartyForDebit(reciept, particular)
             }
             return reciept ? res.status(200).json({ message: "Payment Saved Successfull!", status: true }) : res.status(404).json({ message: "Payment Not Found", status: false })
         } else if (!req.body.userId) {
@@ -258,7 +258,7 @@ export const savePayment = async (req, res, next) => {
             const reciept = await Receipt.create(req.body);
             if (reciept.type === "payment") {
                 let particular = "payment";
-                await ledgerUserForDebit(req.body, particular)
+                await ledgerUserForDebit(reciept, particular)
             }
             return reciept ? res.status(200).json({ message: "Payment Saved Successfull!", status: true }) : res.status(404).json({ message: "Payment Not Found", status: false })
         }
@@ -711,7 +711,7 @@ export const saveReceiptWithExcel22 = async (req, res) => {
                     if (reciept.type === "receipt") {
                         let particular = "receipt";
                         // await ledgerSalesForCredit(document, particular)
-                        await ledgerPartyForCredit(document, particular)
+                        await ledgerPartyForCredit(reciept, particular)
                         // await ledgerPartyForDebit(document, particular)
                     }
                     await overDue1(document)
@@ -804,7 +804,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                     if (reciept.type === "receipt") {
                         let particular = "receipt";
                         // await ledgerSalesForCredit(document, particular)
-                        await ledgerPartyForCredit(document, particular)
+                        await ledgerPartyForCredit(reciept, particular)
                         // await ledgerPartyForDebit(document, particular)
                     }
                     await overDue1(document)
@@ -851,7 +851,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                         let particular = "receipt";
                         // await ledgerSalesForCredit(document, particular)
                         // await ledgerPartyForCredit(document, particular)
-                        await ledgerUserForCredit(document, particular)
+                        await ledgerUserForCredit(reciept, particular)
                         // await ledgerPartyForDebit(document, particular)
                     }
                     // await overDue1(document)
@@ -940,7 +940,7 @@ export const savePaymentWithExcel22 = async (req, res) => {
                     if (reciept.type === "payment") {
                         let particular = "payment";
                         // await ledgerSalesForDebit(document, particular)
-                        await ledgerPartyForDebit(document, particular)
+                        await ledgerPartyForDebit(reciept, particular)
                         // await ledgerPartyForCredit(document, particular)
                     }
                 } else {
@@ -1027,7 +1027,7 @@ export const savePaymentWithExcel = async (req, res) => {
                     if (reciept.type === "payment") {
                         let particular = "payment";
                         // await ledgerSalesForDebit(document, particular)
-                        await ledgerPartyForDebit(document, particular)
+                        await ledgerPartyForDebit(reciept, particular)
                         // await ledgerPartyForCredit(document, particular)
                     }
                 } else {
@@ -1071,7 +1071,7 @@ export const savePaymentWithExcel = async (req, res) => {
                         // await ledgerSalesForDebit(document, particular)
                         // await ledgerPartyForDebit(document, particular)
                         // await ledgerPartyForCredit(document, particular)
-                        await ledgerUserForDebit(req.body, particular)
+                        await ledgerUserForDebit(reciept, particular)
                     }
                 } else {
                     existingUsers.push(document.partyId);

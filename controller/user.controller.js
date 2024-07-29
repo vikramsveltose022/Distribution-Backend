@@ -16,6 +16,7 @@ import { Role } from "../model/role.model.js";
 import mongoose from "mongoose";
 import { WorkingHours } from "../model/workingHours.model.js";
 import { UserBranch } from "../model/userBranch.model.js";
+import { LoginVerificationMail } from "../service/sendmail.js";
 dotenv.config();
 
 
@@ -181,11 +182,20 @@ const otpStore = {};
 
 export const SignIn = async (req, res, next) => {
   try {
+    const otp = Math.floor(100000 + Math.random() * 900000);
     const { email, password, latitude, longitude, currentAddress } = req.body;
     let existingAccount = await User.findOne({ email }).populate({ path: "rolename", model: "role" }).populate({ path: "branch", model: "userBranch" });
     let existingCustomer = await Customer.findOne({ email }).populate({ path: "rolename", model: "role" })
     if (!existingAccount && !existingCustomer) {
       return res.status(400).json({ message: "Incorrect email", status: false });
+    }
+    if (existingAccount) {
+      if (existingAccount.rolename.roleName === "MASTER") {
+        existingAccount.otp = otp
+        await LoginVerificationMail(existingAccount, otp)
+        await existingAccount.save()
+        return res.status(200).json({ message: "otp send successfull!", user: { ...existingAccount.toObject(), password: undefined, otp: undefined, role: "MASTER" }, status: true })
+      }
     }
     if (existingAccount && existingAccount.password !== password ||
       existingCustomer && existingCustomer.password !== password) {
@@ -208,22 +218,15 @@ export const SignIn = async (req, res, next) => {
 export const verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
   try {
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email }).populate({ path: "rolename", model: "role" }).populate({ path: "branch", model: "userBranch" });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User Not Found" });
     }
-    if (otp == otpStore[email]) {
-      delete otpStore[email];
-      let token = await Jwt.sign({ subject: user.email }, "dfdfjdkfdjfkdjf");
-      return res
-        .status(200)
-        .json({
-          message: "Login successful",
-          user: { ...user.toObject(), password: undefined, token },
-          status: true,
-        });
+    if (user.otp === otp) {
+      const token = Jwt.sign({ subject: email }, process.env.TOKEN_SECRET_KEY);
+      return res.json({ message: "Login Successfull", user: { ...user.toObject(), password: undefined, token }, status: true, });
     } else {
-      return res.status(400).json({ error: "Invalid otp" });
+      return res.status(400).json({ error: "Invalid otp", status: false });
     }
   } catch (error) {
     console.error("Error verifying OTP:", error);

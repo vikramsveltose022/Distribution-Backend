@@ -211,7 +211,7 @@ export const SavePurchaseInvoice1 = async (req, res, next) => {
         const invoiceList = await InvoiceList.create(req.body);
         if (invoiceList) {
             // await ledgerSalesForCredit(req.body, particular)
-            await ledgerPartyForCredit(req.body, particular)
+            await ledgerPartyForCredit(invoiceList, particular)
             // await ledgerPartyForDebit(req.body, particular)
         }
         return res.status(201).json({ message: "InvoiceList created successfully", Invoice: invoiceList, status: true });

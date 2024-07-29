@@ -220,6 +220,9 @@ const UserSchema = new mongoose.Schema({
   },
   shift: {
     type: String,
+  },
+  otp: {
+    type: String
   }
 }, { timestamps: true });
 
