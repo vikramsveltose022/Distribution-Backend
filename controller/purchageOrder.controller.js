@@ -216,10 +216,6 @@ export const deletedPurchase = async (req, res, next) => {
         if (!purchase) {
             return res.status(404).json({ message: "PurchaseOrder Not Found", status: false })
         }
-        // const existInvoice = await InvoiceList.findOne({ orderId: req.params.id })
-        // if (!existInvoice) {
-        // return res.status(404).json({ message: "PurchaseOrder Not Found", status: false })
-        // }
         for (const orderItem of purchase.orderItems) {
             const product = await Product.findOne({ _id: orderItem.productId });
             if (product) {
@@ -238,11 +234,9 @@ export const deletedPurchase = async (req, res, next) => {
                 // return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
             }
         }
-        // await deleteLedger(purchase)
         purchase.status = "Deactive"
-        // existInvoice.status = "Deactive"
         await purchase.save()
-        // await existInvoice.save()
+        await Ledger.findOneAndDelete({ orderId: req.params.id })
         return res.status(200).json({ message: "delete successfull!", status: true })
     }
     catch (err) {
@@ -301,20 +295,6 @@ export const DeleteClosingPurchase = async (orderItem, warehouse) => {
             console.log("product item not found in stock")
         }
         return true
-    }
-    catch (err) {
-        console.log(err)
-    }
-}
-export const deleteLedger = async (body) => {
-    try {
-        const ledger = await Ledger.find({ partyId: body.partyId }).sort({ sortorder: -1 })
-        if (ledger.length === 0) {
-            console.log("party id not found in a ledger")
-        }
-        let ledgerId = ledger[ledger.length - 1]
-        // console.log(ledgerId._id)
-        await Ledger.findByIdAndDelete(ledgerId._id.toString())
     }
     catch (err) {
         console.log(err)

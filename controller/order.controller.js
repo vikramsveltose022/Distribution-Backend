@@ -536,14 +536,6 @@ export const deletedSalesOrder = async (req, res, next) => {
         if (!order) {
             return res.status(404).json({ error: "Not Found", status: false });
         }
-        // const existInvoice = await InvoiceList.findOne({ orderId: req.params.id })
-        // if (!existInvoice) {
-        //     return res.status(404).json({ error: "Not Found", status: false });
-        // }
-        // const existGoodDispatch = await GoodDispatch.findOne({ orderId: req.params.id })
-        // if (!existGoodDispatch) {
-        //     return res.status(404).json({ error: "Not Found", status: false });
-        // }
         for (const orderItem of order.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId });
             if (product) {
@@ -566,13 +558,9 @@ export const deletedSalesOrder = async (req, res, next) => {
             }
         }
         await UpdateCheckLimitSales(order)
-        // await deleteLedgerBalance(order)
         order.status = "Deactive";
-        // existInvoice.status = "Deactive";
-        // existGoodDispatch.status = "Deactive";
         await order.save();
-        // await existInvoice.save()
-        // await existGoodDispatch.save()
+        await Ledger.findOneAndDelete({ orderId: req.params.id })
         return res.status(200).json({ message: "delete successfull!", status: true })
     } catch (err) {
         console.log(err);
@@ -604,20 +592,6 @@ export const DeleteClosingSales = async (orderItem, warehouse) => {
             // console.log("ClosingSales : " + stock)
         }
         // return true
-    }
-    catch (err) {
-        console.log(err)
-    }
-}
-export const deleteLedgerBalance = async (body) => {
-    try {
-        const ledger = await Ledger.find({ partyId: body.partyId }).sort({ sortorder: -1 })
-        if (ledger.length === 0) {
-            console.log("party id not found in a ledger")
-        }
-        let ledgerId = ledger[ledger.length - 1]
-        // console.log(ledgerId._id)
-        await Ledger.findByIdAndDelete(ledgerId._id.toString())
     }
     catch (err) {
         console.log(err)

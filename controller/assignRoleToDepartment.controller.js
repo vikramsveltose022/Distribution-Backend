@@ -31,10 +31,7 @@ export const saveAssignRole = async (req, res, next) => {
 };
 export const viewAssignRole = async (req, res, next) => {
     try {
-        const department = await AssignRole.find({ database: req.params.database })
-            .populate({ path: "created_by", model: "user" })
-            .populate({ path: "departmentName", model: "department" }).populate({ path: "roles.roleId", model: "role" })
-            .sort({ sortorder: -1 });
+        const department = await AssignRole.find({ database: req.params.database }).populate({ path: "created_by", model: "user" }).populate({ path: "departmentName", model: "department" }).populate({ path: "roles.roleId", model: "role" }).sort({ sortorder: -1 });
         return (department.length > 0) ? res.status(200).json({ Department: department, status: true }) : res.status(400).json({ message: "Not Found", status: false })
     }
     catch (err) {
