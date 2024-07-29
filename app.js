@@ -39,7 +39,8 @@ import AttendenceRouter from "./routes/attendence.rotue.js";
 import OtherChargesRouter from "./routes/otherCharges.route.js"
 import BankRouter from "./routes/bankDetail.route.js"
 import QuotationRoute from "./routes/quotation.route.js"
-import SubscriptionRouter from "./routes/subscription.route.js"
+import SubscriptionRouter from "./routes/subscription.route.js";
+import CreateAccountRouter from "./routes/createAccount.route.js"
 //------------------------------------------------------------------
 import CreateJobRouter from "./routes/createJob.route.js";
 import JobAppliedRouter from "./routes/jobApplied.route.js";
@@ -127,6 +128,7 @@ app.use("/other-charges", OtherChargesRouter)
 app.use("/bank", BankRouter)
 app.use("/quotation", QuotationRoute)
 app.use("/subscription", SubscriptionRouter)
+app.use("/expenses",CreateAccountRouter)
 //---------------------------------------------
 app.use("/create-job", CreateJobRouter);
 app.use("/job-applied", JobAppliedRouter);
