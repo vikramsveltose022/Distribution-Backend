@@ -1567,7 +1567,7 @@ export const saveReceipt = async (req, res, next) => {
                 const particular = "receipt";
                 if (item.partyId) {
                     await ledgerPartyForCredit(receipt, particular);
-                } else {
+                } else if (item.userId) {
                     await ledgerUserForCredit(receipt, particular);
                 }
             }
