@@ -128,7 +128,7 @@ app.use("/other-charges", OtherChargesRouter)
 app.use("/bank", BankRouter)
 app.use("/quotation", QuotationRoute)
 app.use("/subscription", SubscriptionRouter)
-app.use("/expenses",CreateAccountRouter)
+app.use("/expenses", CreateAccountRouter)
 //---------------------------------------------
 app.use("/create-job", CreateJobRouter);
 app.use("/job-applied", JobAppliedRouter);
@@ -176,7 +176,7 @@ cron.schedule('1 0 1 * *', () => {
   increasePercentage();
 });
 
-app.post('/file', (req, res) => {
+app.post('/checkfile', (req, res) => {
   const filePath = path.join(publicPath1, req.body.fileName);
   fs.unlink(filePath, (err) => {
     if (err) {

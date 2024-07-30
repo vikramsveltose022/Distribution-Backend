@@ -45,6 +45,7 @@ export const overDue1 = async (body) => {
                 party.autoBillingStatus = "open"
                 await party.save()
                 over.activeStatus = "Deactive"
+                over1.activeStatus = "Deactive"
                 await over.save()
                 await over1.save()
             } else {

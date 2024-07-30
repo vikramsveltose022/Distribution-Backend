@@ -2,15 +2,13 @@ import mongoose from "mongoose";
 
 const OverDueSchema = new mongoose.Schema({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user"
+        type: String
     },
     database: {
         type: String
     },
     partyId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "customer"
+        type: String
     },
     orderId: {
         type: String
