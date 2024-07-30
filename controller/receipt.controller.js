@@ -439,7 +439,7 @@ export const savePayment2 = async (req, res, next) => {
 }
 export const viewReceipt = async (req, res, next) => {
     try {
-        const receipts = await Receipt.find({ database: req.params.database, status: "Active" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" });
+        const receipts = await Receipt.find({ database: req.params.database, status: "Active" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" });
         // const populatedReceipts = await Promise.all(receipts.map(async (receipt) => {
         //     const customer = await Customer.findOne({ uniqueCode: receipt.code });
         //     return { ...receipt.toObject(), partyId: customer };
@@ -452,7 +452,7 @@ export const viewReceipt = async (req, res, next) => {
 };
 export const ViewReceiptById = async (req, res, next) => {
     try {
-        let receipt = await Receipt.findById({ _id: req.params.id }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
+        let receipt = await Receipt.findById({ _id: req.params.id }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" });
         // const customer = await Customer.findOne({ uniqueCode: receipt.code }).populate({path:"partyId",model:"customer"});
         // const receipts = { ...receipt.toObject(), partyId: customer };
         return receipt ? res.status(200).json({ Receipts: receipt, status: true }) : res.status(404).json({ error: "Not Found", status: false });
@@ -723,7 +723,7 @@ export const CashBookReport = async (req, res, next) => {
         if (startDate && endDate) {
             targetQuery.createdAt = { $gte: startDate, $lte: endDate };
         }
-        const receipts = await Receipt.find(targetQuery).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
+        const receipts = await Receipt.find(targetQuery).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" });
         if (receipts.length === 0) {
             return res.status(404).json({ message: "Not Found", status: false });
         }
@@ -742,7 +742,7 @@ export const BankAccountReport = async (req, res, next) => {
         if (startDate && endDate) {
             targetQuery.createdAt = { $gte: startDate, $lte: endDate };
         }
-        const receipts = await Receipt.find(targetQuery).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
+        const receipts = await Receipt.find(targetQuery).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" });
         if (receipts.length === 0) {
             return res.status(404).json({ message: "Not Found", status: false });
         }
@@ -1432,7 +1432,7 @@ export const OtpVerifyForReceipt = async (req, res) => {
 }
 export const ViewReceiptByPartyId = async (req, res, next) => {
     try {
-        let receipt = await Receipt.find({ database: req.params.database, partyId: req.params.id }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
+        let receipt = await Receipt.find({ database: req.params.database, partyId: req.params.id }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
         // const customer = await Customer.findOne({ uniqueCode: receipt.code }).populate({path:"partyId",model:"customer"});
         // const receipts = { ...receipt.toObject(), partyId: customer };
         return (receipt.length > 0) ? res.status(200).json({ Receipts: receipt, status: true }) : res.status(404).json({ message: "Receipt Not Found", status: false });
@@ -1533,8 +1533,8 @@ export const saveReceipt = async (req, res, next) => {
         const receiptTypes = ['Bank', 'Cash'];
         for (const item of req.body.Receipt) {
             if (!item.partyId && !item.userId) {
-                const receiptData = { ...req.body, ...item };
-                const receipt = await Receipt.create(receiptData);
+                // const receiptData = { ...req.body, ...item };
+                const receipt = await Receipt.create(item);
                 await partyReceipt.push(receipt);
                 continue;
             }
