@@ -40,7 +40,7 @@ const ReceiptSchema = new mongoose.Schema({
     instrumentNo: {
         type: String
     },
-    note: {
+    remark: {
         type: String
     },
     latitude: {
