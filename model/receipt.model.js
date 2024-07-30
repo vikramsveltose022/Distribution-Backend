@@ -4,11 +4,17 @@ const ReceiptSchema = new mongoose.Schema({
     created_by: {
         type: String
     },
+    database: {
+        type: String
+    },
     userId: {
         type: String
     },
-    database: {
-        type: String
+    partyId: {
+        type: String,
+    },
+    expenseId: {
+        type: String,
     },
     type: {
         type: String
@@ -30,9 +36,6 @@ const ReceiptSchema = new mongoose.Schema({
     },
     title: {
         type: String
-    },
-    partyId: {
-        type: String,
     },
     amount: {
         type: Number
