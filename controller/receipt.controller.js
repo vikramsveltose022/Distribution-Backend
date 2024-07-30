@@ -1532,16 +1532,16 @@ export const saveReceipt = async (req, res, next) => {
         const partyReceipt = [];
         const receiptTypes = ['Bank', 'Cash'];
         for (const item of req.body.Receipt) {
-            if (!item.partyId && !item.userId) {
-                // const receiptData = { ...req.body, ...item };
-                const receipt = await Receipt.create(item);
-                await partyReceipt.push(receipt);
-                continue;
-            }
+            // if (!item.partyId && !item.userId) {
+            //     // const receiptData = { ...req.body, ...item };
+            //     const receipt = await Receipt.create(item);
+            //     await partyReceipt.push(receipt);
+            //     continue;
+            // }
             const isBankPayment = item.paymentMode !== "Cash";
             const paymentMode = isBankPayment ? 'Bank' : 'Cash';
-            const queryField = item.partyId ? { partyId: { $ne: null } } : { userId: { $ne: null } };
-            const rece = await Receipt.find({ status: "Active", paymentMode, ...queryField }).sort({ sortorder: -1 });
+            // const queryField = item.partyId ? { partyId: { $ne: null } } : { userId: { $ne: null } };
+            const rece = await Receipt.find({ status: "Active", paymentMode, }).sort({ sortorder: -1 });
             if (rece.length > 0) {
                 const latestReceipt = rece[rece.length - 1];
                 if (isBankPayment) {
