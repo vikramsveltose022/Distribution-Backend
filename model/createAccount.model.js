@@ -10,6 +10,9 @@ const CreateAccountSchema = new mongoose.Schema({
     title: {
         type: String
     },
+    type: {
+        type: String
+    },
     status: {
         type: String,
         default: "Active"
