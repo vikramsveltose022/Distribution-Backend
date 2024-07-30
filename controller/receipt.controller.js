@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import { Receipt } from "../model/receipt.model.js";
 import { ledgerPartyForCredit, ledgerPartyForDebit, ledgerUserForCredit, ledgerUserForDebit } from "../service/ledger.js";
 import { Customer } from "../model/customer.model.js";
-import { overDue1 } from "../service/overDue.js";
+import { DeleteOverDue, overDue1 } from "../service/overDue.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { SalesReturn } from "../model/salesReturn.model.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
@@ -10,6 +10,7 @@ import { PurchaseReturn } from "../model/purchaseReturn.model.js";
 import { PaymentDueReport } from "../model/payment.due.report.js";
 import { OtpVerify } from "../model/otpVerify.model.js";
 import { User } from "../model/user.model.js";
+import { Ledger } from "../model/ledger.model.js";
 
 export const saveReceipt22 = async (req, res, next) => {
     try {
@@ -469,6 +470,11 @@ export const DeleteReceipt = async (req, res, next) => {
         }
         receipt.status = "Deactive";
         await receipt.save();
+        await Ledger.findOneAndDelete({ orderId: req.params.id })
+        await PaymentDueReport.findOneAndDelete({ orderId: req.params.id })
+        if (receipt.type === "receipt") {
+            await DeleteOverDue(receipt)
+        }
         return res.status(200).json({ message: "delete successful", status: true })
     } catch (err) {
         console.log(err);
@@ -1530,17 +1536,9 @@ export const transactionCalculate = async (req, res, next) => {
 export const saveReceipt = async (req, res, next) => {
     try {
         const partyReceipt = [];
-        const receiptTypes = ['Bank', 'Cash'];
         for (const item of req.body.Receipt) {
-            // if (!item.partyId && !item.userId) {
-            //     // const receiptData = { ...req.body, ...item };
-            //     const receipt = await Receipt.create(item);
-            //     await partyReceipt.push(receipt);
-            //     continue;
-            // }
             const isBankPayment = item.paymentMode !== "Cash";
             const paymentMode = isBankPayment ? 'Bank' : 'Cash';
-            // const queryField = item.partyId ? { partyId: { $ne: null } } : { userId: { $ne: null } };
             const rece = await Receipt.find({ status: "Active", paymentMode, }).sort({ sortorder: -1 });
             if (rece.length > 0) {
                 const latestReceipt = rece[rece.length - 1];
@@ -1572,6 +1570,8 @@ export const saveReceipt = async (req, res, next) => {
                 }
             }
             if (item.partyId) {
+                req.body.orderId = receipt._id.toString()
+                const receiptData = { ...req.body, ...item };
                 await overDue1(receiptData);
                 await PaymentDueReport.create(receiptData);
             }
@@ -1632,6 +1632,58 @@ export const savePayment = async (req, res, next) => {
         }
         return partyReceipt.length > 0 ? res.status(200).json({ message: "Payment Saved Successfully!", status: true }) : res.status(404).json({ message: "Payment Not Found", status: false });
 
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+}
+
+export const updateReceipt = async (req, res, next) => {
+    try {
+        const { receiptId, updates } = req.body;
+        const existingReceipt = await Receipt.findById(receiptId);
+        if (!existingReceipt) {
+            return res.status(404).json({ message: "Receipt Not Found", status: false });
+        }
+        const isBankPayment = updates.paymentMode !== "Cash";
+        const paymentMode = isBankPayment ? 'Bank' : 'Cash';
+        const rece = await Receipt.find({ status: "Active", paymentMode }).sort({ sortorder: -1 });
+        if (rece.length > 0) {
+            const latestReceipt = rece[rece.length - 1];
+            if (isBankPayment) {
+                updates.runningAmount = latestReceipt.runningAmount + updates.amount;
+            } else {
+                updates.cashRunningAmount = latestReceipt.cashRunningAmount + updates.amount;
+            }
+            updates.voucherNo = latestReceipt.voucherNo + 1;
+        } else {
+            if (isBankPayment) {
+                updates.runningAmount = updates.amount;
+            } else {
+                updates.cashRunningAmount = updates.amount;
+            }
+            updates.voucherNo = 1;
+        }
+        updates.voucherType = "receipt";
+        updates.voucherDate = new Date();
+        updates.lockStatus = "No";
+        // Merge the updates with existing receipt data
+        const updatedReceiptData = { ...existingReceipt._doc, ...updates };
+        const updatedReceipt = await Receipt.findByIdAndUpdate(receiptId, updatedReceiptData, { new: true });
+        if (updatedReceipt.type === "receipt") {
+            const particular = "receipt";
+            if (updatedReceipt.partyId) {
+                await ledgerPartyForCredit(updatedReceipt, particular);
+            } else if (updatedReceipt.userId) {
+                await ledgerUserForCredit(updatedReceipt, particular);
+            }
+        }
+        if (updatedReceipt.partyId) {
+            await overDue1(updatedReceiptData);
+            await PaymentDueReport.create(updatedReceiptData);
+        }
+
+        return res.status(200).json({ message: "Receipt Updated Successfully!", status: true, receipt: updatedReceipt });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });

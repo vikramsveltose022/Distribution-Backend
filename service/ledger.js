@@ -286,6 +286,7 @@ export const ledgerUserForCredit = async function ledger(body, particular) {
             const saveData = {
                 database: body.database,
                 userId: body.userId,
+                orderId: body._id.toString(),
                 // partyId1: body.partyId1,
                 // userId: body.SuperAdmin || body.userId,
                 // name: party.firstName + " " + party.lastname,
@@ -306,6 +307,7 @@ export const ledgerUserForCredit = async function ledger(body, particular) {
         const saveData = {
             database: body.database,
             userId: body.userId,
+            orderId: body._id.toString(),
             // partyId1: body.partyId1,
             // userId: body.SuperAdmin || body.userId,
             // name: party.firstName + " " + party.lastName,
