@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import { Receipt } from "../model/receipt.model.js";
 import { ledgerPartyForCredit, ledgerPartyForDebit, ledgerUserForCredit, ledgerUserForDebit } from "../service/ledger.js";
 import { Customer } from "../model/customer.model.js";
-import { DeleteOverDue, overDue1 } from "../service/overDue.js";
+import { DeleteOverDue, UpdateOverDue, overDue1 } from "../service/overDue.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { SalesReturn } from "../model/salesReturn.model.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
@@ -472,7 +472,7 @@ export const DeleteReceipt = async (req, res, next) => {
         await receipt.save();
         await Ledger.findOneAndDelete({ orderId: req.params.id })
         await PaymentDueReport.findOneAndDelete({ orderId: req.params.id })
-        if (receipt.type === "receipt") {
+        if (receipt.partyId && receipt.type === "receipt") {
             await DeleteOverDue(receipt)
         }
         return res.status(200).json({ message: "delete successful", status: true })
@@ -481,7 +481,7 @@ export const DeleteReceipt = async (req, res, next) => {
         return res.status(500).json({ error: "Internal server error", status: false });
     }
 };
-export const UpdateReceipt = async (req, res, next) => {
+export const UpdateReceipt22 = async (req, res, next) => {
     try {
         const receiptId = req.params.id;
         const existingReceipt = await Receipt.findById(receiptId);
@@ -1638,51 +1638,48 @@ export const savePayment = async (req, res, next) => {
     }
 }
 
-export const updateReceipt = async (req, res, next) => {
+export const UpdateReceipt = async (req, res, next) => {
     try {
-        const { receiptId, updates } = req.body;
-        const existingReceipt = await Receipt.findById(receiptId);
+        const existingReceipt = await Receipt.findById(req.params.id);
         if (!existingReceipt) {
             return res.status(404).json({ message: "Receipt Not Found", status: false });
         }
-        const isBankPayment = updates.paymentMode !== "Cash";
-        const paymentMode = isBankPayment ? 'Bank' : 'Cash';
-        const rece = await Receipt.find({ status: "Active", paymentMode }).sort({ sortorder: -1 });
-        if (rece.length > 0) {
-            const latestReceipt = rece[rece.length - 1];
-            if (isBankPayment) {
-                updates.runningAmount = latestReceipt.runningAmount + updates.amount;
-            } else {
-                updates.cashRunningAmount = latestReceipt.cashRunningAmount + updates.amount;
-            }
-            updates.voucherNo = latestReceipt.voucherNo + 1;
-        } else {
-            if (isBankPayment) {
-                updates.runningAmount = updates.amount;
-            } else {
-                updates.cashRunningAmount = updates.amount;
-            }
-            updates.voucherNo = 1;
-        }
-        updates.voucherType = "receipt";
-        updates.voucherDate = new Date();
-        updates.lockStatus = "No";
-        // Merge the updates with existing receipt data
-        const updatedReceiptData = { ...existingReceipt._doc, ...updates };
-        const updatedReceipt = await Receipt.findByIdAndUpdate(receiptId, updatedReceiptData, { new: true });
+        let previousamount = existingReceipt.amount;
+        // const isBankPayment = req.body.paymentMode !== "Cash";
+        // const paymentMode = isBankPayment ? 'Bank' : 'Cash';
+        // const rece = await Receipt.find({ status: "Active", paymentMode }).sort({ sortorder: -1 });
+        // if (rece.length > 0) {
+        //     const latestReceipt = rece[rece.length - 1];
+        //     if (isBankPayment) {
+        //         req.body.runningAmount = latestReceipt.runningAmount + (req.body.amount - existingReceipt.amount);
+        //     } else {
+        //         req.body.cashRunningAmount = latestReceipt.cashRunningAmount + (req.body.amount - existingReceipt.amount);
+        //     }
+        // } else {
+        //     if (isBankPayment) {
+        //         req.body.runningAmount = req.body.amount;
+        //     } else {
+        //         req.body.cashRunningAmount = req.body.amount;
+        //     }
+        // }
+        req.body.voucherType = "receipt";
+        req.body.voucherDate = new Date();
+        req.body.lockStatus = "No";
+        const updatedReceipt = await Receipt.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (updatedReceipt.type === "receipt") {
             const particular = "receipt";
             if (updatedReceipt.partyId) {
-                await ledgerPartyForCredit(updatedReceipt, particular);
+                req.body.credit = updatedReceipt.amount;
+                await Ledger.findOneAndUpdate({ orderId: existingReceipt._id.toString() }, req.body, { new: true });
             } else if (updatedReceipt.userId) {
-                await ledgerUserForCredit(updatedReceipt, particular);
+                req.body.credit = updatedReceipt.amount;
+                await Ledger.findOneAndUpdate({ orderId: existingReceipt._id.toString() }, req.body, { new: true });
             }
         }
         if (updatedReceipt.partyId) {
-            await overDue1(updatedReceiptData);
-            await PaymentDueReport.create(updatedReceiptData);
+            await UpdateOverDue(req.body, previousamount);
+            await PaymentDueReport.findOneAndUpdate({ orderId: existingReceipt._id.toString() }, req.body, { new: true });
         }
-
         return res.status(200).json({ message: "Receipt Updated Successfully!", status: true, receipt: updatedReceipt });
     } catch (err) {
         console.error(err);
