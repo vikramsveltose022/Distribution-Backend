@@ -37,6 +37,10 @@ const SetSalarySchema = new mongoose.Schema({
     bonusAmount: {
         type: Number
     },
+    paidStatus: {
+        type: String,
+        default: "unpaid"
+    },
     employee: [],
     status: {
         type: String,

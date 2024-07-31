@@ -18,6 +18,9 @@ const LedgerSchema = new mongoose.Schema({
     partyId: {
         type: String
     },
+    expenseId: {
+        type: String
+    },
     orderId: {
         type: String
     },
