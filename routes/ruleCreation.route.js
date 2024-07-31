@@ -1,5 +1,5 @@
 import express from "express"
-import { HRMCalculate, Salary, SundayCheck, ViewSalary, deleteRule, saveRule, setSalary, updatedRule, viewRule, viewRuleById, workingHours } from "../controller/ruleCreation.controller.js";
+import { HRMCalculate, Salary, SalaryPaid, SundayCheck, ViewSalary, deleteRule, saveRule, setSalary, updatedRule, viewRule, viewRuleById, workingHours } from "../controller/ruleCreation.controller.js";
 
 const router = express.Router()
 
@@ -12,8 +12,9 @@ router.put("/update-rules/:id", updatedRule)
 router.get("/salary", setSalary)
 router.get("/set/:database", Salary)
 router.get("/view-salary/:database", ViewSalary)
+router.get("/update-salary-status/:id", SalaryPaid)
 router.get("/working-hours/:database/:panNo", workingHours)
 router.get("/check-sunday", SundayCheck)
 
-router.get("/hrm-calculate/:database",HRMCalculate)
+router.get("/hrm-calculate/:database", HRMCalculate)
 export default router;

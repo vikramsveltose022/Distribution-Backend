@@ -269,7 +269,22 @@ export const totalWorkingHours = async function totalWorkingHours(data) {
 export const ViewSalary = async (req, res, next) => {
     try {
         const salary = await SetSalary.find({ database: req.params.database }).sort({ sortorder: -1 }).populate({ path: "userId", model: "user" })
-        return (salary.length > 0) ? res.status(200).json({ Salary: salary, status: true }) : res.status(500).json(404).json({ message: "Not Found", status: false })
+        return (salary.length > 0) ? res.status(200).json({ Salary: salary, status: true }) : res.status(404).json({ message: "Not Found", status: false })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const SalaryPaid = async (req, res, next) => {
+    try {
+        const salary = await SetSalary.findById(req.params.id)
+        if (!salary) {
+            return res.status(404).json({ message: "Salary Not Found", status: false })
+        }
+        salary.paidStatus = "paid"
+        const updatedSalary = await salary.save()
+        return (updatedSalary) ? res.status(200).json({ Salary: salary, status: true }) : res.status(400).json({ message: "Salary Not Updated", status: false })
     }
     catch (err) {
         console.log(err);
