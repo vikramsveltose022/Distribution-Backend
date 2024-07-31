@@ -11,6 +11,8 @@ router.get("/view-reciept/:database", viewReceipt)
 router.get("/view-receipt-by-id/:id", ViewReceiptById)
 router.delete("/delete-receipt/:id", DeleteReceipt);
 router.put("/update-receipt/:id", UpdateReceipt)
+router.put("/update-payment/:id", UpdateReceipt)
+router.delete("/delete-payment/:id", DeleteReceipt);
 
 router.post("/profit-loss-report/:database", ProfitLossReport)
 
