@@ -1679,3 +1679,52 @@ export const UpdateReceipt = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
+export const UpdatePayment = async (req, res, next) => {
+    try {
+        const existingReceipt = await Receipt.findById(req.params.id);
+        if (!existingReceipt) {
+            return res.status(404).json({ message: "Payment Not Found", status: false });
+        }
+        req.body.voucherType = "payment";
+        // if (req.body.partyId) {
+        //     req.body.userId = undefined;
+        //     req.body.expenseId = undefined;
+        // } else if (req.body.userId) {
+        //     req.body.partyId = undefined;
+        //     req.body.expenseId = undefined;
+        // } else {
+        //     req.body.userId = undefined;
+        //     req.body.partyId = undefined;
+        // }
+        const updatedReceipt = await Receipt.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (updatedReceipt.type === "payment") {
+            const particular = "payment";
+            if (updatedReceipt.partyId) {
+                req.body.credit = updatedReceipt.amount;
+                await Ledger.findOneAndUpdate({ orderId: existingReceipt._id.toString() }, req.body, { new: true });
+            } else if (updatedReceipt.userId) {
+                req.body.credit = updatedReceipt.amount;
+                await Ledger.findOneAndUpdate({ orderId: existingReceipt._id.toString() }, req.body, { new: true });
+            }
+        }
+        return res.status(200).json({ message: "Payment Updated Successfully!", status: true, receipt: updatedReceipt });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+}
+export const DeletePayment = async (req, res, next) => {
+    try {
+        const receipt = await Receipt.findById({ _id: req.params.id });
+        if (!receipt) {
+            return res.status(404).json({ error: "Payment Not Found", status: false });
+        }
+        receipt.status = "Deactive";
+        await receipt.save();
+        await Ledger.findOneAndDelete({ orderId: req.params.id })
+        return res.status(200).json({ message: "Payment Delete Successfull!", status: true })
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
