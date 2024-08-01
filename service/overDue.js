@@ -73,8 +73,13 @@ export const DeleteOverDue = async (body) => {
             if (over.remainingAmount <= 0) {
                 party.autoBillingStatus = "open"
                 await party.save()
-                over.activeStatus = "Deactive"
-                over1.activeStatus = "Deactive"
+                await over.save()
+                if (over1) {
+                    over.activeStatus = "Deactive"
+                    over1.activeStatus = "Deactive"
+                    await over.save()
+                    await over1.save()
+                }
                 await over.save()
                 await over1.save()
             } else {
