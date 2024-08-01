@@ -42,13 +42,13 @@ export const overDue1 = async (body) => {
             over.voucherDate = new Date(new Date())
             if (over.remainingAmount <= 0) {
                 party.autoBillingStatus = "open"
-                await party.save()
                 await over.save()
                 if (over1) {
                     over.activeStatus = "Deactive"
                     over1.activeStatus = "Deactive"
                     await over.save()
                     await over1.save()
+                    await party.save()
                 }
             } else {
                 await over.save()
@@ -72,13 +72,13 @@ export const DeleteOverDue = async (body) => {
             over.voucherNo = body.voucherNo - 1 || over.voucherNo + 1
             if (over.remainingAmount <= 0) {
                 party.autoBillingStatus = "open"
-                await party.save()
                 await over.save()
                 if (over1) {
                     over.activeStatus = "Deactive"
                     over1.activeStatus = "Deactive"
                     await over.save()
                     await over1.save()
+                    await party.save()
                 }
                 await over.save()
                 await over1.save()
@@ -103,13 +103,13 @@ export const UpdateOverDue = async (body, previousAmount) => {
             over.remainingAmount = over.remainingAmount - (body.amount - previousAmount);
             if (over.remainingAmount <= 0) {
                 party.autoBillingStatus = "open"
-                await party.save()
                 await over.save()
                 if (over1) {
                     over.activeStatus = "Deactive"
                     over1.activeStatus = "Deactive"
                     await over.save()
                     await over1.save()
+                    await party.save()
                 }
             } else {
                 await over.save()
