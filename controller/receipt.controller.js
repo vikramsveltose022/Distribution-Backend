@@ -11,6 +11,7 @@ import { PaymentDueReport } from "../model/payment.due.report.js";
 import { OtpVerify } from "../model/otpVerify.model.js";
 import { User } from "../model/user.model.js";
 import { Ledger } from "../model/ledger.model.js";
+import { CreateAccount } from "../model/createAccount.model.js";
 
 
 export const saveReceipt = async (req, res, next) => {
@@ -502,6 +503,8 @@ export const saveReceiptWithExcel = async (req, res) => {
         let partyId = "partyId";
         let userId = "userId";
         let database = "database";
+        let type = "type"
+        let expenseId = "expenseId"
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -514,6 +517,7 @@ export const saveReceiptWithExcel = async (req, res) => {
         const insertedDocuments = [];
         const existingParts = [];
         const existingUsers = [];
+        const existingExpenses = [];
         const notExistCode = [];
         for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
             const dataRow = worksheet.getRow(rowIndex);
@@ -523,7 +527,9 @@ export const saveReceiptWithExcel = async (req, res) => {
                 const cellValue = dataRow.getCell(columnIndex).value;
                 document[heading] = cellValue;
             }
+            document[type] = (document.type === "receipt") ? "receipt" : "receipt";
             if (document.partyId) {
+                document[userId] = undefined
                 document[database] = req.params.database
                 const customer = await Customer.findOne({ id: document.partyId, database: document.database })
                 if (customer) {
@@ -568,14 +574,13 @@ export const saveReceiptWithExcel = async (req, res) => {
                     existingParts.push(document.partyId);
                 }
             } else if (!document.userId) {
-                await Receipt.create(document)
-            } else {
-                document[database] = req.params.database
-                const customer = await User.findOne({ id: document.userId, database: document.database })
-                if (customer) {
-                    document[userId] = customer._id.toString();
+                document[userId] = undefined;
+                document[partyId] = undefined
+                const expense = await CreateAccount.findOne({ id: document.expenseId, database: document.database })
+                if (expense) {
+                    document[expenseId] = expense._id.toString()
                     if (document.type === "receipt" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", userId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[runningAmount] = latestReceipt.runningAmount + document.amount
@@ -587,7 +592,42 @@ export const saveReceiptWithExcel = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", userId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
+                            document[voucherType] = "receipt"
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[cashRunningAmount] = document.amount
+                            document[voucherType] = "receipt"
+                            document[voucherNo] = 1
+                        }
+                    }
+                } else {
+                    await existingExpenses.push(document.expenseId)
+                }
+                await Receipt.create(document)
+            } else {
+                document[partyId] = undefined
+                document[database] = req.params.database
+                const customer = await User.findOne({ id: document.userId, database: document.database })
+                if (customer) {
+                    document[userId] = customer._id.toString();
+                    if (document.type === "receipt" && document.paymentMode !== "Cash") {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[runningAmount] = latestReceipt.runningAmount + document.amount
+                            document[voucherType] = "receipt"
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[runningAmount] = document.amount
+                            document[voucherType] = "receipt"
+                            document[voucherNo] = 1
+                        }
+                    } else {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
@@ -612,7 +652,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                     // document[lockStatus] = "No"
                     // await PaymentDueReport.create(document)
                 } else {
-                    existingUsers.push(document.partyId);
+                    existingUsers.push(document.userId);
                 }
             }
         }
@@ -623,6 +663,8 @@ export const saveReceiptWithExcel = async (req, res) => {
             message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
         } else if (existingUsers.length > 0) {
             message = `Some Receipt Not Exist Valid UserId : ${existingUsers.join(', ')}`;
+        } else if (existingExpenses.length > 0) {
+            message = `Some Receipt Not Exist Valid Expenses : ${existingExpenses.join(', ')}`;
         }
         return res.status(200).json({ message, status: true });
     } catch (err) {
