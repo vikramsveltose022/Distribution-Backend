@@ -10,6 +10,7 @@ import { SetSalary } from "../model/setSalary.model.js";
 import { ApplyRule } from "../model/rule.applied.model.js";
 import moment from "moment";
 import { Job } from "../model/CreateJob.model.js";
+import { ledgerUserForCredit, ledgerUserForDebit } from "../service/ledger.js";
 
 export const saveRule = async (req, res, next) => {
     try {
@@ -284,6 +285,17 @@ export const SalaryPaid = async (req, res, next) => {
         }
         salary.paidStatus = "paid"
         const updatedSalary = await salary.save()
+        if (updatedSalary.paidStatus === "paid") {
+            for (const item of salary.employee) {
+                if (item?.rule === "ALLOWANCE" || item?.rule === "INCENTIVE" || item?.rule === "BONUS") {
+                    const particular = "payment";
+                    await ledgerUserForDebit(item, particular)
+                } else {
+                    const particular = "receipt";
+                    await ledgerUserForCredit(item, particular);
+                }
+            }
+        }
         return (updatedSalary) ? res.status(200).json({ Salary: salary, status: true }) : res.status(400).json({ message: "Salary Not Updated", status: false })
     }
     catch (err) {
