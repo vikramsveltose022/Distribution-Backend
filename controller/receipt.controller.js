@@ -49,7 +49,7 @@ export const saveReceipt = async (req, res, next) => {
                 } else if (item.userId) {
                     await ledgerUserForCredit(receipt, particular);
                 } else {
-                    // await ledgerExpensesForCredit(receipt, particular);
+                    await ledgerExpensesForCredit(receipt, particular);
                 }
             }
             if (item.partyId) {
@@ -190,7 +190,7 @@ export const savePayment = async (req, res, next) => {
                 } else if (item.userId) {
                     await ledgerUserForDebit(reciept, particular);
                 } else {
-                    // await ledgerExpensesForDebit(reciept, particular)
+                    await ledgerExpensesForDebit(reciept, particular)
                 }
             }
             partyReceipt.push(reciept);
@@ -572,7 +572,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                 } else {
                     existingParts.push(document.partyId);
                 }
-            } else if (!document.userId) {
+            } else if (!document.userId && !document.partyId) {
                 document[userId] = undefined;
                 document[partyId] = undefined
                 const expense = await CreateAccount.findOne({ id: document.expenseId, database: document.database })
@@ -594,16 +594,20 @@ export const saveReceiptWithExcel = async (req, res) => {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
+                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[cashRunningAmount] = document.amount
+                            // document[cashRunningAmount] = document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = 1
                         }
                     }
-                    await Receipt.create(document)
+                    const receipt = await Receipt.create(document)
+                    if (receipt.type === "receipt") {
+                        let particular = "receipt";
+                        await ledgerExpensesForCredit(receipt, particular);
+                    }
                 } else {
                     await existingExpenses.push(document.expenseId)
                 }
@@ -858,7 +862,11 @@ export const savePaymentWithExcel = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     }
-                    await Receipt.create(document)
+                    const receipt = await Receipt.create(document)
+                    if (receipt.type === "payment") {
+                        let particular = "payment";
+                        await ledgerExpensesForDebit(receipt, particular)
+                    }
                 } else {
                     await existingExpenses.push(document.expenseId)
                 }
