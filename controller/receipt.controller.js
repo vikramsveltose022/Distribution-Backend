@@ -538,11 +538,11 @@ export const saveReceiptWithExcel = async (req, res) => {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[runningAmount] = latestReceipt.runningAmount + document.amount
+                            // document[runningAmount] = latestReceipt.runningAmount + document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[runningAmount] = document.amount
+                            // document[runningAmount] = document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = 1
                         }
@@ -550,11 +550,11 @@ export const saveReceiptWithExcel = async (req, res) => {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
+                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[cashRunningAmount] = document.amount
+                            // document[cashRunningAmount] = document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = 1
                         }
@@ -583,11 +583,11 @@ export const saveReceiptWithExcel = async (req, res) => {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[runningAmount] = latestReceipt.runningAmount + document.amount
+                            // document[runningAmount] = latestReceipt.runningAmount + document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[runningAmount] = document.amount
+                            // document[runningAmount] = document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = 1
                         }
@@ -618,11 +618,11 @@ export const saveReceiptWithExcel = async (req, res) => {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[runningAmount] = latestReceipt.runningAmount + document.amount
+                            // document[runningAmount] = latestReceipt.runningAmount + document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[runningAmount] = document.amount
+                            // document[runningAmount] = document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = 1
                         }
@@ -630,11 +630,11 @@ export const saveReceiptWithExcel = async (req, res) => {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
+                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[cashRunningAmount] = document.amount
+                            // document[cashRunningAmount] = document.amount
                             document[voucherType] = "receipt"
                             document[voucherNo] = 1
                         }
@@ -798,26 +798,26 @@ export const savePaymentWithExcel = async (req, res) => {
                 if (customer) {
                     document[partyId] = customer._id.toString();
                     if (document.type === "payment" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank"}).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[runningAmount] = latestReceipt.runningAmount - document.amount
+                            // document[runningAmount] = latestReceipt.runningAmount - document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[runningAmount] = document.amount
+                            // document[runningAmount] = document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = 1
                         }
                     } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash",}).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[cashRunningAmount] = latestReceipt.cashRunningAmount - document.amount
+                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount - document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[cashRunningAmount] = document.amount
+                            // document[cashRunningAmount] = document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = 1
                         }
@@ -842,11 +842,11 @@ export const savePaymentWithExcel = async (req, res) => {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[runningAmount] = latestReceipt.runningAmount + document.amount
+                            // document[runningAmount] = latestReceipt.runningAmount + document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[runningAmount] = document.amount
+                            // document[runningAmount] = document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = 1
                         }
@@ -854,11 +854,11 @@ export const savePaymentWithExcel = async (req, res) => {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
+                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[cashRunningAmount] = document.amount
+                            // document[cashRunningAmount] = document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = 1
                         }
@@ -873,26 +873,26 @@ export const savePaymentWithExcel = async (req, res) => {
                 if (customer) {
                     document[userId] = customer._id.toString();
                     if (document.type === "payment" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", userId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank"}).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[runningAmount] = latestReceipt.runningAmount - document.amount
+                            // document[runningAmount] = latestReceipt.runningAmount - document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[runningAmount] = document.amount
+                            // document[runningAmount] = document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = 1
                         }
                     } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", userId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash"}).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
-                            document[cashRunningAmount] = latestReceipt.cashRunningAmount - document.amount
+                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount - document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = latestReceipt.voucherNo + 1
                         } else {
-                            document[cashRunningAmount] = document.amount
+                            // document[cashRunningAmount] = document.amount
                             document[voucherType] = "payment"
                             document[voucherNo] = 1
                         }
