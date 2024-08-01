@@ -525,11 +525,11 @@ export const saveReceiptWithExcel = async (req, res) => {
             }
             if (document.partyId) {
                 document[database] = req.params.database
-                const customer = await Customer.findById({ id: document.partyId, database: document.database })
+                const customer = await Customer.findOne({ id: document.partyId, database: document.database })
                 if (customer) {
                     document[partyId] = customer._id.toString();
                     if (document.type === "receipt" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[runningAmount] = latestReceipt.runningAmount + document.amount
@@ -541,7 +541,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
                         if (rece.length > 0) {
                             const latestReceipt = rece[rece.length - 1];
                             document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
@@ -571,7 +571,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                 await Receipt.create(document)
             } else {
                 document[database] = req.params.database
-                const customer = await User.findById({ id: document.userId, database: document.database })
+                const customer = await User.findOne({ id: document.userId, database: document.database })
                 if (customer) {
                     document[userId] = customer._id.toString();
                     if (document.type === "receipt" && document.paymentMode !== "Cash") {
@@ -1111,3 +1111,77 @@ export const transactionCalculate = async (req, res, next) => {
     }
 };
 
+
+export const saveReceiptWithExcel1212 = async (req, res) => {
+    try {
+        const { database } = req.params;
+        const filePath = req.file.path;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(filePath);
+        const worksheet = workbook.getWorksheet(1);
+
+        const headers = worksheet.getRow(1).values.slice(1);
+        const insertedDocuments = [];
+        const existingParts = [];
+        const existingUsers = [];
+        const notExistCode = [];
+
+        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
+            const dataRow = worksheet.getRow(rowIndex).values.slice(1);
+            const document = headers.reduce((acc, header, index) => {
+                acc[header] = dataRow[index];
+                return acc;
+            }, {});
+
+            document.database = database;
+
+            if (document.partyId || document.userId) {
+                const model = document.partyId ? Customer : User;
+                const idField = document.partyId ? 'partyId' : 'userId';
+                const customerId = document[idField];
+
+                const customer = await model.findOne({ id: customerId, database });
+                if (customer) {
+                    document[idField] = customer._id.toString();
+                    const paymentMode = document.paymentMode === 'Cash' ? 'Cash' : 'Bank';
+                    const rece = await Receipt.find({ status: 'Active', paymentMode, [idField]: { $ne: null } }).sort({ sortorder: -1 }).exec();
+                    const latestReceipt = rece[rece.length - 1] || {};
+                    const runningAmountField = paymentMode === 'Cash' ? 'cashRunningAmount' : 'runningAmount';
+
+                    document[runningAmountField] = (latestReceipt[runningAmountField] || 0) + document.amount;
+                    document.voucherType = 'receipt';
+                    document.voucherNo = (latestReceipt.voucherNo || 0) + 1;
+
+                    const receipt = await Receipt.create(document);
+
+                    if (receipt.type === 'receipt') {
+                        const particular = 'receipt';
+                        await (idField === 'partyId' ? ledgerPartyForCredit : ledgerUserForCredit)(receipt, particular);
+                    }
+
+                    document.voucherDate = new Date();
+                    document.lockStatus = 'No';
+                    await PaymentDueReport.create(document);
+                } else {
+                    (document.partyId ? existingParts : existingUsers).push(customerId);
+                }
+            } else {
+                await Receipt.create(document);
+            }
+        }
+
+        let message = 'Data Inserted Successfully';
+        if (existingParts.length > 0) {
+            message = `Some receipts do not have valid partyId: ${existingParts.join(', ')}`;
+        } else if (existingUsers.length > 0) {
+            message = `Some receipts do not have valid userId: ${existingUsers.join(', ')}`;
+        } else if (notExistCode.length > 0) {
+            message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
+        }
+
+        return res.status(200).json({ message, status: true });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
