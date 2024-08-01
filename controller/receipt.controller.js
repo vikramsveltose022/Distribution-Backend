@@ -528,10 +528,10 @@ export const saveReceiptWithExcel = async (req, res) => {
                 document[heading] = cellValue;
             }
             document[type] = (document.type === "receipt") ? "receipt" : "receipt";
+            document[database] = req.params.database
             if (document.partyId) {
                 document[userId] = undefined
                 document[expenseId] = undefined
-                document[database] = req.params.database
                 const customer = await Customer.findOne({ id: document.partyId, database: document.database })
                 if (customer) {
                     document[partyId] = customer._id.toString();
@@ -785,8 +785,8 @@ export const savePaymentWithExcel = async (req, res) => {
                 document[heading] = cellValue;
             }
             document[type] = (document.type === "payment") ? "payment" : "payment";
+            document[database] = req.params.database
             if (document.partyId) {
-                document[database] = req.params.database
                 const customer = await Customer.findOne({ id: document.partyId, database: document.database })
                 if (customer) {
                     document[userId] = undefined
@@ -827,7 +827,7 @@ export const savePaymentWithExcel = async (req, res) => {
                 } else {
                     existingParts.push(document.partyId);
                 }
-            } else if (!document.userId) {
+            } else if (!document.userId && !document.partyId) {
                 const expense = await CreateAccount.findOne({ id: document.expenseId, database: document.database })
                 if (expense) {
                     document[userId] = undefined;
