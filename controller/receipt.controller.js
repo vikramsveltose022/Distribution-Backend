@@ -152,16 +152,6 @@ export const savePayment = async (req, res, next) => {
         for (const item of req.body.Payment) {
             let query = { status: "Active" };
             let isBankPayment = item.type === "payment" && item.paymentMode !== "Cash";
-            // if (item.partyId) {
-            //     query.partyId = { $ne: null };
-            // } else if (item.userId) {
-            //     query.userId = { $ne: null };
-            // } else {
-            //     const receiptData = { ...req.body, ...item };
-            //     const reciept = await Receipt.create(receiptData);
-            //     partyReceipt.push(reciept);
-            //     continue;
-            // }
             query.paymentMode = isBankPayment ? "Bank" : "Cash";
             const rece = await Receipt.find(query).sort({ sortorder: -1 });
             if (rece.length > 0) {
@@ -252,6 +242,314 @@ export const DeletePayment = async (req, res, next) => {
     }
 };
 
+export const saveReceiptWithExcel = async (req, res) => {
+    try {
+        let voucherDate = "voucherDate";
+        let voucherNo = "voucherNo";
+        let voucherType = "voucherType";
+        let lockStatus = "lockStatus";
+        let partyId = "partyId";
+        let userId = "userId";
+        let database = "database";
+        let type = "type"
+        let expenseId = "expenseId"
+        const filePath = await req.file.path;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(filePath);
+        const worksheet = workbook.getWorksheet(1);
+        const headerRow = worksheet.getRow(1);
+        const headings = [];
+        headerRow.eachCell((cell) => {
+            headings.push(cell.value);
+        });
+        const insertedDocuments = [];
+        const existingParts = [];
+        const existingUsers = [];
+        const existingExpenses = [];
+        const notExistCode = [];
+        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
+            const dataRow = worksheet.getRow(rowIndex);
+            const document = {};
+            for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
+                const heading = headings[columnIndex - 1];
+                const cellValue = dataRow.getCell(columnIndex).value;
+                document[heading] = cellValue;
+            }
+            document[type] = (document.type === "receipt") ? "receipt" : "receipt";
+            document[database] = req.params.database
+            if (document.partyId) {
+                const customer = await Customer.findOne({ id: document.partyId, database: document.database })
+                if (customer) {
+                    document[userId] = undefined
+                    document[expenseId] = undefined
+                    document[partyId] = customer._id.toString();
+                    if (document.type === "receipt" && document.paymentMode !== "Cash") {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", }).sort({ sortorder: -1 })
+                        document[voucherType] = "receipt"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    } else {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
+                        document[voucherType] = "receipt"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    }
+                    const reciept = await Receipt.create(document);
+                    if (reciept.type === "receipt") {
+                        let particular = "receipt";
+                        await ledgerPartyForCredit(reciept, particular)
+                    }
+                    await overDue1(document)
+                    document[voucherDate] = new Date(new Date())
+                    document[lockStatus] = "No"
+                    await PaymentDueReport.create(document)
+                } else {
+                    existingParts.push(document.partyId);
+                }
+            } else if (!document.userId && !document.partyId) {
+                const expense = await CreateAccount.findOne({ id: document.expenseId, database: document.database })
+                if (expense) {
+                    document[userId] = undefined;
+                    document[partyId] = undefined
+                    document[expenseId] = expense._id.toString()
+                    if (document.type === "receipt" && document.paymentMode !== "Cash") {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
+                        document[voucherType] = "receipt"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    } else {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
+                        document[voucherType] = "receipt"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    }
+                    const receipt = await Receipt.create(document)
+                    if (receipt.type === "receipt") {
+                        let particular = "receipt";
+                        await ledgerExpensesForCredit(receipt, particular);
+                    }
+                } else {
+                    await existingExpenses.push(document.expenseId)
+                }
+            } else {
+                document[database] = req.params.database
+                const customer = await User.findOne({ id: document.userId, database: document.database })
+                if (customer) {
+                    document[partyId] = undefined
+                    document[expenseId] = undefined
+                    document[userId] = customer._id.toString();
+                    if (document.type === "receipt" && document.paymentMode !== "Cash") {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
+                        document[voucherType] = "receipt"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    } else {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
+                        document[voucherType] = "receipt"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    }
+                    const reciept = await Receipt.create(document);
+                    if (reciept.type === "receipt") {
+                        let particular = "receipt";
+                        await ledgerUserForCredit(reciept, particular)
+                    }
+                } else {
+                    existingUsers.push(document.userId);
+                }
+            }
+        }
+        let message = 'Data Inserted Successfully';
+        if (existingParts.length > 0) {
+            message = `Some reciept not exist valid partyId: ${existingParts.join(', ')}`;
+        } else if (notExistCode.length > 0) {
+            message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
+        } else if (existingUsers.length > 0) {
+            message = `Some Receipt Not Exist Valid UserId : ${existingUsers.join(', ')}`;
+        } else if (existingExpenses.length > 0) {
+            message = `Some Receipt Not Exist Valid Expenses : ${existingExpenses.join(', ')}`;
+        }
+        return res.status(200).json({ message, status: true });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+}
+export const savePaymentWithExcel = async (req, res) => {
+    try {
+        let voucherNo = "voucherNo";
+        let voucherType = "voucherType";
+        let partyId = "partyId";
+        let userId = "userId";
+        let database = "database";
+        let type = "type"
+        let expenseId = "expenseId"
+        const filePath = await req.file.path;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(filePath);
+        const worksheet = workbook.getWorksheet(1);
+        const headerRow = worksheet.getRow(1);
+        const headings = [];
+        headerRow.eachCell((cell) => {
+            headings.push(cell.value);
+        });
+        const insertedDocuments = [];
+        const existingParts = [];
+        const existingUsers = [];
+        const notExistCode = [];
+        const existingExpenses = [];
+        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
+            const dataRow = worksheet.getRow(rowIndex);
+            const document = {};
+            for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
+                const heading = headings[columnIndex - 1];
+                const cellValue = dataRow.getCell(columnIndex).value;
+                document[heading] = cellValue;
+            }
+            document[type] = (document.type === "payment") ? "payment" : "payment";
+            document[database] = req.params.database
+            if (document.partyId) {
+                const customer = await Customer.findOne({ id: document.partyId, database: document.database })
+                if (customer) {
+                    document[userId] = undefined
+                    document[expenseId] = undefined
+                    document[partyId] = customer._id.toString();
+                    if (document.type === "payment" && document.paymentMode !== "Cash") {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
+                        document[voucherType] = "payment"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    } else {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", }).sort({ sortorder: -1 })
+                        document[voucherType] = "payment"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    }
+                    const reciept = await Receipt.create(document);
+                    if (reciept.type === "payment") {
+                        let particular = "payment";
+                        await ledgerPartyForDebit(reciept, particular)
+                    }
+                } else {
+                    existingParts.push(document.partyId);
+                }
+            } else if (!document.userId && !document.partyId) {
+                const expense = await CreateAccount.findOne({ id: document.expenseId, database: document.database })
+                if (expense) {
+                    document[userId] = undefined;
+                    document[partyId] = undefined
+                    document[expenseId] = expense._id.toString()
+                    if (document.type === "payment" && document.paymentMode !== "Cash") {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
+                        document[voucherType] = "payment"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    } else {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
+                        document[voucherType] = "payment"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    }
+                    const receipt = await Receipt.create(document)
+                    if (receipt.type === "payment") {
+                        let particular = "payment";
+                        await ledgerExpensesForDebit(receipt, particular)
+                    }
+                } else {
+                    await existingExpenses.push(document.expenseId)
+                }
+            } else {
+                document[database] = req.params.database
+                const customer = await User.findOne({ id: document.userId, database: document.database })
+                if (customer) {
+                    document[partyId] = undefined
+                    document[expenseId] = undefined
+                    document[userId] = customer._id.toString();
+                    if (document.type === "payment" && document.paymentMode !== "Cash") {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
+                        document[voucherType] = "payment"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    } else {
+                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
+                        document[voucherType] = "payment"
+                        if (rece.length > 0) {
+                            const latestReceipt = rece[rece.length - 1];
+                            document[voucherNo] = latestReceipt.voucherNo + 1
+                        } else {
+                            document[voucherNo] = 1
+                        }
+                    }
+                    const reciept = await Receipt.create(document);
+                    if (reciept.type === "payment") {
+                        let particular = "payment";
+                        await ledgerUserForDebit(reciept, particular)
+                    }
+                } else {
+                    existingUsers.push(document.partyId);
+                }
+            }
+        }
+        let message = 'Data Inserted Successfully';
+        if (existingParts.length > 0) {
+            message = `Some Payment Not Exist Valid PartyId : ${existingParts.join(', ')}`;
+        } else if (notExistCode.length > 0) {
+            message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
+        } else if (existingUsers.length > 0) {
+            message = `Some Payment Not Exist Valid UserId: ${existingUsers.join(', ')}`;
+        } else if (existingExpenses.length > 0) {
+            message = `Some Payment Not Exist Valid ExpenseId : ${existingExpenses.join(', ')}`;
+        }
+        return res.status(200).json({ message, status: true });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+}
 
 export const ProfitLossReport = async (req, res, next) => {
     try {
@@ -400,538 +698,92 @@ export const TaxReport = async (req, res, next) => {
     }
 }
 
-export const saveReceiptWithExcel22 = async (req, res) => {
+// --------------------------------------------------------------------
+
+// For DashBoard
+export const transactionCalculate11 = async (req, res, next) => {
     try {
-        let particular = "receipt";
-        let runningAmount = "runningAmount";
-        let voucherDate = "voucherDate";
-        let voucherNo = "voucherNo";
-        let voucherType = "voucherType";
-        let cashRunningAmount = "cashRunningAmount";
-        let lockStatus = "lockStatus";
-        let partyId = "partyId";
-        let database = "database";
-        const filePath = await req.file.path;
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(filePath);
-        const worksheet = workbook.getWorksheet(1);
-        const headerRow = worksheet.getRow(1);
-        const headings = [];
-        headerRow.eachCell((cell) => {
-            headings.push(cell.value);
-        });
-        const insertedDocuments = [];
-        const existingParts = [];
-        const notExistCode = [];
-        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
-            const dataRow = worksheet.getRow(rowIndex);
-            const document = {};
-            for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
-                const heading = headings[columnIndex - 1];
-                const cellValue = dataRow.getCell(columnIndex).value;
-                document[heading] = cellValue;
-            }
-            if (document.partyId) {
-                document[database] = req.params.database
-                const customer = await Customer.findById({ id: document.partyId, database: document.database })
-                if (customer) {
-                    document[partyId] = customer._id.toString();
-                    if (document.type === "receipt" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            document[runningAmount] = latestReceipt.runningAmount + document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            document[runningAmount] = document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = 1
-                        }
-                    } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            document[cashRunningAmount] = document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = 1
-                        }
-                    }
-                    const reciept = await Receipt.create(document);
-                    if (reciept.type === "receipt") {
-                        let particular = "receipt";
-                        // await ledgerSalesForCredit(document, particular)
-                        await ledgerPartyForCredit(reciept, particular)
-                        // await ledgerPartyForDebit(document, particular)
-                    }
-                    await overDue1(document)
-                    document[voucherDate] = new Date(new Date())
-                    document[lockStatus] = "No"
-                    await PaymentDueReport.create(document)
-                } else {
-                    existingParts.push(document.partyId);
-                }
-            } else {
-                await Receipt.create(document)
-            }
+        let transaction = {
+            BankAmount: 0,
+            CashAmount: 0,
+            marketOutstanding: 0,
+        };
+        let creditAmount = 0;
+        let debitAmount = 0;
+        let creditAmounts = 0;
+        let debitAmounts = 0;
+        const receipts = await Receipt.find({ database: req.params.database, paymentMode: "Bank", status: "Active" }).sort({ sortorder: -1 })
+        const receipt = await Receipt.find({ database: req.params.database, paymentMode: "Cash", status: "Active" }).sort({ sortorder: -1 })
+        if (receipts.length === 0) {
+            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false })
         }
-        let message = 'Data Inserted Successfully';
-        if (existingParts.length > 0) {
-            message = `Some reciept not exist valid partyId: ${existingParts.join(', ')}`;
-        } else if (notExistCode.length > 0) {
-            message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
+        if (receipt.length === 0) {
+            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false })
         }
-        return res.status(200).json({ message, status: true });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error', status: false });
+        receipts.forEach(item => {
+            if (item.type === "receipt") {
+                creditAmount += item.amount
+            } else if (item.type === "payment") {
+                debitAmount += item.amount
+            }
+        })
+        transaction.BankAmount = (creditAmount - debitAmount)
+        receipt.forEach(item => {
+            if (item.type === "receipt") {
+                creditAmounts += item.amount
+            } else if (item.type === "payment") {
+                debitAmounts += item.amount
+            }
+        })
+        transaction.CashAmount = (creditAmounts - debitAmounts)
+        res.status(200).json({ transaction, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: "Internal Server Error", status: false })
     }
 }
-export const saveReceiptWithExcel = async (req, res) => {
+export const transactionCalculate = async (req, res, next) => {
     try {
-        let particular = "receipt";
-        let runningAmount = "runningAmount";
-        let voucherDate = "voucherDate";
-        let voucherNo = "voucherNo";
-        let voucherType = "voucherType";
-        let cashRunningAmount = "cashRunningAmount";
-        let lockStatus = "lockStatus";
-        let partyId = "partyId";
-        let userId = "userId";
-        let database = "database";
-        let type = "type"
-        let expenseId = "expenseId"
-        const filePath = await req.file.path;
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(filePath);
-        const worksheet = workbook.getWorksheet(1);
-        const headerRow = worksheet.getRow(1);
-        const headings = [];
-        headerRow.eachCell((cell) => {
-            headings.push(cell.value);
+        let transaction = {
+            BankAmount: 0,
+            CashAmount: 0,
+            marketOutstanding: 0,
+        };
+        let creditAmountBank = 0;
+        let debitAmountBank = 0;
+        let creditAmountCash = 0;
+        let debitAmountCash = 0;
+        const receipts = await Receipt.find({ database: req.params.database, status: "Active", paymentMode: { $in: ["Bank", "Cash"] } }).sort({ sortorder: -1 });
+        if (receipts.length === 0) {
+            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false });
+        }
+        receipts.forEach(item => {
+            if (item.paymentMode === "Bank") {
+                if (item.type === "receipt") {
+                    creditAmountBank += item.amount;
+                } else if (item.type === "payment") {
+                    debitAmountBank += item.amount;
+                }
+            } else if (item.paymentMode === "Cash") {
+                if (item.type === "receipt") {
+                    creditAmountCash += item.amount;
+                } else if (item.type === "payment") {
+                    debitAmountCash += item.amount;
+                }
+            }
         });
-        const insertedDocuments = [];
-        const existingParts = [];
-        const existingUsers = [];
-        const existingExpenses = [];
-        const notExistCode = [];
-        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
-            const dataRow = worksheet.getRow(rowIndex);
-            const document = {};
-            for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
-                const heading = headings[columnIndex - 1];
-                const cellValue = dataRow.getCell(columnIndex).value;
-                document[heading] = cellValue;
-            }
-            document[type] = (document.type === "receipt") ? "receipt" : "receipt";
-            document[database] = req.params.database
-            if (document.partyId) {
-                document[userId] = undefined
-                document[expenseId] = undefined
-                const customer = await Customer.findOne({ id: document.partyId, database: document.database })
-                if (customer) {
-                    document[partyId] = customer._id.toString();
-                    if (document.type === "receipt" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[runningAmount] = latestReceipt.runningAmount + document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[runningAmount] = document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = 1
-                        }
-                    } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[cashRunningAmount] = document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = 1
-                        }
-                    }
-                    const reciept = await Receipt.create(document);
-                    if (reciept.type === "receipt") {
-                        let particular = "receipt";
-                        await ledgerPartyForCredit(reciept, particular)
-                    }
-                    await overDue1(document)
-                    document[voucherDate] = new Date(new Date())
-                    document[lockStatus] = "No"
-                    await PaymentDueReport.create(document)
-                } else {
-                    existingParts.push(document.partyId);
-                }
-            } else if (!document.userId && !document.partyId) {
-                document[userId] = undefined;
-                document[partyId] = undefined
-                const expense = await CreateAccount.findOne({ id: document.expenseId, database: document.database })
-                if (expense) {
-                    document[expenseId] = expense._id.toString()
-                    if (document.type === "receipt" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[runningAmount] = latestReceipt.runningAmount + document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[runningAmount] = document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = 1
-                        }
-                    } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[cashRunningAmount] = document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = 1
-                        }
-                    }
-                    const receipt = await Receipt.create(document)
-                    if (receipt.type === "receipt") {
-                        let particular = "receipt";
-                        await ledgerExpensesForCredit(receipt, particular);
-                    }
-                } else {
-                    await existingExpenses.push(document.expenseId)
-                }
-            } else {
-                document[partyId] = undefined
-                document[expenseId] = undefined
-                document[database] = req.params.database
-                const customer = await User.findOne({ id: document.userId, database: document.database })
-                if (customer) {
-                    document[userId] = customer._id.toString();
-                    if (document.type === "receipt" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[runningAmount] = latestReceipt.runningAmount + document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[runningAmount] = document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = 1
-                        }
-                    } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[cashRunningAmount] = document.amount
-                            document[voucherType] = "receipt"
-                            document[voucherNo] = 1
-                        }
-                    }
-                    const reciept = await Receipt.create(document);
-                    if (reciept.type === "receipt") {
-                        let particular = "receipt";
-                        await ledgerUserForCredit(reciept, particular)
-                    }
-                } else {
-                    existingUsers.push(document.userId);
-                }
-            }
-        }
-        let message = 'Data Inserted Successfully';
-        if (existingParts.length > 0) {
-            message = `Some reciept not exist valid partyId: ${existingParts.join(', ')}`;
-        } else if (notExistCode.length > 0) {
-            message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
-        } else if (existingUsers.length > 0) {
-            message = `Some Receipt Not Exist Valid UserId : ${existingUsers.join(', ')}`;
-        } else if (existingExpenses.length > 0) {
-            message = `Some Receipt Not Exist Valid Expenses : ${existingExpenses.join(', ')}`;
-        }
-        return res.status(200).json({ message, status: true });
+        transaction.BankAmount = creditAmountBank - debitAmountBank;
+        transaction.CashAmount = creditAmountCash - debitAmountCash;
+
+        res.status(200).json({ transaction, status: true });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error', status: false });
-    }
-}
-export const savePaymentWithExcel22 = async (req, res) => {
-    try {
-        let particular = "payment";
-        let runningAmount = "runningAmount";
-        let voucherNo = "voucherNo";
-        let voucherType = "voucherType";
-        let cashRunningAmount = "cashRunningAmount";
-        let partyId = "partyId";
-        let database = "database";
-        const filePath = await req.file.path;
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(filePath);
-        const worksheet = workbook.getWorksheet(1);
-        const headerRow = worksheet.getRow(1);
-        const headings = [];
-        headerRow.eachCell((cell) => {
-            headings.push(cell.value);
-        });
-        const insertedDocuments = [];
-        const existingParts = [];
-        const notExistCode = [];
-        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
-            const dataRow = worksheet.getRow(rowIndex);
-            const document = {};
-            for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
-                const heading = headings[columnIndex - 1];
-                const cellValue = dataRow.getCell(columnIndex).value;
-                document[heading] = cellValue;
-            }
-            if (document.partyId) {
-                document[database] = req.params.database
-                const customer = await Customer.findOne({ id: document.partyId, database: document.database })
-                if (customer) {
-                    document[partyId] = customer._id.toString();
-                    if (document.type === "payment" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            document[runningAmount] = latestReceipt.runningAmount - document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            document[runningAmount] = document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = 1
-                        }
-                    } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            document[cashRunningAmount] = latestReceipt.cashRunningAmount - document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            document[cashRunningAmount] = document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = 1
-                        }
-                    }
-                    const reciept = await Receipt.create(document);
-                    if (reciept.type === "payment") {
-                        let particular = "payment";
-                        // await ledgerSalesForDebit(document, particular)
-                        await ledgerPartyForDebit(reciept, particular)
-                        // await ledgerPartyForCredit(document, particular)
-                    }
-                } else {
-                    existingParts.push(document.partyId);
-                }
-            } else {
-                await Receipt.create(document)
-            }
-        }
-        let message = 'Data Inserted Successfully';
-        if (existingParts.length > 0) {
-            message = `This Party Not Exist: ${existingParts.join(', ')}`;
-        } else if (notExistCode.length > 0) {
-            message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
-        }
-        return res.status(200).json({ message, status: true });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error', status: false });
-    }
-}
-export const savePaymentWithExcel = async (req, res) => {
-    try {
-        let particular = "payment";
-        let runningAmount = "runningAmount";
-        let voucherNo = "voucherNo";
-        let voucherType = "voucherType";
-        let cashRunningAmount = "cashRunningAmount";
-        let partyId = "partyId";
-        let userId = "userId";
-        let database = "database";
-        let type = "type"
-        let expenseId = "expenseId"
-        const filePath = await req.file.path;
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(filePath);
-        const worksheet = workbook.getWorksheet(1);
-        const headerRow = worksheet.getRow(1);
-        const headings = [];
-        headerRow.eachCell((cell) => {
-            headings.push(cell.value);
-        });
-        const insertedDocuments = [];
-        const existingParts = [];
-        const existingUsers = [];
-        const notExistCode = [];
-        const existingExpenses = [];
-        for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
-            const dataRow = worksheet.getRow(rowIndex);
-            const document = {};
-            for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
-                const heading = headings[columnIndex - 1];
-                const cellValue = dataRow.getCell(columnIndex).value;
-                document[heading] = cellValue;
-            }
-            document[type] = (document.type === "payment") ? "payment" : "payment";
-            document[database] = req.params.database
-            if (document.partyId) {
-                const customer = await Customer.findOne({ id: document.partyId, database: document.database })
-                if (customer) {
-                    document[userId] = undefined
-                    document[expenseId] = undefined
-                    document[partyId] = customer._id.toString();
-                    if (document.type === "payment" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[runningAmount] = latestReceipt.runningAmount - document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[runningAmount] = document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = 1
-                        }
-                    } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount - document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[cashRunningAmount] = document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = 1
-                        }
-                    }
-                    const reciept = await Receipt.create(document);
-                    if (reciept.type === "payment") {
-                        let particular = "payment";
-                        // await ledgerSalesForDebit(document, particular)
-                        await ledgerPartyForDebit(reciept, particular)
-                        // await ledgerPartyForCredit(document, particular)
-                    }
-                } else {
-                    existingParts.push(document.partyId);
-                }
-            } else if (!document.userId && !document.partyId) {
-                const expense = await CreateAccount.findOne({ id: document.expenseId, database: document.database })
-                if (expense) {
-                    document[userId] = undefined;
-                    document[partyId] = undefined
-                    document[expenseId] = expense._id.toString()
-                    if (document.type === "payment" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[runningAmount] = latestReceipt.runningAmount + document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[runningAmount] = document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = 1
-                        }
-                    } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount + document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[cashRunningAmount] = document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = 1
-                        }
-                    }
-                    const receipt = await Receipt.create(document)
-                    if (receipt.type === "payment") {
-                        let particular = "payment";
-                        await ledgerExpensesForDebit(receipt, particular)
-                    }
-                } else {
-                    await existingExpenses.push(document.expenseId)
-                }
-            } else {
-                document[database] = req.params.database
-                const customer = await User.findOne({ id: document.userId, database: document.database })
-                if (customer) {
-                    document[partyId] = undefined
-                    document[expenseId] = undefined
-                    document[userId] = customer._id.toString();
-                    if (document.type === "payment" && document.paymentMode !== "Cash") {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[runningAmount] = latestReceipt.runningAmount - document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[runningAmount] = document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = 1
-                        }
-                    } else {
-                        const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
-                        if (rece.length > 0) {
-                            const latestReceipt = rece[rece.length - 1];
-                            // document[cashRunningAmount] = latestReceipt.cashRunningAmount - document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = latestReceipt.voucherNo + 1
-                        } else {
-                            // document[cashRunningAmount] = document.amount
-                            document[voucherType] = "payment"
-                            document[voucherNo] = 1
-                        }
-                    }
-                    const reciept = await Receipt.create(document);
-                    if (reciept.type === "payment") {
-                        let particular = "payment";
-                        // await ledgerSalesForDebit(document, particular)
-                        // await ledgerPartyForDebit(document, particular)
-                        // await ledgerPartyForCredit(document, particular)
-                        await ledgerUserForDebit(reciept, particular)
-                    }
-                } else {
-                    existingUsers.push(document.partyId);
-                }
-            }
-        }
-        let message = 'Data Inserted Successfully';
-        if (existingParts.length > 0) {
-            message = `Some Payment Not Exist Valid PartyId : ${existingParts.join(', ')}`;
-        } else if (notExistCode.length > 0) {
-            message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
-        } else if (existingUsers.length > 0) {
-            message = `Some Payment Not Exist Valid UserId: ${existingUsers.join(', ')}`;
-        } else if (existingExpenses.length > 0) {
-            message = `Some Payment Not Exist Valid ExpenseId : ${existingExpenses.join(', ')}`;
-        }
-        return res.status(200).json({ message, status: true });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error', status: false });
+        return res.status(500).json({ message: "Internal Server Error", status: false });
     }
 }
 
+// For App
 export const PartySendOtp = async (req, res, next) => {
     try {
         // if (!req.body.otp) {
@@ -1111,88 +963,3 @@ export const ViewReceiptByPartyId = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-
-// --------------------------------------------------------------------
-
-// For DashBoard
-export const transactionCalculate11 = async (req, res, next) => {
-    try {
-        let transaction = {
-            BankAmount: 0,
-            CashAmount: 0,
-            marketOutstanding: 0,
-        };
-        let creditAmount = 0;
-        let debitAmount = 0;
-        let creditAmounts = 0;
-        let debitAmounts = 0;
-        const receipts = await Receipt.find({ database: req.params.database, paymentMode: "Bank", status: "Active" }).sort({ sortorder: -1 })
-        const receipt = await Receipt.find({ database: req.params.database, paymentMode: "Cash", status: "Active" }).sort({ sortorder: -1 })
-        if (receipts.length === 0) {
-            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false })
-        }
-        if (receipt.length === 0) {
-            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false })
-        }
-        receipts.forEach(item => {
-            if (item.type === "receipt") {
-                creditAmount += item.amount
-            } else if (item.type === "payment") {
-                debitAmount += item.amount
-            }
-        })
-        transaction.BankAmount = (creditAmount - debitAmount)
-        receipt.forEach(item => {
-            if (item.type === "receipt") {
-                creditAmounts += item.amount
-            } else if (item.type === "payment") {
-                debitAmounts += item.amount
-            }
-        })
-        transaction.CashAmount = (creditAmounts - debitAmounts)
-        res.status(200).json({ transaction, status: true })
-    }
-    catch (err) {
-        console.log(err)
-        return res.status(500).json({ message: "Internal Server Error", status: false })
-    }
-}
-export const transactionCalculate = async (req, res, next) => {
-    try {
-        let transaction = {
-            BankAmount: 0,
-            CashAmount: 0,
-            marketOutstanding: 0,
-        };
-        let creditAmountBank = 0;
-        let debitAmountBank = 0;
-        let creditAmountCash = 0;
-        let debitAmountCash = 0;
-        const receipts = await Receipt.find({ database: req.params.database, status: "Active", paymentMode: { $in: ["Bank", "Cash"] } }).sort({ sortorder: -1 });
-        if (receipts.length === 0) {
-            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false });
-        }
-        receipts.forEach(item => {
-            if (item.paymentMode === "Bank") {
-                if (item.type === "receipt") {
-                    creditAmountBank += item.amount;
-                } else if (item.type === "payment") {
-                    debitAmountBank += item.amount;
-                }
-            } else if (item.paymentMode === "Cash") {
-                if (item.type === "receipt") {
-                    creditAmountCash += item.amount;
-                } else if (item.type === "payment") {
-                    debitAmountCash += item.amount;
-                }
-            }
-        });
-        transaction.BankAmount = creditAmountBank - debitAmountBank;
-        transaction.CashAmount = creditAmountCash - debitAmountCash;
-
-        res.status(200).json({ transaction, status: true });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Internal Server Error", status: false });
-    }
-}

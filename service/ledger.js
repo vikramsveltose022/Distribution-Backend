@@ -89,8 +89,6 @@ export const ledgerPartyForCredit = async function ledger(body, particular) {
                 database: body.database,
                 partyId: body.partyId,
                 orderId: body._id.toString(),
-                // userId: body.SuperAdmin || body.userId,
-                // name: party.firstName + " " + party.lastname,
                 reason: body.invoiceId || body.type,
                 particular: part,
                 voucherNo: first.voucherNo + 1,
@@ -109,8 +107,6 @@ export const ledgerPartyForCredit = async function ledger(body, particular) {
             database: body.database,
             partyId: body.partyId,
             orderId: body._id.toString(),
-            // userId: body.SuperAdmin || body.userId,
-            // name: party.firstName + " " + party.lastName,
             reason: body.invoiceId || body.type,
             particular: part,
             voucherType: part,
@@ -150,10 +146,8 @@ export const ledgerPartyForDebit = async function ledger(body, particular) {
             }
             const saveData = {
                 database: body.database,
-                // userId: body.SuperAdmin || body.userId,
                 partyId: body.partyId,
                 orderId: body._id.toString(),
-                // name: party.firstName + " " + party.lastName,
                 reason: body.type || body.invoiceId,
                 particular: part,
                 voucherType: part,
@@ -170,10 +164,8 @@ export const ledgerPartyForDebit = async function ledger(body, particular) {
         }
         const saveData = {
             database: body.database,
-            // userId: body.SuperAdmin || body.userId,
             partyId: body.partyId,
             orderId: body._id.toString(),
-            // name: party.firstName + " " + party.lastName,
             reason: body.type || body.invoiceId,
             particular: part,
             voucherType: part,
@@ -287,9 +279,6 @@ export const ledgerUserForCredit = async function ledger(body, particular) {
                 database: body.database,
                 userId: body.userId,
                 orderId: body._id.toString(),
-                // partyId1: body.partyId1,
-                // userId: body.SuperAdmin || body.userId,
-                // name: party.firstName + " " + party.lastname,
                 reason: body.invoiceId || body.type,
                 particular: part,
                 voucherNo: first.voucherNo + 1,
@@ -308,9 +297,6 @@ export const ledgerUserForCredit = async function ledger(body, particular) {
             database: body.database,
             userId: body.userId,
             orderId: body._id.toString(),
-            // partyId1: body.partyId1,
-            // userId: body.SuperAdmin || body.userId,
-            // name: party.firstName + " " + party.lastName,
             reason: body.invoiceId || body.type,
             particular: part,
             voucherType: part,
@@ -349,10 +335,8 @@ export const ledgerUserForDebit = async function ledger(body, particular) {
             }
             const saveData = {
                 database: body.database,
-                // userId: body.SuperAdmin || body.userId,
+                orderId: body._id.toString(),
                 userId: body.userId,
-                // partyId1: body.partyId1,
-                // name: party.firstName + " " + party.lastName,
                 reason: body.type || body.invoiceId,
                 particular: part,
                 voucherType: part,
@@ -369,10 +353,8 @@ export const ledgerUserForDebit = async function ledger(body, particular) {
         }
         const saveData = {
             database: body.database,
-            // userId: body.SuperAdmin || body.userId,
+            orderId: body._id.toString(),
             userId: body.userId,
-            // partyId1: body.partyId1,
-            // name: party.firstName + " " + party.lastName,
             reason: body.type || body.invoiceId,
             particular: part,
             voucherType: part,
@@ -475,6 +457,7 @@ export const ledgerExpensesForDebit = async function ledger(body, particular) {
             }
             const saveData = {
                 database: body.database,
+                orderId: body._id.toString(),
                 expenseId: body.expenseId,
                 reason: body.type || body.invoiceId,
                 particular: part,
@@ -492,6 +475,7 @@ export const ledgerExpensesForDebit = async function ledger(body, particular) {
         }
         const saveData = {
             database: body.database,
+            orderId: body._id.toString(),
             expenseId: body.expenseId,
             reason: body.type || body.invoiceId,
             particular: part,
