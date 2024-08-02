@@ -26,8 +26,7 @@ const roleSchema = mongoose.Schema({
         type: Number
     },
     assign: {
-        type: Number,
-        default: 0
+        type: []
     },
     top: {
         type: Number

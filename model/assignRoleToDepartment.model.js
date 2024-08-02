@@ -5,6 +5,9 @@ const DepartmentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
     },
+    userId: {
+        type: String
+    },
     database: {
         type: String
     },
