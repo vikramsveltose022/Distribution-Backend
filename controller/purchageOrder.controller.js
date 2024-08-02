@@ -343,7 +343,6 @@ export const CreditorCalculate11 = async (req, res, next) => {
         })
         receipt.forEach(item => {
             Creditor.totalPaid += item.amount
-            // Creditor.outstanding += item?.cashRunningAmount || item?.runningAmount
         })
         receipts.forEach(item => {
             Creditor.currentPaid += item.amount
