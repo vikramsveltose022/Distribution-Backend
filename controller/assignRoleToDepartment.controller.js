@@ -3,7 +3,7 @@ import { Role } from "../model/role.model.js";
 import { User } from "../model/user.model.js";
 
 
-export const saveAssignRole1 = async (req, res, next) => {
+export const saveAssignRole = async (req, res, next) => {
     try {
         const { roles } = req.body;
         if (roles) {
@@ -29,7 +29,7 @@ export const saveAssignRole1 = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-export const viewAssignRole1 = async (req, res, next) => {
+export const viewAssignRole = async (req, res, next) => {
     try {
         const department = await AssignRole.find({ database: req.params.database }).populate({ path: "created_by", model: "user" }).populate({ path: "departmentName", model: "department" }).populate({ path: "roles.roleId", model: "role" }).sort({ sortorder: -1 });
         return (department.length > 0) ? res.status(200).json({ Department: department, status: true }) : res.status(400).json({ message: "Not Found", status: false })
@@ -39,7 +39,7 @@ export const viewAssignRole1 = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-export const updateAssignRole1 = async (req, res, next) => {
+export const updateAssignRole = async (req, res, next) => {
     try {
         if (req.body.deleteRole && req.body.deleteRole.length > 0) {
             for (let id of req.body.deleteRole) {
@@ -67,13 +67,13 @@ export const ViewAssignRoleById = async (req, res, next) => {
 };
 
 // userId
-export const saveAssignRole = async (req, res, next) => {
+export const saveAssignRole1 = async (req, res, next) => {
     try {
         const { roles } = req.body;
         if (roles) {
             for (let id of roles) {
                 const role = await Role.findById({ _id: id.roleId });
-                role.assign.push(req.body.created_by);
+                role.assign.push(req.body.created_by.toString());
                 await role.save();
             }
         }
@@ -93,7 +93,7 @@ export const saveAssignRole = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-export const viewAssignRole = async (req, res, next) => {
+export const viewAssignRole1 = async (req, res, next) => {
     try {
         const department = await AssignRole.find({ database: req.params.database, userId: req.params.id }).populate({ path: "created_by", model: "user" }).populate({ path: "departmentName", model: "department" }).populate({ path: "roles.roleId", model: "role" }).sort({ sortorder: -1 });
         return (department.length > 0) ? res.status(200).json({ Department: department, status: true }) : res.status(400).json({ message: "Not Found", status: false })
@@ -103,7 +103,7 @@ export const viewAssignRole = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-export const updateAssignRole = async (req, res, next) => {
+export const updateAssignRole1 = async (req, res, next) => {
     try {
         if (req.body.deleteRole && req.body.deleteRole.length > 0) {
             for (let id of req.body.deleteRole) {
