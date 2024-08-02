@@ -155,14 +155,12 @@ app.use("/bonus", BonusRouter)
 app.use("/check", customerCheckRouter)
 app.use("/branch", UserBranchRouter)
 
-mongoose.connect(process.env.DATABASE_URL, {
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
-}).then(() => {
-  console.log("DB CONNECTED SUCCEFULLY");
-}).catch((error) => {
-  console.log(error);
-});
+mongoose.connect(process.env.DATABASE_URL, { useUnifiedTopology: true, useNewUrlParser: true, })
+  .then(() => {
+    console.log("DB CONNECTED SUCCEFULLY");
+  }).catch((error) => {
+    console.log(error);
+  });
 
 //------------------------------------------------------------------------------
 cron.schedule('0 20 * * *', () => {

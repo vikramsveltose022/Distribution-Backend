@@ -4,7 +4,8 @@ import { ViewAssignRoleById, saveAssignRole, updateAssignRole, viewAssignRole } 
 const router = express.Router();
 
 router.post("/save-assign-role", saveAssignRole);
-router.get("/view-assign-role/:database", viewAssignRole)
-router.put("/update-assign-role/:id",updateAssignRole)
-router.get("/view-assign-role-by-id/:id",ViewAssignRoleById)
+// router.get("/view-assign-role/:database", viewAssignRole)
+router.get("/view-assign-role/:id/:database", viewAssignRole)
+router.put("/update-assign-role/:id", updateAssignRole)
+router.get("/view-assign-role-by-id/:id", ViewAssignRoleById)
 export default router;
