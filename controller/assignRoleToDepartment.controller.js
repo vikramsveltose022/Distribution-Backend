@@ -73,7 +73,7 @@ export const saveAssignRole = async (req, res, next) => {
         if (roles) {
             for (let id of roles) {
                 const role = await Role.findById({ _id: id.roleId });
-                role.assign.push(req.body.userId);
+                role.assign.push(req.body.created_by);
                 await role.save();
             }
         }
@@ -107,7 +107,7 @@ export const updateAssignRole = async (req, res, next) => {
     try {
         if (req.body.deleteRole && req.body.deleteRole.length > 0) {
             for (let id of req.body.deleteRole) {
-                const result = await Role.updateMany({ _id: id.roleId }, { $pull: { shift: req.body.userId } });
+                const result = await Role.updateMany({ _id: id.roleId }, { $pull: { shift: req.body.created_by } });
             }
         }
         const updatedAssignRole = await AssignRole.findByIdAndUpdate(req.params.id, req.body, { new: true });
