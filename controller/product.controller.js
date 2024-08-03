@@ -247,7 +247,7 @@ export const saveItemWithExcel = async (req, res) => {
         } else {
           document[warehouse] = existingWarehouse._id.toString()
           if (document.id) {
-            const existingId = await Product.findOne({ id: document.warehouse, database: document.database });
+            const existingId = await Product.findOne({ id: document.id, database: document.database });
             if (existingId) {
               existingIds.push(document.Product_Title)
             } else {
@@ -281,6 +281,7 @@ export const saveItemWithExcel = async (req, res) => {
 }
 export const updateItemWithExcel = async (req, res) => {
   try {
+    let warehouse = "warehouse"
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -292,6 +293,7 @@ export const updateItemWithExcel = async (req, res) => {
     });
     const insertedDocuments = [];
     const existingParts = [];
+    const WarehouseNotExisting = []
     for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
       const dataRow = worksheet.getRow(rowIndex);
       const document = {};
@@ -300,20 +302,29 @@ export const updateItemWithExcel = async (req, res) => {
         const cellValue = dataRow.getCell(columnIndex).value;
         document[heading] = cellValue;
       }
-      // if (document.HSN_Code) {
-      const filter = { id: document.id, database: req.params.database }; // Ensure the filter is correctly formed
-      const options = { new: true, upsert: true }; // Consider using upsert if you want to create the document if it doesn't exist
-      const insertedDocument = await Product.findOneAndUpdate(filter, document, options);
-
-      // await addProductInWarehouse1(document, insertedDocument.warehouse,insertedDocument)
-      insertedDocuments.push(insertedDocument);
-      // } else {
-      //   existingParts.push(document.Product_Title)
-      // }
+      if (document.HSN_Code) {
+        const existingWarehouse = await Warehouse.findOne({ id: document.warehouse, database: document.database })
+        if (!existingWarehouse) {
+          WarehouseNotExisting.push(document.warehouse)
+        } else {
+          document[warehouse] = existingWarehouse._id.toString()
+          const filter = { id: document.id, database: req.params.database };
+          const options = { new: true, upsert: true };
+          const insertedDocument = await Product.findOneAndUpdate(filter, document, options);
+          // await addProductInWarehouse1(document, insertedDocument.warehouse,insertedDocument)
+          insertedDocuments.push(insertedDocument);
+          // } else {
+          //   existingParts.push(document.Product_Title)
+        }
+      } else {
+        existingParts.push(document.Product_Title)
+      }
     }
     let message = 'Updated Successfull !';
     if (existingParts.length > 0) {
       message = `Some product not exist hsn code: ${existingParts.join(', ')}`;
+    } else if (WarehouseNotExisting.length > 0) {
+      message = `warehouse not exist : ${WarehouseNotExisting.join(', ')}`;
     }
     return res.status(200).json({ message, status: true });
   } catch (err) {

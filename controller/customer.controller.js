@@ -503,6 +503,8 @@ export const saveExcelFile = async (req, res) => {
 }
 export const updateExcelFile = async (req, res) => {
     try {
+        let category = "category";
+        let rolename = "rolename";
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -514,6 +516,9 @@ export const updateExcelFile = async (req, res) => {
         });
         const insertedDocuments = [];
         const existingParts = [];
+        const dataNotExist = []
+        const group = [];
+        const roles = []
         for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
             const dataRow = worksheet.getRow(rowIndex);
             const document = {};
@@ -527,14 +532,40 @@ export const updateExcelFile = async (req, res) => {
                 }
                 // document[heading] = cellValue;
             }
-            const filter = { id: document.id, database: req.params.database }; // Ensure the filter is correctly formed
-            const options = { new: true, upsert: true }; // Consider using upsert if you want to create the document if it doesn't exist
-            const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
-            insertedDocuments.push(insertedDocument);
+            if (document.database) {
+                const role = await Role.findOne({ id: document.rolename, database: document.database })
+                if (!role) {
+                    roles.push(document.firstName)
+                } else {
+                    const existCustomerGroup = await CustomerGroup.findOne({ id: document.category, database: document.database })
+                    if (!existCustomerGroup) {
+                        group.push(document.id)
+                    } else {
+                        document[rolename] = role._id.toString()
+                        document[category] = await existCustomerGroup._id.toString()
+                        const filter = { id: document.id, database: req.params.database };
+                        const options = { new: true, upsert: true };
+                        const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
+                        insertedDocuments.push(insertedDocument);
+                    }
+                }
+            } else {
+                dataNotExist.push(document.id)
+            }
+            // const filter = { id: document.id, database: req.params.database };
+            // const options = { new: true, upsert: true };
+            // const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
+            // insertedDocuments.push(insertedDocument);
         }
         let message = 'Data Inserted Successfully';
         if (existingParts.length > 0) {
             message = `Some party already exist: ${existingParts.join(', ')}`;
+        } else if (roles.length > 0) {
+            message = `this customer role id not exist : ${roles.join(', ')}`;
+        } else if (group.length > 0) {
+            message = `this customer category id not exist : ${group.join(', ')}`;
+        } else if (dataNotExist.length > 0) {
+            message = `this customer database not exist : ${dataNotExist.join(', ')}`;
         }
         return res.status(200).json({ message, status: true });
     } catch (err) {
