@@ -199,9 +199,6 @@ export const SuperAdminList = async (req, res, next) => {
     }
 };
 
-
-
-
 export const SignInWithMobile = async (req, res, next) => {
     try {
         const { mobileNo } = req.body;

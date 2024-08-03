@@ -56,10 +56,13 @@ export const SaveUser = async (req, res, next) => {
         req.body.userAllotted = sub.noOfUser
       }
     }
-    const user = await User.create(req.body);
     if (req.body.warehouse) {
       req.body.warehouse = await JSON.parse(req.body.warehouse)
       await assingWarehouse(req.body.warehouse, user._id)
+    }
+    const user = await User.create(req.body);
+    if (req.body.warehouse) {
+      await assingWarehouse(user.warehouse, user._id)
     }
     if (user) {
       await setSalary(user)

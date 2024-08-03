@@ -18,9 +18,11 @@ const UserSchema = new mongoose.Schema({
   geotagging: {
     type: String
   },
-  warehouse: {
-    type: []
-  },
+  warehouse: [{
+    id: {
+      type: String
+    }
+  }],
   setRule: {
     type: []
   },
