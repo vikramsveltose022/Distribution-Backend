@@ -82,7 +82,7 @@ export const getUserHierarchyDetails = async function getUserHierarchyDetails(pa
                     return [];
                 }
                 processedIds.add(parentId);
-                const users = await User.find({ created_by: parentId, database: `${database}`, status: "Active" }).populate({ path: "created_by", model: "user" }).populate({ path: "rolename", model: "role" }).populate({ path: "subscriptionPlan", model: "subscription" }).populate({ path: "branch", model: "userBranch" }).populate({ path: "shift", model: "WorkingHour" }).lean();
+                const users = await User.find({ created_by: parentId, database: `${database}`, status: "Active" }).populate({ path: "created_by", model: "user" }).populate({ path: "rolename", model: "role" }).populate({ path: "subscriptionPlan", model: "subscription" }).populate({ path: "branch", model: "userBranch" }).populate({ path: "shift", model: "WorkingHour" }).populate({ path: "warehouse.id", model: "warehouse" }).lean();
                 const subUserIds = users.map(user => user._id);
                 const subResultsPromises = subUserIds.map(userId => getUserHierarchy(userId, database, processedIds));
                 const subResults = await Promise.all(subResultsPromises);
