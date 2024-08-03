@@ -561,6 +561,9 @@ export const saveUserWithExcel = async (req, res) => {
 }
 export const updateUserWithExcel = async (req, res) => {
   try {
+    let rolename = "rolename";
+    let shift = "shift";
+    let branch = "branch"
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -572,6 +575,10 @@ export const updateUserWithExcel = async (req, res) => {
     });
     const insertedDocuments = [];
     const existingParts = [];
+    const roles = [];
+    const shiftss = [];
+    const branchss = [];
+    const dataNotExist = [];
     for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
       const dataRow = worksheet.getRow(rowIndex);
       const document = {};
@@ -585,14 +592,48 @@ export const updateUserWithExcel = async (req, res) => {
         }
         // document[heading] = cellValue;
       }
-      const filter = { id: document.id, database: req.params.database };
-      const options = { new: true, upsert: true };
-      const insertedDocument = await User.findOneAndUpdate(filter, document, options);
-      insertedDocuments.push(insertedDocument);
+      if (document.database) {
+        const role = await Role.findOne({ id: document.rolename, database: document.database })
+        if (!role) {
+          roles.push(document.id)
+        } else {
+          const shifts = await WorkingHours.findOne({ id: document.shift, database: document.database })
+          if (!shifts) {
+            shiftss.push(document.id)
+          } else {
+            const branchs = await UserBranch.findOne({ id: document.branch, database: document.database })
+            if (!branchs) {
+              branchss.push(document.id)
+            } else {
+              document[rolename] = role._id.toString()
+              document[shift] = shifts._id.toString()
+              document[branch] = branchs._id.toString()
+              const filter = { id: document.id, database: req.params.database };
+              const options = { new: true, upsert: true };
+              const insertedDocument = await User.findOneAndUpdate(filter, document, options);
+              insertedDocuments.push(insertedDocument);
+            }
+          }
+        }
+      } else {
+        dataNotExist.push(document.id)
+      }
+      // const filter = { id: document.id, database: req.params.database };
+      // const options = { new: true, upsert: true };
+      // const insertedDocument = await User.findOneAndUpdate(filter, document, options);
+      // insertedDocuments.push(insertedDocument);
     }
-    let message = 'Data Inserted Successfully';
+    let message = 'User Updated Successfully!';
     if (existingParts.length > 0) {
       message = `some user already exist: ${existingParts.join(', ')}`;
+    } else if (roles.length > 0) {
+      message = `this user's role id not correct : ${roles.join(', ')}`;
+    } else if (shiftss.length > 0) {
+      message = `this user's shift id is required : ${shiftss.join(', ')}`;
+    } else if (branchss.length > 0) {
+      message = `this user's branch id is required : ${branchss.join(', ')}`;
+    } else if (dataNotExist.length > 0) {
+      message = `this user's database not exist : ${dataNotExist.join(', ')}`;
     }
     return res.status(200).json({ message, status: true });
   } catch (err) {
