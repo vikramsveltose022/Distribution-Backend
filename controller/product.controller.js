@@ -247,7 +247,7 @@ export const saveItemWithExcel = async (req, res) => {
         } else {
           document[warehouse] = existingWarehouse._id.toString()
           if (document.id) {
-            const existingId = await Product.findOne({ id: document.id, database: document.database });
+            const existingId = await Product.findOne({ id: document.warehouse, database: document.database });
             if (existingId) {
               existingIds.push(document.Product_Title)
             } else {
