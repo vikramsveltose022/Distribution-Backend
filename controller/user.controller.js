@@ -102,7 +102,7 @@ export const SuperAdminRoleUpdate = async (req, res, next) => {
 }
 export const ViewUserById = async (req, res, next) => {
   try {
-    let user = await User.findById({ _id: req.params.id, status: "Active" }).populate({ path: "subscriptionPlan", model: "subscription" }).populate({ path: "created_by", model: "user" }).populate({ path: "rolename", model: "role" }).populate({ path: "branch", model: "userBranch" }).populate({ path: "shift", model: "WorkingHour" })
+    let user = await User.findById({ _id: req.params.id, status: "Active" }).populate({ path: "subscriptionPlan", model: "subscription" }).populate({ path: "created_by", model: "user" }).populate({ path: "rolename", model: "role" }).populate({ path: "branch", model: "userBranch" }).populate({ path: "shift", model: "WorkingHour" }).populate({ path: "warehouse.id", model: "warehouse" })
     return res.status(200).json({ User: user, status: true });
   } catch (err) {
     console.error(err);
