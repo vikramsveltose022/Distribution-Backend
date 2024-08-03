@@ -241,7 +241,7 @@ export const saveItemWithExcel = async (req, res) => {
       }
       document[database] = req.params.database
       if (document.HSN_Code) {
-        const existingWarehouse = await Warehouse.findOne({ id: document.id, database: document.database })
+        const existingWarehouse = await Warehouse.findOne({ id: document.warehouse, database: document.database })
         if (!existingWarehouse) {
           WarehouseNotExisting.push(document.warehouse)
         } else {
