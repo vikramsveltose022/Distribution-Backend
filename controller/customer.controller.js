@@ -519,7 +519,8 @@ export const updateExcelFile = async (req, res) => {
         const existingParts = [];
         const dataNotExist = []
         const group = [];
-        const roles = []
+        const roles = [];
+        const IdNotExisting = [];
         for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
             const dataRow = worksheet.getRow(rowIndex);
             const document = {};
@@ -543,12 +544,17 @@ export const updateExcelFile = async (req, res) => {
                 if (!existCustomerGroup) {
                     group.push(document.id)
                 } else {
-                    document[rolename] = role._id.toString()
-                    document[category] = await existCustomerGroup._id.toString()
-                    const filter = { id: document.id, database: req.params.database };
-                    const options = { new: true, upsert: true };
-                    const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
-                    insertedDocuments.push(insertedDocument);
+                    const existCustomer = await Customer.findOne({ id: document.id, database: document.database })
+                    if (!existCustomer) {
+                        IdNotExisting.push(document.id)
+                    } else {
+                        document[rolename] = role._id.toString()
+                        document[category] = await existCustomerGroup._id.toString()
+                        const filter = { id: document.id, database: req.params.database };
+                        const options = { new: true, upsert: true };
+                        const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
+                        insertedDocuments.push(insertedDocument);
+                    }
                 }
             }
             // } else {
@@ -568,6 +574,8 @@ export const updateExcelFile = async (req, res) => {
             message = `this customer category id not exist : ${group.join(', ')}`;
         } else if (dataNotExist.length > 0) {
             message = `this customer database not exist : ${dataNotExist.join(', ')}`;
+        } else if (IdNotExisting.length > 0) {
+            message = `this customer id not found : ${IdNotExisting.join(', ')}`;
         }
         return res.status(200).json({ message, status: true });
     } catch (err) {
