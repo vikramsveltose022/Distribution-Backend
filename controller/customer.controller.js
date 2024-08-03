@@ -503,6 +503,7 @@ export const saveExcelFile = async (req, res) => {
 }
 export const updateExcelFile = async (req, res) => {
     try {
+        let database = "database";
         let category = "category";
         let rolename = "rolename";
         const filePath = await req.file.path;
@@ -532,26 +533,27 @@ export const updateExcelFile = async (req, res) => {
                 }
                 // document[heading] = cellValue;
             }
-            if (document.database) {
-                const role = await Role.findOne({ id: document.rolename, database: document.database })
-                if (!role) {
-                    roles.push(document.firstName)
-                } else {
-                    const existCustomerGroup = await CustomerGroup.findOne({ id: document.category, database: document.database })
-                    if (!existCustomerGroup) {
-                        group.push(document.id)
-                    } else {
-                        document[rolename] = role._id.toString()
-                        document[category] = await existCustomerGroup._id.toString()
-                        const filter = { id: document.id, database: req.params.database };
-                        const options = { new: true, upsert: true };
-                        const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
-                        insertedDocuments.push(insertedDocument);
-                    }
-                }
+            document[database] = req.params.database
+            // if (document.database) {
+            const role = await Role.findOne({ id: document.rolename, database: document.database })
+            if (!role) {
+                roles.push(document.firstName)
             } else {
-                dataNotExist.push(document.id)
+                const existCustomerGroup = await CustomerGroup.findOne({ id: document.category, database: document.database })
+                if (!existCustomerGroup) {
+                    group.push(document.id)
+                } else {
+                    document[rolename] = role._id.toString()
+                    document[category] = await existCustomerGroup._id.toString()
+                    const filter = { id: document.id, database: req.params.database };
+                    const options = { new: true, upsert: true };
+                    const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
+                    insertedDocuments.push(insertedDocument);
+                }
             }
+            // } else {
+            //     dataNotExist.push(document.id)
+            // }
             // const filter = { id: document.id, database: req.params.database };
             // const options = { new: true, upsert: true };
             // const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);

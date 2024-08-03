@@ -281,6 +281,7 @@ export const saveItemWithExcel = async (req, res) => {
 }
 export const updateItemWithExcel = async (req, res) => {
   try {
+    let database = "database";
     let warehouse = "warehouse"
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
@@ -302,6 +303,7 @@ export const updateItemWithExcel = async (req, res) => {
         const cellValue = dataRow.getCell(columnIndex).value;
         document[heading] = cellValue;
       }
+      document[database] = req.params.database
       if (document.HSN_Code) {
         const existingWarehouse = await Warehouse.findOne({ id: document.warehouse, database: document.database })
         if (!existingWarehouse) {
@@ -311,10 +313,7 @@ export const updateItemWithExcel = async (req, res) => {
           const filter = { id: document.id, database: req.params.database };
           const options = { new: true, upsert: true };
           const insertedDocument = await Product.findOneAndUpdate(filter, document, options);
-          // await addProductInWarehouse1(document, insertedDocument.warehouse,insertedDocument)
           insertedDocuments.push(insertedDocument);
-          // } else {
-          //   existingParts.push(document.Product_Title)
         }
       } else {
         existingParts.push(document.Product_Title)

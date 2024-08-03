@@ -564,6 +564,7 @@ export const updateUserWithExcel = async (req, res) => {
     let rolename = "rolename";
     let shift = "shift";
     let branch = "branch"
+    let database = "database";
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -592,32 +593,33 @@ export const updateUserWithExcel = async (req, res) => {
         }
         // document[heading] = cellValue;
       }
-      if (document.database) {
-        const role = await Role.findOne({ id: document.rolename, database: document.database })
-        if (!role) {
-          roles.push(document.id)
+      document[database] = req.params.database
+      // if (document.database) {
+      const role = await Role.findOne({ id: document.rolename, database: document.database })
+      if (!role) {
+        roles.push(document.id)
+      } else {
+        const shifts = await WorkingHours.findOne({ id: document.shift, database: document.database })
+        if (!shifts) {
+          shiftss.push(document.id)
         } else {
-          const shifts = await WorkingHours.findOne({ id: document.shift, database: document.database })
-          if (!shifts) {
-            shiftss.push(document.id)
+          const branchs = await UserBranch.findOne({ id: document.branch, database: document.database })
+          if (!branchs) {
+            branchss.push(document.id)
           } else {
-            const branchs = await UserBranch.findOne({ id: document.branch, database: document.database })
-            if (!branchs) {
-              branchss.push(document.id)
-            } else {
-              document[rolename] = role._id.toString()
-              document[shift] = shifts._id.toString()
-              document[branch] = branchs._id.toString()
-              const filter = { id: document.id, database: req.params.database };
-              const options = { new: true, upsert: true };
-              const insertedDocument = await User.findOneAndUpdate(filter, document, options);
-              insertedDocuments.push(insertedDocument);
-            }
+            document[rolename] = role._id.toString()
+            document[shift] = shifts._id.toString()
+            document[branch] = branchs._id.toString()
+            const filter = { id: document.id, database: req.params.database };
+            const options = { new: true, upsert: true };
+            const insertedDocument = await User.findOneAndUpdate(filter, document, options);
+            insertedDocuments.push(insertedDocument);
           }
         }
-      } else {
-        dataNotExist.push(document.id)
       }
+      // } else {
+      //   dataNotExist.push(document.id)
+      // }
       // const filter = { id: document.id, database: req.params.database };
       // const options = { new: true, upsert: true };
       // const insertedDocument = await User.findOneAndUpdate(filter, document, options);
