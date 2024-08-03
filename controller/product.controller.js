@@ -241,7 +241,7 @@ export const saveItemWithExcel = async (req, res) => {
       }
       document[database] = req.params.database
       if (document.HSN_Code) {
-        const existingWarehouse = await Warehouse.findOne({ id: document.id, database: document.database })
+        const existingWarehouse = await Warehouse.findOne({ id: document.warehouse, database: document.database })
         if (!existingWarehouse) {
           WarehouseNotExisting.push(document.warehouse)
         } else {
@@ -301,7 +301,7 @@ export const updateItemWithExcel = async (req, res) => {
         document[heading] = cellValue;
       }
       // if (document.HSN_Code) {
-      const filter = { Product_Title: document.Product_Title, database: req.params.database }; // Ensure the filter is correctly formed
+      const filter = { id: document.id, database: req.params.database }; // Ensure the filter is correctly formed
       const options = { new: true, upsert: true }; // Consider using upsert if you want to create the document if it doesn't exist
       const insertedDocument = await Product.findOneAndUpdate(filter, document, options);
 
