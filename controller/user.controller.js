@@ -170,8 +170,7 @@ export const UpdateUser = async (req, res, next) => {
       const updatedUser = req.body;
       const user = await User.findByIdAndUpdate(userId, updatedUser, { new: true });
       if (req.body.warehouse?.length > 0) {
-        req.body.warehouse = JSON.parse(req.body.warehouse)
-        await assingWarehouse(req.body.warehouse, userId)
+        await assingWarehouse(user.warehouse, userId)
       }
       if (user) {
         await setSalary(user)
