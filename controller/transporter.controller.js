@@ -160,6 +160,8 @@ export const saveExcelFile = async (req, res) => {
 }
 export const UpdateExcelTransporter = async (req, res) => {
     try {
+        let database = "database"
+        let rolename = "rolename";
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -170,6 +172,7 @@ export const UpdateExcelTransporter = async (req, res) => {
             headings.push(cell.value);
         });
         const insertedDocuments = [];
+        const roles = [];
         for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
             const dataRow = worksheet.getRow(rowIndex);
             const document = {};
@@ -178,13 +181,22 @@ export const UpdateExcelTransporter = async (req, res) => {
                 const cellValue = dataRow.getCell(columnIndex).value;
                 document[heading] = cellValue;
             }
-            const filter = { id: document.id, database: req.params.database }
-            const options = { new: true, upsert: true };
-            const insertedDocument = await Transporter.findOneAndUpdate(filter, document, options);
-            insertedDocuments.push(insertedDocument);
-
+            document[database] = req.params.database
+            const role = await Role.findOne({ id: document.rolename, database: document.database })
+            if (!role) {
+                roles.push(document.id)
+            } else {
+                document[rolename] = role._id.toString()
+                const filter = { id: document.id, database: req.params.database }
+                const options = { new: true, upsert: true };
+                const insertedDocument = await Transporter.findOneAndUpdate(filter, document, options);
+                insertedDocuments.push(insertedDocument);
+            }
         }
         let message = 'Updated Successfully';
+        if (roles.length > 0) {
+            message = `this transporter's role id is required: ${roles.join(', ')}`;
+        }
         return res.status(200).json({ message, status: true });
     } catch (err) {
         console.error(err);
