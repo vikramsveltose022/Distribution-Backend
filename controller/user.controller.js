@@ -580,6 +580,7 @@ export const updateUserWithExcel = async (req, res) => {
     const shiftss = [];
     const branchss = [];
     const dataNotExist = [];
+    const IdNotExisting = [];
     for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
       const dataRow = worksheet.getRow(rowIndex);
       const document = {};
@@ -607,13 +608,18 @@ export const updateUserWithExcel = async (req, res) => {
           if (!branchs) {
             branchss.push(document.id)
           } else {
-            document[rolename] = role._id.toString()
-            document[shift] = shifts._id.toString()
-            document[branch] = branchs._id.toString()
-            const filter = { id: document.id, database: req.params.database };
-            const options = { new: true, upsert: true };
-            const insertedDocument = await User.findOneAndUpdate(filter, document, options);
-            insertedDocuments.push(insertedDocument);
+            const existUser = await User.findOne({ id: document.id, database: document.database })
+            if (!existUser) {
+              IdNotExisting.push(document.id)
+            } else {
+              document[rolename] = role._id.toString()
+              document[shift] = shifts._id.toString()
+              document[branch] = branchs._id.toString()
+              const filter = { id: document.id, database: req.params.database };
+              const options = { new: true, upsert: true };
+              const insertedDocument = await User.findOneAndUpdate(filter, document, options);
+              insertedDocuments.push(insertedDocument);
+            }
           }
         }
       }
@@ -636,6 +642,8 @@ export const updateUserWithExcel = async (req, res) => {
       message = `this user's branch id is required : ${branchss.join(', ')}`;
     } else if (dataNotExist.length > 0) {
       message = `this user's database not exist : ${dataNotExist.join(', ')}`;
+    } else if (IdNotExisting.length > 0) {
+      message = `this user's id not found : ${IdNotExisting.join(', ')}`;
     }
     return res.status(200).json({ message, status: true });
   } catch (err) {

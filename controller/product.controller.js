@@ -295,6 +295,7 @@ export const updateItemWithExcel = async (req, res) => {
     const insertedDocuments = [];
     const existingParts = [];
     const WarehouseNotExisting = []
+    const IdNotExisting = []
     for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
       const dataRow = worksheet.getRow(rowIndex);
       const document = {};
@@ -309,11 +310,16 @@ export const updateItemWithExcel = async (req, res) => {
         if (!existingWarehouse) {
           WarehouseNotExisting.push(document.warehouse)
         } else {
-          document[warehouse] = existingWarehouse._id.toString()
-          const filter = { id: document.id, database: req.params.database };
-          const options = { new: true, upsert: true };
-          const insertedDocument = await Product.findOneAndUpdate(filter, document, options);
-          insertedDocuments.push(insertedDocument);
+          const existProduct = await Product.findOne({ id: document.id, database: document.database })
+          if (!existProduct) {
+            IdNotExisting.push(document.id)
+          } else {
+            document[warehouse] = existingWarehouse._id.toString()
+            const filter = { id: document.id, database: req.params.database };
+            const options = { new: true, upsert: true };
+            const insertedDocument = await Product.findOneAndUpdate(filter, document, options);
+            insertedDocuments.push(insertedDocument);
+          }
         }
       } else {
         existingParts.push(document.Product_Title)
@@ -324,6 +330,8 @@ export const updateItemWithExcel = async (req, res) => {
       message = `Some product not exist hsn code: ${existingParts.join(', ')}`;
     } else if (WarehouseNotExisting.length > 0) {
       message = `warehouse not exist : ${WarehouseNotExisting.join(', ')}`;
+    } else if (IdNotExisting.length > 0) {
+      message = `this product's id not found : ${IdNotExisting.join(', ')}`;
     }
     return res.status(200).json({ message, status: true });
   } catch (err) {
