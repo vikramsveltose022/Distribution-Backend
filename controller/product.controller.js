@@ -523,6 +523,7 @@ export const UpdateProductSalesRateMultiple = async (req, res, next) => {
       } else {
         existingProduct.SalesRate = item.SalesRate;
         existingProduct.Product_MRP = item.Product_MRP;
+        existingProduct.ProfitPercentage = item.ProfitPercentage;
         await existingProduct.save()
       }
     }
@@ -541,6 +542,7 @@ export const UpdateProductSalesRate = async (req, res, next) => {
     } else {
       existingProduct.SalesRate = req.body.SalesRate;
       existingProduct.Product_MRP = req.body.Product_MRP;
+      existingProduct.ProfitPercentage = item.ProfitPercentage;
       existingProduct.save()
       return res.status(200).json({ message: "Product Updated Successfully", status: true });
     }
