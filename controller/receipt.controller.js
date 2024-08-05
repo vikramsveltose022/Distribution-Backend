@@ -823,9 +823,7 @@ export const PartySendOtp = async (req, res, next) => {
             const reciept = await Receipt.create(req.body);
             if (reciept.type === "receipt") {
                 let particular = "receipt";
-                // await ledgerSalesForCredit(req.body, particular)
                 await ledgerPartyForCredit(req.body, particular)
-                // await ledgerPartyForDebit(req.body, particular)
             }
             await overDue1(req.body)
             req.body.voucherDate = new Date(new Date())
@@ -886,9 +884,7 @@ export const VerifyPartyPayment = async (req, res, next) => {
         await existingParty.save()
         if (req.body.type === "receipt") {
             let particular = "receipt";
-            // await ledgerSalesForCredit(req.body, particular)
             await ledgerPartyForCredit(req.body, particular)
-            // await ledgerPartyForDebit(req.body, particular)
         }
         await overDue1(req.body)
         req.body.voucherDate = new Date(new Date())

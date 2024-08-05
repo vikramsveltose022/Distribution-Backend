@@ -9,6 +9,7 @@ import { Customer } from "../model/customer.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { Product } from "../model/product.model.js";
 import { InvoiceList } from "../model/createInvoice.model.js";
+import { ledgerPartyForDebit } from "../service/ledger.js";
 
 
 export const saveGoodDispatch = async (req, res) => {
@@ -226,6 +227,11 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
                 }
+            }
+        } else {
+            if (orders.status === "completed") {
+                const particular = "SalesInvoice";
+                // await ledgerPartyForDebit(orders, particular)
             }
         }
         return res.status(200).json({ message: "Status updated successfully", status: true });

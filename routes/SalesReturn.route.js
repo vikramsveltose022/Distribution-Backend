@@ -1,9 +1,8 @@
 import express from "express";
-import { SalesReturnXml, deleteSalesReturn, deleteSalesReturnCreateOrder, saveSalesReturnCreateOrder, saveSalesReturnOrder, updateSalesReturnCreateOrder, updateSalesReturnOrder, viewSalesReturn, viewSalesReturnById, viewSalesReturnCreateOrder, viewSalesReturnCreateOrderById } from "../controller/SalesReturn.controller.js";
+import { deleteSalesReturn, deleteSalesReturnCreateOrder, saveSalesReturnCreateOrder, saveSalesReturnOrder, updateSalesReturnCreateOrder, updateSalesReturnOrder, viewSalesReturn, viewSalesReturnById, viewSalesReturnCreateOrder, viewSalesReturnCreateOrderById } from "../controller/SalesReturn.controller.js";
 
 const router = express.Router();
 
-router.get("/get-xml", SalesReturnXml);
 router.post("/save-sales-return", saveSalesReturnOrder)
 router.get("/view-sales-return/:id/:database", viewSalesReturn);
 router.get("/view-sales-return-by-id/:id", viewSalesReturnById)
