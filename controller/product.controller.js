@@ -101,7 +101,7 @@ export const UpdateProduct = async (req, res, next) => {
   }
 };
 
-export const StockAlert = async (req, res) => {
+export const StockAlert1 = async (req, res) => {
   try {
     const warehouses = await Warehouse.find({ database: req.params.database });
     let alertProducts = [];
@@ -154,7 +154,42 @@ export const StockAlert = async (req, res) => {
     return res.status(500).json({ error: error.message, status: false });
   }
 };
-
+export const StockAlert = async (req, res) => {
+  try {
+    const Stock = []
+    const product = await Product.find({ database: req.params.database, status: "Active" }).populate({ path: "partyId", model: "customer" }).populate({ path: "warehouse", model: "warehouse" })
+    if (product.length === 0) {
+      return res.status(404).json({ message: "product not found", status: false })
+    }
+    product.forEach(item => {
+      if (item.Opening_Stock < item.MIN_stockalert) {
+        let StockAlerts = {
+          productId: item._id.toString(),
+          HSN_Code: item.HSN_Code,
+          Product_Title: item.Product_Title,
+          Product_image: item.Product_image,
+          Product_Desc: item.Product_Desc,
+          Product_MRP: item.Product_MRP,
+          GSTRate: item.GSTRate,
+          Size: item.Size,
+          taxableAmount: (item.Opening_Stock * item.Product_MRP),
+          Total: ((item.Opening_Stock * item.Product_MRP) * (100 + parseInt(item.GSTRate))) / 100,
+          currentStock: item.Opening_Stock,
+          MIN_stockalert: item.MIN_stockalert,
+          warehouseName: item.warehouse.warehouseName,
+          warehosueAddress: item.warehouse.address,
+          SupplierName: item?.partyId?.ownerName || null,
+          SupplierGST: item?.partyId?.gstNumber || null
+        };
+        Stock.push(StockAlerts)
+      }
+    })
+    return (Stock.length > 0) ? res.status(200).json({ alertProducts: Stock, status: true }) : res.status(404).json({ message: "Product Not Found", status: false })
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message, status: false });
+  }
+};
 export const viewCurrentStock = async (req, res, next) => {
   try {
     const warehouse = await Warehouse.findById(req.params.id);
@@ -172,47 +207,6 @@ export const viewCurrentStock = async (req, res, next) => {
   }
 };
 
-export const saveItemWithExcel11 = async (req, res) => {
-  try {
-    let database = "database"
-    const filePath = await req.file.path;
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(filePath);
-    const worksheet = workbook.getWorksheet(1);
-    const headerRow = worksheet.getRow(1);
-    const headings = [];
-    headerRow.eachCell((cell) => {
-      headings.push(cell.value);
-    });
-    const insertedDocuments = [];
-    const existingParts = [];
-    for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
-      const dataRow = worksheet.getRow(rowIndex);
-      const document = {};
-      for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
-        const heading = headings[columnIndex - 1];
-        const cellValue = dataRow.getCell(columnIndex).value;
-        document[heading] = cellValue;
-      }
-      document[database] = req.params.database
-      if (document.HSN_Code) {
-        const insertedDocument = await Product.create(document);
-        await addProductInWarehouse1(document, insertedDocument.warehouse, insertedDocument)
-        insertedDocuments.push(insertedDocument);
-      } else {
-        existingParts.push(document.Product_Title)
-      }
-    }
-    let message = 'Data Inserted Successfully';
-    if (existingParts.length > 0) {
-      message = `Some product not exist hsn code: ${existingParts.join(', ')}`;
-    }
-    return res.status(200).json({ message, status: true });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error', status: false });
-  }
-}
 export const saveItemWithExcel = async (req, res) => {
   try {
     let database = "database";
@@ -513,6 +507,7 @@ export const HSNWisePurchaseReport = async (req, res, next) => {
   }
 };
 
+// Sales Price
 export const UpdateProductSalesRateMultiple = async (req, res, next) => {
   try {
     for (let item of req.body.Products) {
