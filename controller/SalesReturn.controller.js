@@ -1,4 +1,3 @@
-import axios from "axios";
 import { SalesReturn } from "../model/salesReturn.model.js";
 import { Order } from "../model/order.model.js";
 import { CreditNote } from "../model/creditNote.model.js";
@@ -7,29 +6,16 @@ import { Product } from "../model/product.model.js";
 import { getSalesReturnHierarchy } from "../rolePermission/RolePermission.js";
 import { User } from "../model/user.model.js";
 import { DebitNote } from "../model/debitNote.model.js";
-import { Ledger } from "../model/ledger.model.js";
-import { ledgerPartyForDebit, ledgerSalesForCredit } from "../service/ledger.js";
 import { Customer } from "../model/customer.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
 
-export const SalesReturnXml = async (req, res) => {
-    const fileUrl = "https://xmlfiles.nyc3.digitaloceanspaces.com/SalesReturn.xml";
-    try {
-        const response = await axios.get(fileUrl);
-        const data = response.data;
-        return res.status(200).json({ data, status: true });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send("Error reading the file");
-    }
-};
 export const viewSalesReturn = async (req, res, next) => {
     try {
         const userId = req.params.id;
         const database = req.params.database;
         const adminDetail = await getSalesReturnHierarchy(userId, database)
         return (adminDetail.length > 0) ? res.status(200).json({ SalesReturn: adminDetail, status: true }) : res.status(400).json({ message: "Not Found", status: false })
-        // const salesReturn = await SalesReturn.find().sort({ sortorder: -1 }).populate({ path: "returnItems.productId", model: "product" });
+        // const salesReturn = await SalesReturn.find({}).sort({ sortorder: -1 }).populate({ path: "returnItems.productId", model: "product" });
         // return salesReturn ? res.status(200).json({ SalesReturn: salesReturn, status: true }) : res.status(404).json({ message: "Not Found", status: false })
     }
     catch (err) {
@@ -251,10 +237,7 @@ export const saveSalesReturnCreateOrder = async (req, res) => {
         }, 0);
         req.body.totalAmount = req.body.Return_amount;
         req.body.productItems = returnItems;
-        // req.body.partyId = undefined;
         await CreditNote.create(req.body)
-        // await ledgerPartyForDebit(req.body,party)
-        // await ledgerSalesForCredit(req.body)
         const salesReturns = await SalesReturn.create(req.body);
         req.body.partyId = req.body.userId;
         req.body.userId = partyId;

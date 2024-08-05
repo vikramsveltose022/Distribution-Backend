@@ -2,7 +2,7 @@ import { InvoiceList } from "../model/createInvoice.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 import { Customer } from "../model/customer.model.js";
-import { ledgerPartyForCredit, ledgerPartyForDebit, ledgerSalesForCredit, ledgerSalesForDebit } from "../service/ledger.js";
+import { ledgerPartyForCredit, ledgerPartyForDebit } from "../service/ledger.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
 import { OverDueReport } from "../model/overDue.mode.js";
 import { Product } from "../model/product.model.js";
@@ -14,20 +14,6 @@ import { create } from "html-pdf";
 
 export const SaveInvoiceList = async (req, res, next) => {
     try {
-        // if (req.files) {
-        //     let image = null;
-        //     let images = null;
-        //     req.files.map(file => {
-        //         if (file.fieldname === "invoice") {
-        //             image = file.filename;
-        //         }
-        //         else {
-        //             images = file.filename
-        //         }
-        //     })
-        //     req.body.FetchSalesInvoice = image;
-        //     req.body.CNUpload = images
-        // }
         let ware
         let particular = "SalesInvoice"
         const orderId = req.params.id;
@@ -94,32 +80,21 @@ export const SaveInvoiceList = async (req, res, next) => {
         createOrder.cgstTotal = req.body.cgstTotal
         createOrder.roundOff = req.body.roundOff
         createOrder.grandTotal = req.body.grandTotal
-
-        // req.body.warehouseId = ware
-        // req.body.orderId = orderId
-        // req.body.invoiceType = "sales"
-        // req.body.invoiceStatus = true
         createOrder.warehouseId = ware
         createOrder.orderId = orderId
         createOrder.invoiceType = "sales"
         createOrder.invoiceStatus = true
         createOrder.status = req.body.status
-        // const invoiceList = await InvoiceList.create(req.body);
         createOrder.transporter = req.body.transporter
         createOrder.vehicleNo = req.body.vehicleNo
         createOrder.ARNStatus = req.body.ARNStatus
         createOrder.ARN = req.body.ARN
         createOrder.overAllDiscountPer = req.body.overAllDiscountPer
         createOrder.overAllCharges = req.body.overAllCharges
-        // createOrder.CNUpload = req.body.CNUpload
-        // createOrder.FetchSalesInvoice = req.body.FetchSalesInvoice
-        // createOrder.CNDetails = req.body.CNDetails
         createOrder.AssignDeliveryBoy = req.body.AssignDeliveryBoy
         const updated = await createOrder.save()
         if (updated) {
-            // await ledgerSalesForDebit(req.body, particular)
             await ledgerPartyForDebit(updated, particular)
-            // await ledgerPartyForCredit(req.body, particular)
         }
         return res.status(201).json({ message: "InvoiceList created successfully", Invoice: updated, status: true, data: updated });
     } catch (err) {
@@ -210,9 +185,7 @@ export const SavePurchaseInvoice1 = async (req, res, next) => {
         req.body.invoiceType = "purchase"
         const invoiceList = await InvoiceList.create(req.body);
         if (invoiceList) {
-            // await ledgerSalesForCredit(req.body, particular)
             await ledgerPartyForCredit(invoiceList, particular)
-            // await ledgerPartyForDebit(req.body, particular)
         }
         return res.status(201).json({ message: "InvoiceList created successfully", Invoice: invoiceList, status: true });
     } catch (err) {

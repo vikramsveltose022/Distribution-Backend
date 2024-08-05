@@ -101,6 +101,9 @@ const ProductSchema = new mongoose.Schema({
     },
     SalesRate: {
         type: Number
+    },
+    ProfitPercentage: {
+        type: Number
     }
 }, { timestamps: true })
 export const Product = mongoose.model('product', ProductSchema);
