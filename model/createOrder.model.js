@@ -304,6 +304,9 @@ const createOrderSchema = new mongoose.Schema({
     AssignDeliveryBoy: {
         type: String
     },
+    orderId: {
+        type: String
+    }
 }, { timestamps: true })
 
 export const CreateOrder = mongoose.model("createOrder", createOrderSchema)
