@@ -65,6 +65,10 @@ const LedgerSchema = new mongoose.Schema({
     },
     particular: {
         type: String
+    },
+
+    paymentMode: {
+        type: String
     }
 }, { timestamps: true })
 
