@@ -134,13 +134,13 @@ export const deleteGoodDispatch = async (req, res, next) => {
 
 export const viewOrderForDeliveryBoy = async (req, res, next) => {
     try {
-        const userId = req.params.id;
-        const database = req.params.database;
+        // const userId = req.params.id;
+        // const database = req.params.database;
         // const adminDetail = await getUserHierarchyBottomToTop(userId, database)
         // if (!adminDetail.length > 0) {
         //     return res.status(404).json({ error: "Product Not Found", status: false })
         // }
-        let goodDispatch = await CreateOrder.find({ database: database, userId: userId }).sort({ sortorder: -1 }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).populate({ path: "orderId", model: "createOrder" }).populate({ path: "warehouseId", model: "warehouse" })
+        let goodDispatch = await CreateOrder.find({ AssignDeliveryBoy: req.params.id }).sort({ sortorder: -1 }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).populate({ path: "orderId", model: "createOrder" }).populate({ path: "warehouseId", model: "warehouse" })
         return (goodDispatch.length > 0) ? res.status(200).json({ OrderList: goodDispatch, status: true }) : res.status(404).json({ error: "Not Found", status: false })
     }
     catch (err) {
