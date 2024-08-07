@@ -192,7 +192,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
         const { status, otp, partyId, orderId, reason, paymentMode } = req.body;
         const user = await Customer.findById(partyId);
         const orders = await CreateOrder.findById(orderId);
-        if (!orders) {
+        if (!orders && !user) {
             return res.status(404).json({ message: "Order Not Found", status: false });
         }
         if (user.otpVerify !== parseInt(otp)) {
