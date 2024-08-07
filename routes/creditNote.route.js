@@ -3,7 +3,7 @@ import { CreditDebitNoteReport, SaveCreditNote, viewCreateNote, viewCreditNoteBy
 
 const router = express.Router();
 
-router.get("/save-credit-note", SaveCreditNote);
+router.post("/save-credit-note", SaveCreditNote);
 router.get("/view-credit-note/:id", viewCreateNote);
 router.post("/view-credit-note-by-id", viewCreditNoteById);
 router.post("/cdnr-report/:database", CreditDebitNoteReport)
