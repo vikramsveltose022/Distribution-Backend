@@ -204,7 +204,8 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
         if (user.otpVerify !== parseInt(otp)) {
             return res.status(400).json({ message: "Incorrect OTP", status: false });
         }
-        const commonUpdate = { status, paymentMode, CNUpload, FetchSalesInvoice, CNDetails };
+        let invoiceId = orders.challanNo || orders.invoiceId
+        const commonUpdate = { status, paymentMode, CNUpload, invoiceId, FetchSalesInvoice, CNDetails };
         if (reason) {
             commonUpdate.reason = reason;
         }
