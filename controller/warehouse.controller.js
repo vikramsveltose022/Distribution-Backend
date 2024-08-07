@@ -184,7 +184,8 @@ export const warehouseProductItem = async (body, lastStock) => {
     let matchingStocks = {};
     for (let id of body.productItems) {
         if (body._id.toString() === lastStock.warehouseId.toString()) {
-            const stock = lastStock.productItems.find((item) => item.productId === id.productId._id);
+            console.log(id)
+            const stock = lastStock.productItems.find((item) => item.productId === id?.productId?._id);
             if (stock) {
                 matchingStocks[id._id] = {
                     productId: id.productId,

@@ -191,11 +191,11 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
         let CNDetails = req.body.CNDetails
         const { status, otp, partyId, orderId, reason, paymentMode } = req.body;
         const user = await Customer.findById(partyId);
-        const orders = await CreateOrder.findOne({ _id: orderId });
+        const orders = await CreateOrder.findById(orderId);
         if (!orders) {
             return res.status(404).json({ message: "Order Not Found", status: false });
         }
-        if (user.otpVerify !== otp) {
+        if (user.otpVerify !== parseInt(otp)) {
             return res.status(400).json({ message: "Incorrect OTP", status: false });
         }
         const commonUpdate = { status, paymentMode, CNUpload, FetchSalesInvoice, CNDetails };
