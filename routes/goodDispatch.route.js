@@ -25,6 +25,6 @@ router.put("/update-good-dispatch/:id", upload.any("files"), updateGoodDispatch)
 
 router.get("/view-order-list/:id/:database", viewOrderForDeliveryBoy)
 router.get("/send-otp/:id", sendOtp)
-router.post("/verify-authentication/:id", upload.any("files"), updateOrderStatusByDeliveryBoy);
+router.post("/verify-authentication/:id", upload.single("file"), updateOrderStatusByDeliveryBoy);
 
 export default router;

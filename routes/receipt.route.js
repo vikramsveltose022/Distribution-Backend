@@ -1,5 +1,5 @@
 import express from "express";
-import { BankAccountReport, CashBookReport, DeleteReceipt, OtpVerifyForReceipt, PartySendOtp, ProfitLossReport, SaveOtp, TaxReport, UpdateReceipt, ViewOtp, ViewReceiptById, ViewReceiptByPartyId, savePayment, savePaymentWithExcel, saveReceipt, saveReceiptWithExcel, transactionCalculate, viewReceipt } from "../controller/receipt.controller.js";
+import { BankAccountReport, CashBookReport, DeletePayment, DeleteReceipt, OtpVerifyForReceipt, PartySendOtp, ProfitLossReport, SaveOtp, TaxReport, UpdatePayment, UpdateReceipt, ViewOtp, ViewReceiptById, ViewReceiptByPartyId, savePayment, savePaymentWithExcel, saveReceipt, saveReceiptWithExcel, transactionCalculate, viewReceipt } from "../controller/receipt.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -11,8 +11,8 @@ router.get("/view-reciept/:database", viewReceipt)
 router.get("/view-receipt-by-id/:id", ViewReceiptById)
 router.delete("/delete-receipt/:id", DeleteReceipt);
 router.put("/update-receipt/:id", UpdateReceipt)
-router.put("/update-payment/:id", UpdateReceipt)
-router.delete("/delete-payment/:id", DeleteReceipt);
+router.put("/update-payment/:id", UpdatePayment)
+router.delete("/delete-payment/:id", DeletePayment);
 
 router.post("/profit-loss-report/:database", ProfitLossReport)
 

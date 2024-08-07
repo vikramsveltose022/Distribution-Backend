@@ -1,4 +1,3 @@
-import axios from "axios";
 import { GoodDispatch } from "../model/goodDispatch.model.js";
 import { Order } from "../model/order.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
@@ -172,22 +171,26 @@ export const sendOtp = async (req, res) => {
 }
 export const updateOrderStatusByDeliveryBoy = async (req, res) => {
     try {
-        if (req.files) {
-            let image = null;
-            let images = null;
-            req.files.map(file => {
-                if (file.fieldname === "invoice") {
-                    image = file.filename;
-                }
-                else {
-                    images = file.filename
-                }
-            })
-            req.body.FetchSalesInvoice = image;
-            req.body.CNUpload = images
+        if (req.file) {
+            req.body.CNUpload = req.file.filename;
         }
+
+        // if (req.files) {
+        //     let image = null;
+        //     let images = null;
+        //     req.files.map(file => {
+        //         if (file.fieldname === "invoice") {
+        //             image = file.filename;
+        //         }
+        //         else {
+        //             images = file.filename
+        //         }
+        //     })
+        //     req.body.FetchSalesInvoice = image;
+        //     req.body.CNUpload = images
+        // }
+
         let CNUpload = req.body.CNUpload
-        let FetchSalesInvoice = req.body.FetchSalesInvoice
         let CNDetails = req.body.CNDetails
         const { status, otp, partyId, orderId, reason, paymentMode } = req.body;
         const user = await Customer.findById(partyId);
