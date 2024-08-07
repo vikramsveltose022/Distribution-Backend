@@ -1,10 +1,11 @@
 import express from "express";
-import { CreditDebitNoteReport, viewCreateNote, viewCreditNoteById } from "../controller/creditNote.controller.js";
+import { CreditDebitNoteReport, SaveCreditNote, viewCreateNote, viewCreditNoteById } from "../controller/creditNote.controller.js";
 
-const router  = express.Router();
+const router = express.Router();
 
+router.get("/save-credit-note", SaveCreditNote);
 router.get("/view-credit-note/:id", viewCreateNote);
-router.post("/view-credit-note-by-id",viewCreditNoteById);
-router.post("/cdnr-report/:database",CreditDebitNoteReport)
+router.post("/view-credit-note-by-id", viewCreditNoteById);
+router.post("/cdnr-report/:database", CreditDebitNoteReport)
 
 export default router;

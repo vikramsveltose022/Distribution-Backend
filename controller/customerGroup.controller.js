@@ -27,7 +27,6 @@ export const ViewCustomerGroup = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-
 export const ViewCustomerGroupById = async (req, res, next) => {
     try {
         let customerGroup = await CustomerGroup.findById({ _id: req.params.id }).sort({

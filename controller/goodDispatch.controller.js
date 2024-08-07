@@ -8,8 +8,6 @@ import { getGoodDispatchHierarchy, getUserHierarchyBottomToTop } from "../rolePe
 import { Customer } from "../model/customer.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { Product } from "../model/product.model.js";
-import { InvoiceList } from "../model/createInvoice.model.js";
-import { ledgerPartyForDebit } from "../service/ledger.js";
 
 
 export const saveGoodDispatch = async (req, res) => {
@@ -134,13 +132,13 @@ export const deleteGoodDispatch = async (req, res, next) => {
 
 export const viewOrderForDeliveryBoy = async (req, res, next) => {
     try {
-        // const userId = req.params.id;
-        // const database = req.params.database;
-        // const adminDetail = await getUserHierarchyBottomToTop(userId, database)
-        // if (!adminDetail.length > 0) {
-        //     return res.status(404).json({ error: "Product Not Found", status: false })
-        // }
-        let goodDispatch = await CreateOrder.find({ AssignDeliveryBoy: req.params.id }).sort({ sortorder: -1 }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).populate({ path: "orderId", model: "createOrder" }).populate({ path: "warehouseId", model: "warehouse" })
+        const userId = req.params.id;
+        const database = req.params.database;
+        const adminDetail = await getUserHierarchyBottomToTop(userId, database)
+        if (!adminDetail.length > 0) {
+            return res.status(404).json({ error: "Product Not Found", status: false })
+        }
+        const goodDispatch = await CreateOrder.find({ database: database, AssignDeliveryBoy: req.params.id }).sort({ sortorder: -1 }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).populate({ path: "orderId", model: "createOrder" }).populate({ path: "warehouseId", model: "warehouse" })
         return (goodDispatch.length > 0) ? res.status(200).json({ OrderList: goodDispatch, status: true }) : res.status(404).json({ error: "Not Found", status: false })
     }
     catch (err) {
