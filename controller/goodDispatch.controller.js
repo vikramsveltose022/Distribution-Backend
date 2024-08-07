@@ -171,26 +171,11 @@ export const sendOtp = async (req, res) => {
 }
 export const updateOrderStatusByDeliveryBoy = async (req, res) => {
     try {
+        let CNUpload
         if (req.file) {
             req.body.CNUpload = req.file.filename;
+            CNUpload = req.body.CNUpload
         }
-
-        // if (req.files) {
-        //     let image = null;
-        //     let images = null;
-        //     req.files.map(file => {
-        //         if (file.fieldname === "invoice") {
-        //             image = file.filename;
-        //         }
-        //         else {
-        //             images = file.filename
-        //         }
-        //     })
-        //     req.body.FetchSalesInvoice = image;
-        //     req.body.CNUpload = images
-        // }
-
-        let CNUpload = req.body.CNUpload
         let CNDetails = req.body.CNDetails
         const { status, otp, partyId, orderId, reason, paymentMode } = req.body;
         const user = await Customer.findById(partyId);
@@ -205,7 +190,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             return res.status(400).json({ message: "Incorrect OTP", status: false });
         }
         let invoiceId = orders.challanNo || orders.invoiceId
-        const commonUpdate = { status, paymentMode, CNUpload, invoiceId, FetchSalesInvoice, CNDetails };
+        const commonUpdate = { status, paymentMode, CNUpload, invoiceId, CNDetails };
         if (reason) {
             commonUpdate.reason = reason;
         }
@@ -236,10 +221,10 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
         } else {
             if (orders.status === "completed") {
                 const particular = "SalesInvoice";
-                // await ledgerPartyForDebit(orders, particular)
+                await ledgerPartyForDebit(orders, particular)
             }
         }
-        return res.status(200).json({ message: "Status updated successfully", status: true });
+        return res.status(200).json({ message: "Delivery Status Updated Successfully", status: true });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });

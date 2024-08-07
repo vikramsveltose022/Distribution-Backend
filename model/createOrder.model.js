@@ -95,6 +95,9 @@ const createOrderSchema = new mongoose.Schema({
     orderNo: {
         type: String
     },
+    challanNo: {
+        type: String
+    },
     warehouseId: {
         type: String
     },
@@ -296,9 +299,6 @@ const createOrderSchema = new mongoose.Schema({
         default: false
     },
     invoiceType: {
-        type: String
-    },
-    challanNo: {
         type: String
     },
     AssignDeliveryBoy: {
