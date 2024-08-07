@@ -198,8 +198,6 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
         if (!orders) {
             return res.status(404).json({ message: "Order Not Found", status: false });
         }
-        console.log(user)
-        console.log(user.otpVerify)
         if (user.otpVerify !== parseInt(otp)) {
             return res.status(400).json({ message: "Incorrect OTP", status: false });
         }
@@ -211,33 +209,32 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             Object.assign(orders, commonUpdate);
             await orders.save();
         }
-        console.log(commonUpdate)
-        // if (status === "Cancelled") {
-        //     for (const orderItem of orders.orderItems) {
-        //         const product = await Product.findById({ _id: orderItem.productId });
-        //         if (product) {
-        //             const warehouse = await Warehouse.findById(product.warehouse)
-        //             if (warehouse) {
-        //                 const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
-        //                 pro.currentStock += (orderItem.qty);
-        //                 product.Opening_Stock += orderItem.qty;
-        //                 if (pro.currentStock < 0) {
-        //                     return res.status(404).json({ message: "Product Out Of Stock", status: false })
-        //                 }
-        //                 pro.pendingStock -= (orderItem.qty)
-        //                 await warehouse.save();
-        //                 await product.save()
-        //             }
-        //         } else {
-        //             console.error(`Product with ID ${orderItem.productId} not found`);
-        //         }
-        //     }
-        // } else {
-        //     if (orders.status === "completed") {
-        //         const particular = "SalesInvoice";
-        //         // await ledgerPartyForDebit(orders, particular)
-        //     }
-        // }
+        if (status === "Cancelled") {
+            for (const orderItem of orders.orderItems) {
+                const product = await Product.findById({ _id: orderItem.productId });
+                if (product) {
+                    const warehouse = await Warehouse.findById(product.warehouse)
+                    if (warehouse) {
+                        const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
+                        pro.currentStock += (orderItem.qty);
+                        product.Opening_Stock += orderItem.qty;
+                        if (pro.currentStock < 0) {
+                            return res.status(404).json({ message: "Product Out Of Stock", status: false })
+                        }
+                        pro.pendingStock -= (orderItem.qty)
+                        await warehouse.save();
+                        await product.save()
+                    }
+                } else {
+                    console.error(`Product with ID ${orderItem.productId} not found`);
+                }
+            }
+        } else {
+            if (orders.status === "completed") {
+                const particular = "SalesInvoice";
+                // await ledgerPartyForDebit(orders, particular)
+            }
+        }
         return res.status(200).json({ message: "Status updated successfully", status: true });
     } catch (err) {
         console.error(err);
