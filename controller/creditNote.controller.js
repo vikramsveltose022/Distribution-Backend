@@ -4,20 +4,21 @@ import { getCreditNoteHierarchy } from "../rolePermission/RolePermission.js";
 
 export const viewCreateNote = async (req, res, next) => {
     try {
-        const userId = req.params.id;
-        const adminDetail = await getCreditNoteHierarchy(userId);
-        return (adminDetail.length > 0) ? res.status(200).json({ CreditNote: adminDetail, status: true }) : res.status(400).json({ message: "Not Found", status: false })
+        // const userId = req.params.id;
+        // const adminDetail = await getCreditNoteHierarchy(userId);
+        const credit = await CreditNote.find({ database: req.params.databae }).populate({ path: "productItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" })
+        return (credit.length > 0) ? res.status(200).json({ CreditNote: adminDetail, status: true }) : res.status(400).json({ message: "Not Found", status: false })
     }
     catch (err) {
         console.log(err);
-        return res.status(500).json({ error: err, status: false });
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
 export const viewCreditNoteById = async (req, res) => {
     const { orderId, userId, productId } = req.body;
     try {
         const query = { $or: [{ orderId }, { userId }, { 'productItems.productId': productId }] };
-        const orderData = await CreditNote.findOne(query).populate({ path: "productItems.productId", model: "product" })
+        const orderData = await CreditNote.findOne(query).populate({ path: "productItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" })
         if (orderData) {
             return res.status(200).json({ CreditNote: orderData, status: true });
         } else {
