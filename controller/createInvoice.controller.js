@@ -93,9 +93,9 @@ export const SaveInvoiceList = async (req, res, next) => {
         createOrder.overAllCharges = req.body.overAllCharges
         createOrder.AssignDeliveryBoy = req.body.AssignDeliveryBoy
         const updated = await createOrder.save()
-        if (updated) {
-            await ledgerPartyForDebit(updated, particular)
-        }
+        // if (updated) {
+        //     await ledgerPartyForDebit(updated, particular)
+        // }
         return res.status(201).json({ message: "InvoiceList created successfully", Invoice: updated, status: true, data: updated });
     } catch (err) {
         console.error(err);
