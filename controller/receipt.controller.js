@@ -43,7 +43,7 @@ export const saveReceipt = async (req, res, next) => {
             const receiptData = { ...req.body, ...item };
             const receipt = await Receipt.create(receiptData);
             if (receipt.type === "receipt") {
-                const particular = "receipt";
+                const particular = receipt.paymentMode + " " + "receipt";
                 if (item.partyId) {
                     await ledgerPartyForCredit(receipt, particular);
                 } else if (item.userId) {
@@ -172,18 +172,18 @@ export const savePayment = async (req, res, next) => {
             }
             req.body.voucherType = "payment";
             const receiptData = { ...req.body, ...item };
-            const reciept = await Receipt.create(receiptData);
-            if (reciept.type === "payment") {
-                const particular = "payment";
+            const receipt = await Receipt.create(receiptData);
+            if (receipt.type === "payment") {
+                const particular = receipt.paymentMode + " " + "payment";
                 if (item.partyId) {
-                    await ledgerPartyForDebit(reciept, particular);
+                    await ledgerPartyForDebit(receipt, particular);
                 } else if (item.userId) {
-                    await ledgerUserForDebit(reciept, particular);
+                    await ledgerUserForDebit(receipt, particular);
                 } else {
-                    await ledgerExpensesForDebit(reciept, particular)
+                    await ledgerExpensesForDebit(receipt, particular)
                 }
             }
-            partyReceipt.push(reciept);
+            partyReceipt.push(receipt);
         }
         return partyReceipt.length > 0 ? res.status(200).json({ message: "Payment Saved Successfully!", status: true }) : res.status(404).json({ message: "Payment Not Found", status: false });
 
@@ -302,10 +302,10 @@ export const saveReceiptWithExcel = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     }
-                    const reciept = await Receipt.create(document);
-                    if (reciept.type === "receipt") {
-                        let particular = "receipt";
-                        await ledgerPartyForCredit(reciept, particular)
+                    const receipt = await Receipt.create(document);
+                    if (receipt.type === "receipt") {
+                        let particular = receipt.paymentMode + " " + "receipt";
+                        await ledgerPartyForCredit(receipt, particular)
                     }
                     await overDue1(document)
                     document[voucherDate] = new Date(new Date())
@@ -341,7 +341,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                     }
                     const receipt = await Receipt.create(document)
                     if (receipt.type === "receipt") {
-                        let particular = "receipt";
+                        let particular = receipt.paymentMode + " " + "receipt";
                         await ledgerExpensesForCredit(receipt, particular);
                     }
                 } else {
@@ -373,10 +373,10 @@ export const saveReceiptWithExcel = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     }
-                    const reciept = await Receipt.create(document);
-                    if (reciept.type === "receipt") {
-                        let particular = "receipt";
-                        await ledgerUserForCredit(reciept, particular)
+                    const receipt = await Receipt.create(document);
+                    if (receipt.type === "receipt") {
+                        let particular = receipt.paymentMode + " " + "receipt";
+                        await ledgerUserForCredit(receipt, particular)
                     }
                 } else {
                     existingUsers.push(document.userId);
@@ -385,7 +385,7 @@ export const saveReceiptWithExcel = async (req, res) => {
         }
         let message = 'Data Inserted Successfully';
         if (existingParts.length > 0) {
-            message = `Some reciept not exist valid partyId: ${existingParts.join(', ')}`;
+            message = `Some receipt not exist valid partyId: ${existingParts.join(', ')}`;
         } else if (notExistCode.length > 0) {
             message = `Write code fields in these notes: ${notExistCode.join(', ')}`;
         } else if (existingUsers.length > 0) {
@@ -457,10 +457,10 @@ export const savePaymentWithExcel = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     }
-                    const reciept = await Receipt.create(document);
-                    if (reciept.type === "payment") {
-                        let particular = "payment";
-                        await ledgerPartyForDebit(reciept, particular)
+                    const receipt = await Receipt.create(document);
+                    if (receipt.type === "payment") {
+                        let particular = receipt.paymentMode + " " + "payment";
+                        await ledgerPartyForDebit(receipt, particular)
                     }
                 } else {
                     existingParts.push(document.partyId);
@@ -492,7 +492,7 @@ export const savePaymentWithExcel = async (req, res) => {
                     }
                     const receipt = await Receipt.create(document)
                     if (receipt.type === "payment") {
-                        let particular = "payment";
+                        let particular = receipt.paymentMode + " " + "payment";
                         await ledgerExpensesForDebit(receipt, particular)
                     }
                 } else {
@@ -524,10 +524,10 @@ export const savePaymentWithExcel = async (req, res) => {
                             document[voucherNo] = 1
                         }
                     }
-                    const reciept = await Receipt.create(document);
-                    if (reciept.type === "payment") {
-                        let particular = "payment";
-                        await ledgerUserForDebit(reciept, particular)
+                    const receipt = await Receipt.create(document);
+                    if (receipt.type === "payment") {
+                        let particular = receipt.paymentMode + " " + "payment";
+                        await ledgerUserForDebit(receipt, particular)
                     }
                 } else {
                     existingUsers.push(document.partyId);
@@ -820,8 +820,8 @@ export const PartySendOtp = async (req, res, next) => {
                     req.body.voucherNo = 1
                 }
             }
-            const reciept = await Receipt.create(req.body);
-            if (reciept.type === "receipt") {
+            const receipt = await Receipt.create(req.body);
+            if (receipt.type === "receipt") {
                 let particular = "receipt";
                 await ledgerPartyForCredit(req.body, particular)
             }
@@ -830,11 +830,11 @@ export const PartySendOtp = async (req, res, next) => {
             req.body.lockStatus = "No"
             await PaymentDueReport.create(req.body)
             await OtpVerify.create(req.body)
-            return reciept ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
+            return receipt ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
         } else {
             return res.status(404).json({ message: "PartyId Required..", status: false })
-            // const reciept = await Receipt.create(req.body);
-            // return reciept ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
+            // const receipt = await Receipt.create(req.body);
+            // return receipt ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
         }
     }
     catch (err) {
@@ -880,7 +880,7 @@ export const VerifyPartyPayment = async (req, res, next) => {
                 req.body.voucherNo = 1
             }
         }
-        // const reciept = await Receipt.create(req.body);
+        // const receipt = await Receipt.create(req.body);
         await existingParty.save()
         if (req.body.type === "receipt") {
             let particular = "receipt";
