@@ -192,6 +192,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             if (user.otpVerify !== parseInt(otp)) {
                 return res.status(400).json({ message: "Incorrect OTP", status: false });
             }
+            user.otpVerify = undefined
             let invoiceId = orders.challanNo || orders.invoiceId
             const commonUpdate = { status, paymentMode, CNUpload, invoiceId, CNDetails };
             if (reason) {
@@ -200,6 +201,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             if (orders) {
                 Object.assign(orders, commonUpdate);
                 await orders.save();
+                await user.save();
             }
         } else {
             const user = await Customer.findById(partyId);
@@ -213,6 +215,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             if (user.otpVerify !== parseInt(otp)) {
                 return res.status(400).json({ message: "Incorrect OTP", status: false });
             }
+            user.otpVerify = undefined
             let invoiceId = orders.challanNo || orders.invoiceId
             const commonUpdate = { status, paymentMode, CNUpload, invoiceId, CNDetails };
             if (reason) {
@@ -221,6 +224,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             if (orders) {
                 Object.assign(orders, commonUpdate);
                 await orders.save();
+                await user.save();
             }
             // if (status === "Cancelled") {
             //     for (const orderItem of orders.orderItems) {
@@ -276,14 +280,6 @@ export const sendOtp = async (req, res) => {
             party.otpVerify = otp
             await party.save()
         }
-        // const existing = await OtpVerify.findOne({ partyId: req.body.partyId, userId: req.body.userId })
-        // if (!existing) {
-        //     await OtpVerify.create(req.body)
-        // } else {
-        //     existing.otp = req.body.otp;
-        //     existing.type = "order"
-        //     await existing.save()
-        // }
         return res.status(200).json({ message: "otp send successfull!", status: true });
     } catch (error) {
         console.error(error);
