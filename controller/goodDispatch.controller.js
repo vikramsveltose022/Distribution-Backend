@@ -284,20 +284,23 @@ export const sendOtp = async (req, res) => {
         //     existing.type = "order"
         //     await existing.save()
         // }
-        return res.status(200).json({ message0: "otp send successfull!", status: true });
+        return res.status(200).json({ message: "otp send successfull!", status: true });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 };
 export const ViewOtp = async (req, res) => {
-    const { userId, partyId } = req.body;
     try {
-        const query = { $or: [{ userId }, { partyId }], type: "order" };
-        const orderData = await OtpVerify.findOne(query)
+        // const query = { $or: [{ userId }, { partyId }], type: "order" };
+        const orderData = await Customer.findById(req.params.id).select('otpVerify')
         if (orderData) {
             return res.status(200).json({ otp: orderData, status: true });
         } else {
+            const orderData = await User.findById(req.params.id).select('otpVerify')
+            if (orderData) {
+                return res.status(200).json({ otp: orderData, status: true });
+            }
             return res.status(404).json({ message: 'otp not found', status: false });
         }
     } catch (error) {
