@@ -249,25 +249,15 @@ export const EditProfile = async (req, res, next) => {
     const userDetail = req.body;
     const user_first = await User.findById(req.params.id);
     if (!user_first) {
-      return res
-        .status(404)
-        .json({ error: "this user not found", status: false });
+      return res.status(404).json({ error: "this user not found", status: false });
     }
-    const user = await User.findByIdAndUpdate(userId, userDetail, {
-      new: true,
-    });
+    const user = await User.findByIdAndUpdate(userId, userDetail, { new: true, });
     if (user)
-      return res
-        .status(200)
-        .json({ User: user, message: "successful updated", status: true });
-    return res
-      .status(404)
-      .json({ error: "something went wrong", status: false });
+      return res.status(200).json({ User: user, message: "successful updated", status: true });
+    return res.status(404).json({ error: "something went wrong", status: false });
   } catch (err) {
     console.log(err);
-    return res
-      .status(500)
-      .json({ error: "Internal Server Error", status: false });
+    return res.status(500).json({ error: "Internal Server Error", status: false });
   }
 };
 // --------------------------------------------------------
@@ -347,99 +337,10 @@ export const ViewWarehouse = async (req, res, next) => {
     return adminDetail.length > 0 ? res.status(200).json({ adminDetails: adminDetail, status: true }) : res.status(404).json({ error: "Not Found", status: false });
   } catch (err) {
     console.log(err);
-    return res
-      .status(500)
-      .json({ error: "Internal Server Error", status: false });
+    return res.status(500).json({ error: "Internal Server Error", status: false });
   }
 };
 
-export const saveUserWithExcel11 = async (req, res) => {
-  try {
-    let code = "code";
-    let database = "database"
-    const filePath = await req.file.path;
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(filePath);
-    const worksheet = workbook.getWorksheet(1);
-    const headerRow = worksheet.getRow(1);
-    const headings = [];
-    headerRow.eachCell((cell) => {
-      headings.push(cell.value);
-    });
-    const insertedDocuments = [];
-    const existingParts = [];
-    const panMobile = [];
-    const existingIds = [];
-    const dataNotExist = []
-    for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
-      const dataRow = worksheet.getRow(rowIndex);
-      const document = {};
-      for (let columnIndex = 1; columnIndex <= headings.length; columnIndex++) {
-        const heading = headings[columnIndex - 1];
-        const cellValue = dataRow.getCell(columnIndex).value;
-        if (heading === 'email' && typeof cellValue === 'object' && 'text' in cellValue) {
-          document[heading] = cellValue.text;
-        } else {
-          document[heading] = cellValue;
-        }
-        // document[heading] = cellValue;
-      }
-      document[database] = req.params.database
-      if (document.database) {
-        const existingId = await User.findOne({ id: document.id, database: document.database });
-        if (existingId) {
-          existingIds.push(document.id)
-        } else {
-          if (document.Pan_No) {
-            document[code] = document.Pan_No;
-            const existingRecord = await User.findOne({
-              Pan_No: document.Pan_No, database: document.database
-            });
-            if (!existingRecord) {
-              const insertedDocument = await User.create(document);
-              insertedDocuments.push(insertedDocument);
-            } else {
-              existingParts.push(document.Pan_No);
-            }
-          } else {
-            if (document.Aadhar_No) {
-              const codes = document.Aadhar_No;
-              document[code] = codes;
-              const existingRecord = await User.findOne({
-                Aadhar_No: document.Aadhar_No, database: document.database
-              });
-              if (!existingRecord) {
-                const insertedDocument = await User.create(document);
-                insertedDocuments.push(insertedDocument);
-              } else {
-                existingParts.push(document.Aadhar_No);
-              }
-            } else {
-              // const insertedDocument = await Customer.create(document);
-              panMobile.push(document.Aadhar_No);
-            }
-          }
-        }
-      } else {
-        dataNotExist.push(document.firstName)
-      }
-    }
-    let message = 'Data Inserted Successfully';
-    if (existingParts.length > 0) {
-      message = `some user already exist: ${existingParts.join(', ')}`;
-    } else if (panMobile.length > 0) {
-      message = `this pan or adharCard already exist: ${panMobile.join(', ')}`;
-    } else if (existingIds.length > 0) {
-      message = `this user id already exist: ${existingIds.join(', ')}`;
-    } else if (dataNotExist.length > 0) {
-      message = `this user's database not exist: ${dataNotExist.join(', ')}`;
-    }
-    return res.status(200).json({ message, status: true });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error', status: false });
-  }
-}
 export const saveUserWithExcel = async (req, res) => {
   try {
     let code = "code";
@@ -753,7 +654,6 @@ export const assingWarehouse = async function assingWarehouse(warehouse, userId)
     return res.status(500).json({ error: "Internal Server Error", status: false })
   }
 }
-
 export const GetExcelKeys = async (req, res) => {
   const excludedKeys = ['_id', 'createdAt', 'updatedAt', '__v', 'latitude', 'longitude', 'currentAddress', 'warehouse', 'typeStatus', 'otpVerify', 'position', 'code', 'created_by', 'status'];
   const modelKeys = Object.keys(User.schema.paths).filter(key => !excludedKeys.includes(key));
