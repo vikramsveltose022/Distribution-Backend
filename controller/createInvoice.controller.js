@@ -10,6 +10,7 @@ import { addProductInWarehouse } from "./product.controller.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
 import { create } from "html-pdf";
+import { CustomerGroup } from "../model/customerGroup.model.js";
 
 
 export const SaveInvoiceList = async (req, res, next) => {
@@ -195,6 +196,7 @@ export const SavePurchaseInvoice1 = async (req, res, next) => {
 };
 export const SavePurchaseInvoice = async (req, res, next) => {
     try {
+        let groupDiscount = 0;
         let particular = "PurchaseInvoice"
         const orderId = req.params.id;
         const purchase = await PurchaseOrder.findById(orderId);
@@ -208,6 +210,18 @@ export const SavePurchaseInvoice = async (req, res, next) => {
         for (const orderItem of purchase.orderItems) {
             const product = await Product.findOne({ _id: orderItem.productId });
             if (product) {
+                const group = await CustomerGroup.find({ database: product.database, status: "Active" })
+                if (group.length > 0) {
+                    const maxDiscount = group.reduce((max, group) => {
+                        return group.discount > max.discount ? group : max;
+                    });
+                    groupDiscount = maxDiscount.discount;
+                }
+                if (!product.ProfitPercentage || product.ProfitPercentage === 0) {
+                    product.Purchase_Rate = orderItem.landedCost;
+                    product.SalesRate = product.Purchase_Rate * 1.03;
+                    product.Product_MRP = (product.SalesRate) * (1 + product.gstPercentage / 100) * (1 + groupDiscount / 100);
+                }
                 const current = new Date(new Date())
                 product.purchaseDate = current
                 product.partyId = purchase.partyId;
