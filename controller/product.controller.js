@@ -33,7 +33,7 @@ export const SaveProduct = async (req, res) => {
     if (!req.body.ProfitPercentage || req.body.ProfitPercentage === 0) {
       req.body.SalesRate = req.body.Purchase_Rate * 1.03;
       req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.gstPercentage / 100) * (1 + groupDiscount / 100);
-      // const latest = (req.body.SalesRate + (req.body.SalesRate * req.body.gstPercentage / 100))
+      // const latest = (req.body.SalesRate + (req.body.SalesRate * req.body.GSTRate / 100))
       // req.body.Product_MRP = latest + (latest * (groupDiscount) / 100);
     }
     const product = await Product.create(req.body);
