@@ -248,7 +248,7 @@ export const WarehouseDifferenceReport = async (req, res, next) => {
 export const warehouseProductItem1 = async (body, lastStock) => {
     let matchingStocks = {};
     for (let id of body) {
-        const stock = lastStock.find((item) => item.productId === id.productId);
+        const stock = lastStock.find((item) => item.productId === id.productId._id);
         if (stock) {
             if (!matchingStocks[id.productId._id]) {
                 matchingStocks[id.productId._id] = {
