@@ -8,6 +8,7 @@ import { Customer } from "../model/customer.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { Product } from "../model/product.model.js";
 import { ledgerPartyForDebit } from "../service/ledger.js";
+import { OtpVerify } from "../model/otpVerify.model.js";
 
 
 export const saveGoodDispatch = async (req, res) => {
@@ -146,7 +147,7 @@ export const viewOrderForDeliveryBoy = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
-export const sendOtp = async (req, res) => {
+export const sendOtp1 = async (req, res) => {
     try {
         const otp = Math.floor(100000 + Math.random() * 900000);
         const user = await Customer.findById({ _id: req.params.id })
@@ -179,47 +180,69 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
         }
         let CNDetails = req.body.CNDetails
         const { status, otp, partyId, orderId, reason, paymentMode } = req.body;
-        const user = await Customer.findById(partyId);
-        if (!user) {
-            return res.status(404).json({ message: "Party Not Found", status: false })
-        }
-        const orders = await CreateOrder.findById(orderId);
-        if (!orders) {
-            return res.status(404).json({ message: "Order Not Found", status: false });
-        }
-        if (user.otpVerify !== parseInt(otp)) {
-            return res.status(400).json({ message: "Incorrect OTP", status: false });
-        }
-        let invoiceId = orders.challanNo || orders.invoiceId
-        const commonUpdate = { status, paymentMode, CNUpload, invoiceId, CNDetails };
-        if (reason) {
-            commonUpdate.reason = reason;
-        }
-        if (orders) {
-            Object.assign(orders, commonUpdate);
-            await orders.save();
-        }
         if (status === "Cancelled") {
-            for (const orderItem of orders.orderItems) {
-                const product = await Product.findById({ _id: orderItem.productId });
-                if (product) {
-                    const warehouse = await Warehouse.findById(product.warehouse)
-                    if (warehouse) {
-                        const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
-                        pro.currentStock += (orderItem.qty);
-                        product.Opening_Stock += orderItem.qty;
-                        if (pro.currentStock < 0) {
-                            return res.status(404).json({ message: "Product Out Of Stock", status: false })
-                        }
-                        pro.pendingStock -= (orderItem.qty)
-                        await warehouse.save();
-                        await product.save()
-                    }
-                } else {
-                    console.error(`Product with ID ${orderItem.productId} not found`);
-                }
+            const orders = await CreateOrder.findById(orderId);
+            if (!orders) {
+                return res.status(404).json({ message: "Order Not Found", status: false });
+            }
+            const user = await User.findById(orders.userId);
+            if (!user) {
+                return res.status(404).json({ message: "Party Not Found", status: false })
+            }
+            if (user.otpVerify !== parseInt(otp)) {
+                return res.status(400).json({ message: "Incorrect OTP", status: false });
+            }
+            let invoiceId = orders.challanNo || orders.invoiceId
+            const commonUpdate = { status, paymentMode, CNUpload, invoiceId, CNDetails };
+            if (reason) {
+                commonUpdate.reason = reason;
+            }
+            if (orders) {
+                Object.assign(orders, commonUpdate);
+                await orders.save();
             }
         } else {
+            const user = await Customer.findById(partyId);
+            if (!user) {
+                return res.status(404).json({ message: "Party Not Found", status: false })
+            }
+            const orders = await CreateOrder.findById(orderId);
+            if (!orders) {
+                return res.status(404).json({ message: "Order Not Found", status: false });
+            }
+            if (user.otpVerify !== parseInt(otp)) {
+                return res.status(400).json({ message: "Incorrect OTP", status: false });
+            }
+            let invoiceId = orders.challanNo || orders.invoiceId
+            const commonUpdate = { status, paymentMode, CNUpload, invoiceId, CNDetails };
+            if (reason) {
+                commonUpdate.reason = reason;
+            }
+            if (orders) {
+                Object.assign(orders, commonUpdate);
+                await orders.save();
+            }
+            // if (status === "Cancelled") {
+            //     for (const orderItem of orders.orderItems) {
+            //         const product = await Product.findById({ _id: orderItem.productId });
+            //         if (product) {
+            //             const warehouse = await Warehouse.findById(product.warehouse)
+            //             if (warehouse) {
+            //                 const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
+            //                 pro.currentStock += (orderItem.qty);
+            //                 product.Opening_Stock += orderItem.qty;
+            //                 if (pro.currentStock < 0) {
+            //                     return res.status(404).json({ message: "Product Out Of Stock", status: false })
+            //                 }
+            //                 pro.pendingStock -= (orderItem.qty)
+            //                 await warehouse.save();
+            //                 await product.save()
+            //             }
+            //         } else {
+            //             console.error(`Product with ID ${orderItem.productId} not found`);
+            //         }
+            //     }
+            // }
             if (orders.status === "completed") {
                 const particular = "SalesInvoice";
                 await ledgerPartyForDebit(orders, particular)
@@ -229,6 +252,57 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+export const sendOtp = async (req, res) => {
+    try {
+        const otp = Math.floor(1000 + Math.random() * 9000);
+        const existing = await CreateOrder.findById(req.params.id)
+        if (!existing) {
+            return res.status(404).json({ message: "order not found", status: false })
+        }
+        if (req.body.type === "Cancelled") {
+            const user = await User.findOne({ _id: existing.userId, status: "Active" })
+            if (!user) {
+                return res.status(404).json({ message: "user not found", status: false })
+            }
+            user.otpVerify = otp
+            await user.save()
+        } else {
+            const party = await Customer.findOne({ _id: existing.partyId, status: "Active" })
+            if (!party) {
+                return res.status(404).json({ message: "party not found", status: false })
+            }
+            party.otpVerify = otp
+            await party.save()
+        }
+        // const existing = await OtpVerify.findOne({ partyId: req.body.partyId, userId: req.body.userId })
+        // if (!existing) {
+        //     await OtpVerify.create(req.body)
+        // } else {
+        //     existing.otp = req.body.otp;
+        //     existing.type = "order"
+        //     await existing.save()
+        // }
+        return res.status(200).json({ message0: "otp send successfull!", status: true });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
+export const ViewOtp = async (req, res) => {
+    const { userId, partyId } = req.body;
+    try {
+        const query = { $or: [{ userId }, { partyId }], type: "order" };
+        const orderData = await OtpVerify.findOne(query)
+        if (orderData) {
+            return res.status(200).json({ otp: orderData, status: true });
+        } else {
+            return res.status(404).json({ message: 'otp not found', status: false });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 };
 
