@@ -1,6 +1,5 @@
 import moment from "moment";
 import { ClosingStock } from "../model/closingStock.model.js";
-import { InvoiceList } from "../model/createInvoice.model.js";
 import { Ledger } from "../model/ledger.model.js";
 import { Product } from "../model/product.model.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";

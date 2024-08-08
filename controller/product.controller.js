@@ -3,9 +3,11 @@ import { Product } from "../model/product.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
+import { CustomerGroup } from "../model/customerGroup.model.js";
 
 export const SaveProduct = async (req, res) => {
   try {
+    let groupDiscount = 0;
     if (req.body.id) {
       const existing = await Product.findOne({ database: req.body.database, id: req.body.id })
       if (existing) {
@@ -14,6 +16,13 @@ export const SaveProduct = async (req, res) => {
     } else {
       return res.status(400).json({ message: "product id required", status: false })
     }
+    const group = await CustomerGroup.find({ database: req.body.database, status: "Active" })
+    if (group.length > 0) {
+      const maxDiscount = group.reduce((max, group) => {
+        return group.discount > max.discount ? group : max;
+      });
+      groupDiscount = maxDiscount.discount;
+    }
     if (req.files) {
       let images = [];
       req.files.map((file) => {
@@ -21,12 +30,18 @@ export const SaveProduct = async (req, res) => {
       });
       req.body.Product_image = images;
     }
+    if (!req.body.ProfitPercentage || req.body.ProfitPercentage === 0) {
+      req.body.SalesRate = req.body.Purchase_Rate * 1.03;
+      req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.gstPercentage / 100) * (1 + groupDiscount / 100);
+      // const latest = (req.body.SalesRate + (req.body.SalesRate * req.body.gstPercentage / 100))
+      // req.body.Product_MRP = latest + (latest * (groupDiscount) / 100);
+    }
     const product = await Product.create(req.body);
     await addProductInWarehouse1(req.body, product.warehouse, product)
     return product ? res.status(200).json({ message: "product save successfully", status: true }) : res.status(400).json({ message: "something went wrong", status: false });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal Server Error" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal Server Error", status: false });
   }
 };
 export const ViewProduct = async (req, res, next) => {
