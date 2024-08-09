@@ -57,7 +57,7 @@ export const createOrder = async (req, res, next) => {
                         pro.currentStock -= (orderItem.qty);
                         product.Opening_Stock -= orderItem.qty;
                         if (pro.currentStock < 0) {
-                            return res.status(404).json({ message: "Product Out Of Stock", status: false })
+                            return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
                         }
                         pro.pendingStock += (orderItem.qty)
                         await warehouse.save();
