@@ -226,27 +226,25 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                 await orders.save();
                 await user.save();
             }
-            // if (status === "Cancelled") {
-            //     for (const orderItem of orders.orderItems) {
-            //         const product = await Product.findById({ _id: orderItem.productId });
-            //         if (product) {
-            //             const warehouse = await Warehouse.findById(product.warehouse)
-            //             if (warehouse) {
-            //                 const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId)
-            //                 pro.currentStock += (orderItem.qty);
-            //                 product.Opening_Stock += orderItem.qty;
-            //                 if (pro.currentStock < 0) {
-            //                     return res.status(404).json({ message: "Product Out Of Stock", status: false })
-            //                 }
-            //                 pro.pendingStock -= (orderItem.qty)
-            //                 await warehouse.save();
-            //                 await product.save()
-            //             }
-            //         } else {
-            //             console.error(`Product with ID ${orderItem.productId} not found`);
-            //         }
-            //     }
-            // }
+            for (const orderItem of orders.orderItems) {
+                const product = await Product.findById({ _id: orderItem.productId });
+                if (product) {
+                    const warehouse = await Warehouse.findById(product.warehouse)
+                    if (warehouse) {
+                        const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
+                        // pro.currentStock += (orderItem.qty);
+                        // product.Opening_Stock += orderItem.qty;
+                        // if (pro.currentStock < 0) {
+                        //     return res.status(404).json({ message: "Product Out Of Stock", status: false })
+                        // }
+                        pro.pendingStock -= (orderItem.qty)
+                        await warehouse.save();
+                        // await product.save()
+                    }
+                } else {
+                    console.error(`Product with ID ${orderItem.productId} not found`);
+                }
+            }
             if (orders.status === "completed") {
                 const particular = "SalesInvoice";
                 await ledgerPartyForDebit(orders, particular)
