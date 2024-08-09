@@ -477,23 +477,16 @@ export const ViewOverDueStock = async (body) => {
 export const savedd = async (req, res, next) => {
     try {
         const rolesss = []
-        const role = await Role.find({ database: "" })
-        const roles = await Role.find({ database: req.params.database })
-        if (role.length === 0 && roles.length === 0) {
+        const role = await Role.find({ database: req.params.database })
+        // const roles = await Role.find({ database: req.params.database })
+        if (role.length === 0) {
             return res.status(404).json({ message: "Not Found", status: false })
         }
-        // console.log(role.length)
+        console.log(role.length)
         for (let item of role) {
-            for (let i of roles) {
-                if (i.roleName === item.roleName) {
-                    console.log(item.id)
-                    i.id = item.id
-                    const roleupdated = await i.save()
-                    rolesss.push(roleupdated)
-                }
-            }
+            await Role.findByIdAndDelete(item._id.toString())
         }
-        res.status(200).json({ role: rolesss, status: true })
+        res.status(200).json({ message: "suceess", status: true })
     }
     catch (err) {
         console.log(err)
