@@ -32,7 +32,7 @@ export const SaveProduct = async (req, res) => {
     }
     if (!req.body.ProfitPercentage || req.body.ProfitPercentage === 0) {
       req.body.SalesRate = req.body.Purchase_Rate * 1.03;
-      req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.gstPercentage / 100) * (1 + groupDiscount / 100);
+      req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.GSTRate / 100) * (1 + groupDiscount / 100);
       // const latest = (req.body.SalesRate + (req.body.SalesRate * req.body.GSTRate / 100))
       // req.body.Product_MRP = latest + (latest * (groupDiscount) / 100);
     }
@@ -90,6 +90,7 @@ export const DeleteProduct = async (req, res, next) => {
 };
 export const UpdateProduct = async (req, res, next) => {
   try {
+    let groupDiscount = 0;
     if (req.files) {
       let images = [];
       req.files.map((file) => {
@@ -102,6 +103,17 @@ export const UpdateProduct = async (req, res, next) => {
     if (!existingProduct) {
       return res.status(404).json({ error: "product not found", status: false });
     } else {
+      const group = await CustomerGroup.find({ database: existingProduct.database, status: "Active" })
+      if (group.length > 0) {
+        const maxDiscount = group.reduce((max, group) => {
+          return group.discount > max.discount ? group : max;
+        });
+        groupDiscount = maxDiscount.discount;
+      }
+      if (!req.body.ProfitPercentage || req.body.ProfitPercentage === 0) {
+        req.body.SalesRate = req.body.Purchase_Rate || existingProduct.Purchase_Rate * 1.03;
+        req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.GSTRate || existingProduct.GSTRate / 100) * (1 + groupDiscount / 100);
+      }
       const updatedProduct = req.body;
       const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
       // if (req.body.warehouse) {
@@ -224,8 +236,11 @@ export const viewCurrentStock = async (req, res, next) => {
 
 export const saveItemWithExcel = async (req, res) => {
   try {
+    let groupDiscount = 0;
     let database = "database";
     let warehouse = "warehouse"
+    let SalesRate = "SalesRate"
+    let Product_MRP = "Product_MRP"
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -260,6 +275,17 @@ export const saveItemWithExcel = async (req, res) => {
             if (existingId) {
               existingIds.push(document.Product_Title)
             } else {
+              const group = await CustomerGroup.find({ database: document.database, status: "Active" })
+              if (group.length > 0) {
+                const maxDiscount = group.reduce((max, group) => {
+                  return group.discount > max.discount ? group : max;
+                });
+                groupDiscount = maxDiscount.discount;
+              }
+              if (!document.ProfitPercentage || document.ProfitPercentage === 0) {
+                document[SalesRate] = document.Purchase_Rate * 1.03;
+                document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate / 100) * (1 + groupDiscount / 100);
+              }
               const insertedDocument = await Product.create(document);
               await addProductInWarehouse1(document, insertedDocument.warehouse, insertedDocument)
               insertedDocuments.push(insertedDocument);
@@ -290,6 +316,9 @@ export const saveItemWithExcel = async (req, res) => {
 }
 export const updateItemWithExcel = async (req, res) => {
   try {
+    let groupDiscount = 0;
+    let SalesRate = "SalesRate"
+    let Product_MRP = "Product_MRP"
     let database = "database";
     let warehouse = "warehouse"
     const filePath = await req.file.path;
@@ -323,6 +352,17 @@ export const updateItemWithExcel = async (req, res) => {
           if (!existProduct) {
             IdNotExisting.push(document.id)
           } else {
+            const group = await CustomerGroup.find({ database: document.database, status: "Active" })
+            if (group.length > 0) {
+              const maxDiscount = group.reduce((max, group) => {
+                return group.discount > max.discount ? group : max;
+              });
+              groupDiscount = maxDiscount.discount;
+            }
+            if (!document.ProfitPercentage || document.ProfitPercentage === 0) {
+              document[SalesRate] = document.Purchase_Rate || existProduct.Purchase_Rate * 1.03;
+              document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate || existProduct.GSTRate / 100) * (1 + groupDiscount / 100);
+            }
             document[warehouse] = existingWarehouse._id.toString()
             const filter = { id: document.id, database: req.params.database };
             const options = { new: true, upsert: true };
