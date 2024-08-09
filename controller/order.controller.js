@@ -50,7 +50,7 @@ export const createOrder = async (req, res, next) => {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
                     orderItem.warehouse = product.warehouse;
-                    ware = product.warehouse
+                    // ware = product.warehouse
                     product.salesDate = new Date()
                     const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
@@ -72,7 +72,7 @@ export const createOrder = async (req, res, next) => {
             req.body.database = user.database
             req.body.orderNo = orderNo
             req.body.orderItems = orderItems
-            req.body.warehouseId = ware
+            // req.body.warehouseId = ware
             const savedOrder = CreateOrder.create(req.body)
             req.body.database = user.database;
             req.body.totalAmount = req.body.grandTotal;

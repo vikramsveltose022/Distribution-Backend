@@ -63,7 +63,10 @@ const orderItemsSchema = new mongoose.Schema({
     },
     igstTaxType: {
         type: Boolean
-    }
+    },
+    warehouse: {
+        type: String
+    },
 }, { timestamps: true });
 const createOrderSchema = new mongoose.Schema({
     CNUpload: {
