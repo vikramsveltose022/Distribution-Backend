@@ -302,12 +302,16 @@ export const ViewOtp = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 };
-// export const viewOrderInWarehouse = async (req, res, next) => {
-//     try {
-//         const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id })
-//     }
-//     catch (err) {
-//         console.log(err)
-//     }
-// }
+export const ViewWarehouseByOrder = async (req, res, next) => {
+    try {
+        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Cancel in processs" })
+        if (!order) {
+            return res.status(404).json({ message: "warehouse stock not found", status: false })
+        }
+        return res.status(200).json({ Order: order, status: false })
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
 

@@ -2,19 +2,16 @@ import mongoose from "mongoose";
 
 const StockUpdationSchema = new mongoose.Schema({
     created_by: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user"
+        type: String
     },
     database: {
         type: String
     },
     warehouseToId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "warehouse"
+        type: String
     },
     warehouseFromId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "warehouse"
+        type: String
     },
     stockTransferDate: {
         type: String
@@ -24,10 +21,18 @@ const StockUpdationSchema = new mongoose.Schema({
     },
     productItems: [{
         productId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "product"
+            type: String
         },
         unitType: {
+            type: String
+        },
+        primaryUnit: {
+            type: String
+        },
+        secondaryUnit: {
+            type: String
+        },
+        secondarySize: {
             type: String
         },
         Size: {
@@ -45,14 +50,33 @@ const StockUpdationSchema = new mongoose.Schema({
         totalPrice: {
             type: Number
         },
-        demadge_percent: {
-            type: String
+        sgstRate: {
+            type: Number
         },
-        reason: {
+        cgstRate: {
+            type: Number
+        },
+        isgtRate: {
+            type: Number
+        },
+        taxableAmount: {
+            type: Number
+        },
+        grandTotal: {
+            type: Number
+        },
+        gstPercentage: {
             type: String
         },
         igstTaxType: {
             type: Boolean
+        },
+        pendingStock: {
+            type: Number,
+            default: 0
+        },
+        damageItem: {
+            type: Object
         }
     }],
     grandTotal: {
@@ -66,8 +90,10 @@ const StockUpdationSchema = new mongoose.Schema({
     },
     OutwardStatus: {
         type: String
+    },
+    status: {
+        type: String,
+        default: "Active"
     }
-
-
 }, { timestamps: true })
 export const StockUpdation = mongoose.model("stockUpdation", StockUpdationSchema)
