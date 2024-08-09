@@ -61,12 +61,12 @@ export const SaveInvoiceList = async (req, res, next) => {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     pro.currentStock -= (orderItem.qty);
                     if (pro.currentStock < 0) {
-                        return res.status(404).json({ message: "out of stock", status: false })
+                        // return res.status(404).json({ message: "out of stock", status: false })
                     }
                     pro.pendingStock += (orderItem.qty)
                     // await warehouse.save();
                     // await product.save()
-                    await ClosingSales(orderItem, product.warehouse)
+                    // await ClosingSales(orderItem, product.warehouse)
                 }
             } else {
                 console.error(`Product with ID ${orderItem.productId._id} not found`);
