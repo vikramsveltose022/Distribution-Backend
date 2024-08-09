@@ -202,7 +202,7 @@ export const OrdertoDispatch = async (req, res) => {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     pro.currentStock -= (orderItem.qty);
                     if (pro.currentStock < 0) {
-                        return res.status(404).json({ message: "Product Out Of Stock", status: false })
+                        // return res.status(404).json({ message: "Product Out Of Stock", status: false })
                     }
                     pro.pendingStock += (orderItem.qty)
                     // await warehouse.save();
