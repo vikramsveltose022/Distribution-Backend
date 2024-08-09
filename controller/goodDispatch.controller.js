@@ -180,7 +180,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
         }
         let CNDetails = req.body.CNDetails
         const { status, otp, partyId, orderId, reason, paymentMode } = req.body;
-        if (status === "Cancelled") {
+        if (status === "Cancel in processs") {
             const orders = await CreateOrder.findById(orderId);
             if (!orders) {
                 return res.status(404).json({ message: "Order Not Found", status: false });

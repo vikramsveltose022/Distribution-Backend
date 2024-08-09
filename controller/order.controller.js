@@ -49,6 +49,7 @@ export const createOrder = async (req, res, next) => {
             for (const orderItem of orderItems) {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
+                    orderItem.warehouse = product.warehouse;
                     ware = product.warehouse
                     product.salesDate = new Date()
                     const warehouse = await Warehouse.findById(product.warehouse)
