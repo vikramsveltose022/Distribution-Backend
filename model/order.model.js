@@ -44,6 +44,9 @@ const orderItemsSchema = new mongoose.Schema({
     totalPriceWithDiscount: {
         type: Number
     },
+    warehouse:{
+        type:String
+    },
     status: {
         type: String,
         default: "ordered"
