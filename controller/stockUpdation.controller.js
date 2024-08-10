@@ -128,8 +128,8 @@ export const updateWarehousetoWarehouse = async (req, res, next) => {
                 if (sourceProductItem) {
                     // sourceProductItem.price = item.price;
                     // sourceProductItem.currentStock -= (item.transferQty);
+                    // sourceProductItem.totalPrice -= item.totalPrice;
                     sourceProductItem.pendingStock -= (item.transferQty);
-                    sourceProductItem.totalPrice -= item.totalPrice;
                     sourceProduct.markModified('productItems');
                     await sourceProduct.save();
                     const destinationProduct = await Warehouse.findOne({
@@ -143,17 +143,9 @@ export const updateWarehousetoWarehouse = async (req, res, next) => {
                         destinationProductItem.totalPrice += item.totalPrice;
                         await destinationProduct.save();
                     } else {
+                        item.currentStock = item.transferQty
                         await Warehouse.updateOne({ _id: existingFactory.warehouseToId },
-                            {
-                                $push: { productItems: item },
-                                $set: {
-                                    stockTransferDate: existingFactory.stockTransferDate,
-                                    transferStatus: existingFactory.transferStatus,
-                                    grandTotal: existingFactory.grandTotal,
-                                    warehouseFromId: existingFactory.warehouseFromId
-                                }
-                            },
-                            { upsert: true });
+                            { $push: { productItems: item }, $set: { stockTransferDate: existingFactory.stockTransferDate, transferStatus: existingFactory.transferStatus, grandTotal: existingFactory.grandTotal, warehouseFromId: existingFactory.warehouseFromId } }, { upsert: true });
                     }
                 } else {
                     // return res.status(400).json({ error: 'Insufficient quantity in the source warehouse or product not found' });
