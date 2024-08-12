@@ -352,3 +352,16 @@ export const OrderCancelWarehouse = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+export const ProductInWarehouse = async (req, res, next) => {
+    try {
+        const warehouse = await Warehouse.find({ "productItems.productId": req.params.productId, status: "Active" }).select('warehouseName')
+        if (!warehouse) {
+            return res.status(404).json({ message: "Product Not Found in Warehouse", status: false })
+        }
+        return res.status(200).json({ Warehouse: warehouse, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
