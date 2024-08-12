@@ -215,6 +215,7 @@ export const OrdertoDispatch = async (req, res) => {
                 console.error(`Product with ID ${orderItem.productId._id} not found`);
             }
         }
+        order.NoOfPackage += req.body.NoOfPackage
         order.status = "Dispatch"
         await order.save();
         return res.status(200).json({ message: "Order Dispatch Seccessfull!", Order: order, status: true });
