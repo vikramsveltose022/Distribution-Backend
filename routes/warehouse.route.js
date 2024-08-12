@@ -1,9 +1,10 @@
 import express from "express";
-import { DeleteWarehouse, HSNStockSummary, SaveWarehouse, StockCalculate, UpdateWarehouse, ViewWarehouse, ViewWarehouseById, ViewWarehouseForProduct, ViewWarehouseList, ViewWarehouseListIncharge, WarehouseDifferenceReport, WarehouseReport, getWarehouseData, savedd } from "../controller/warehouse.controller.js";
+import { DeleteWarehouse, HSNStockSummary, SaveWarehouse, SignIn, StockCalculate, UpdateWarehouse, ViewWarehouse, ViewWarehouseById, ViewWarehouseForProduct, ViewWarehouseList, ViewWarehouseListIncharge, WarehouseDifferenceReport, WarehouseReport, getWarehouseData, savedd } from "../controller/warehouse.controller.js";
 
 const router = express.Router();
 
 router.post("/save-warehouse", SaveWarehouse);
+router.post("/signin", SignIn);
 router.get("/view-warehouse/:database", ViewWarehouse);
 router.get("/view-warehouse-product/:database", ViewWarehouseForProduct)
 router.get("/view-warehouse-by-id/:id", ViewWarehouseById);
