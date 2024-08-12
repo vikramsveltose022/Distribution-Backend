@@ -22,6 +22,12 @@ const WarehouseSchema = new mongoose.Schema({
   address: {
     type: String
   },
+  Password: {
+    type: String
+  },
+  Username: {
+    type: String
+  },
   productItems: [{
     productId: {
       type: String

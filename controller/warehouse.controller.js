@@ -1,4 +1,5 @@
-import axios from "axios";
+import dotenv from "dotenv"
+import Jwt from "jsonwebtoken";
 import { Warehouse } from "../model/warehouse.model.js";
 import { Factory } from "../model/factory.model.js";
 import { Stock } from "../model/stock.js";
@@ -7,8 +8,27 @@ import moment from "moment";
 import { Product } from "../model/product.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { Role } from "../model/role.model.js";
+dotenv.config();
 
-
+export const SignIn = async (req, res, next) => {
+    try {
+        const { username, password } = req.body;
+        let warehouse = await Warehouse.findOne({ Username: username })
+        if (!warehouse) {
+            return res.status(400).json({ message: "Incorrect Warehouse Username", status: false });
+        }
+        if (warehouse && warehouse.password !== password) {
+            return res.status(400).json({ message: "Incorrect Password", status: false });
+        }
+        if (warehouse) {
+            const token = Jwt.sign({ subject: username }, process.env.TOKEN_SECRET_KEY);
+            return res.status(200).json({ message: "Warehouse SignIn Successfull!", warehouse: { ...warehouse.toObject(), password: undefined, token: token }, status: true })
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
 export const SaveWarehouse = async (req, res, next) => {
     try {
         if (req.body.id) {
