@@ -44,8 +44,8 @@ const orderItemsSchema = new mongoose.Schema({
     totalPriceWithDiscount: {
         type: Number
     },
-    warehouse:{
-        type:String
+    warehouse: {
+        type: String
     },
     status: {
         type: String,
@@ -208,7 +208,10 @@ const OrderSchema = new mongoose.Schema({
     otherCharges: {
         type: Number
     },
-    gstOtherCharges: []
+    gstOtherCharges: [],
+    NoOfPackage: {
+        type: Number
+    }
 }, { timestamps: true })
 
 export const Order = mongoose.model("order", OrderSchema)
