@@ -180,7 +180,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
         }
         let CNDetails = req.body.CNDetails
         const { status, otp, partyId, orderId, reason, paymentMode } = req.body;
-        if (status === "Cancel in processs") {
+        if (status === "Cancel in process") {
             const orders = await CreateOrder.findById(orderId);
             if (!orders) {
                 return res.status(404).json({ message: "Order Not Found", status: false });
@@ -232,11 +232,6 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                     const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
                         const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                        // pro.currentStock += (orderItem.qty);
-                        // product.Opening_Stock += orderItem.qty;
-                        // if (pro.currentStock < 0) {
-                        //     return res.status(404).json({ message: "Product Out Of Stock", status: false })
-                        // }
                         pro.pendingStock -= (orderItem.qty)
                         await warehouse.save();
                         // await product.save()
@@ -314,4 +309,46 @@ export const ViewWarehouseByOrder = async (req, res, next) => {
         console.log(err)
     }
 }
-
+export const OrderCancelWarehouse = async (req, res, next) => {
+    try {
+        const existingOrder = await CreateOrder.findById(req.params.id)
+        if (!existingOrder) {
+            return res.status(404).json({ message: "Order Not Found", status: false })
+        }
+        let productFound = false;
+        for (const item of existingOrder.orderItems) {
+            if (item.productId.toString() === req.params.productId) {
+                item.status = "Cancelled"
+                productFound = true;
+                const product = await Product.findById({ _id: item.productId });
+                if (product) {
+                    // const warehouse = await Warehouse.findById(item.warehouse)
+                    const warehouse = await Warehouse.findById(product.warehouse)
+                    if (warehouse) {
+                        const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString())
+                        pro.currentStock += (item.qty);
+                        product.Opening_Stock += item.qty;
+                        pro.pendingStock -= (item.qty)
+                        await warehouse.save();
+                        await product.save()
+                    }
+                } else {
+                    console.error(`Product with ID ${orderItem.productId} not found`);
+                }
+            } else if (item.status === "Cancelled") {
+                existingOrder.status = "Cancelled"
+            } else {
+                existingOrder.status = "Cancel in process"
+            }
+        }
+        if (!productFound) {
+            return res.status(404).json({ message: "Product Not Found in Order", status: false });
+        }
+        await existingOrder.save()
+        return res.status(200).json({ message: "Product Cancel Successfull!", status: true })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}

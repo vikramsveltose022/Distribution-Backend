@@ -517,7 +517,7 @@ export const ViewDeadParty1 = async (req, res, next) => {
         const currentDate = moment();
         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
 
-        const hierarchy = await Customer.find({ database: database, status: 'Active', createdAt: { $lt: startOfLastMonth } })
+        const hierarchy = await Customer.find({ database: database, status: 'Active', leadStatusCheck: "false", createdAt: { $lt: startOfLastMonth } })
 
         const allOrderedParties = await CreateOrder.find({ database: database, createdAt: { $gte: startOfLastMonth.toDate() } })
         let allParty = []
@@ -553,7 +553,7 @@ export const ViewDeadParty = async (req, res, next) => {
         const database = req.params.database;
         const currentDate = moment();
         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
-        const hierarchy = await Customer.find({ database: database, status: 'Active', createdAt: { $lt: startOfLastMonth } }).lean();
+        const hierarchy = await Customer.find({ database: database, status: 'Active', leadStatusCheck: "false", createdAt: { $lt: startOfLastMonth } }).lean();
 
         const allOrderedParties = await CreateOrder.find({ database: database, createdAt: { $gte: startOfLastMonth.toDate() } }).lean();
 
