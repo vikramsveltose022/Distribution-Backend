@@ -12,17 +12,17 @@ dotenv.config();
 
 export const SignIn = async (req, res, next) => {
     try {
-        const { username, password } = req.body;
-        let warehouse = await Warehouse.findOne({ Username: username })
+        const { Username, Password } = req.body;
+        let warehouse = await Warehouse.findOne({ Username: Username })
         if (!warehouse) {
             return res.status(400).json({ message: "Incorrect Warehouse Username", status: false });
         }
-        if (warehouse && warehouse.password !== password) {
+        if (warehouse && warehouse.Password !== Password) {
             return res.status(400).json({ message: "Incorrect Password", status: false });
         }
         if (warehouse) {
-            const token = Jwt.sign({ subject: username }, process.env.TOKEN_SECRET_KEY);
-            return res.status(200).json({ message: "Warehouse SignIn Successfull!", warehouse: { ...warehouse.toObject(), password: undefined, token: token }, status: true })
+            const token = Jwt.sign({ subject: Username }, process.env.TOKEN_SECRET_KEY);
+            return res.status(200).json({ message: "Warehouse SignIn Successfull!", warehouse: { ...warehouse.toObject(), Password: undefined, token: token }, status: true })
         }
     } catch (err) {
         console.error(err);
