@@ -306,6 +306,9 @@ const createOrderSchema = new mongoose.Schema({
     },
     AssignDeliveryBoy: {
         type: String
+    },
+    NoOfPackage: {
+        type: Number
     }
 }, { timestamps: true })
 
