@@ -253,7 +253,6 @@ export const OrdertoDispatch = async (req, res) => {
             }
             if (orderItem.warehouse.toString() === req.body.warehouse.toString()) {
                 orderItem.status = "Dispatch"
-                productFound = true;
             } else if (orderItem.status === "Dispatch") {
                 order.status = "Dispatch"
             } else {
