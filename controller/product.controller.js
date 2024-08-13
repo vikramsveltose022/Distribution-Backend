@@ -112,8 +112,8 @@ export const UpdateProduct = async (req, res, next) => {
         groupDiscount = maxDiscount.discount;
       }
       if (!req.body.ProfitPercentage || req.body.ProfitPercentage === 0) {
-        req.body.SalesRate = req.body.Purchase_Rate || existingProduct.Purchase_Rate * 1.03;
-        req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.GSTRate || existingProduct.GSTRate / 100) * (1 + groupDiscount / 100);
+        req.body.SalesRate = req.body.Purchase_Rate * 1.03;
+        req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.GSTRate / 100) * (1 + groupDiscount / 100);
       }
       const updatedProduct = req.body;
       const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
@@ -363,8 +363,8 @@ export const updateItemWithExcel = async (req, res) => {
               groupDiscount = maxDiscount.discount;
             }
             if (!document.ProfitPercentage || document.ProfitPercentage === 0) {
-              document[SalesRate] = document.Purchase_Rate || existProduct.Purchase_Rate * 1.03;
-              document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate || existProduct.GSTRate / 100) * (1 + groupDiscount / 100);
+              document[SalesRate] = document.Purchase_Rate * 1.03;
+              document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate / 100) * (1 + groupDiscount / 100);
             }
             document[warehouse] = existingWarehouse._id.toString()
             const filter = { id: document.id, database: req.params.database };
