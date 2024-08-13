@@ -206,16 +206,16 @@ export const OrdertoBilling = async (req, res) => {
                         return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
                     }
                     pro.pendingStock += (orderItem.qty)
-                    await warehouse.save();
-                    await product.save()
-                    // await ClosingSales(orderItem, product.warehouse)
+                    // await warehouse.save();
+                    // await product.save()
+                    // await ClosingSales(orderItem, orderItem.warehouse)
                 }
             } else {
                 console.error(`Product with ID ${orderItem.productId._id} not found`);
             }
         }
         order.orderItems = req.body.orderItems;
-        order.status = "Billing"
+        order.status = "Billing";
         await order.save();
         return res.status(200).json({ message: "Order Billing Seccessfull!", Order: order, status: true });
     } catch (error) {
@@ -240,16 +240,24 @@ export const OrdertoDispatch = async (req, res) => {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     pro.currentStock -= (orderItem.qty);
                     product.Opening_Stock -= orderItem.qty;
-                    // if (pro.currentStock < 0) {
-                    //     return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
-                    // }
+                    if (pro.currentStock < 0) {
+                        return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
+                    }
                     pro.pendingStock += (orderItem.qty)
-                    // await warehouse.save();
-                    // await product.save()
+                    await warehouse.save();
+                    await product.save()
                     await ClosingSales(orderItem, orderItem.warehouse)
                 }
             } else {
                 console.error(`Product with ID ${orderItem.productId._id} not found`);
+            }
+            if (orderItem.warehouse.toString() === req.body.warehouse.toString()) {
+                orderItem.status = "Dispatch"
+                productFound = true;
+            } else if (orderItem.status === "Dispatch") {
+                order.status = "Dispatch"
+            } else {
+                order.status = "Billing"
             }
         }
         if (order.NoOfPackage) {
@@ -257,7 +265,7 @@ export const OrdertoDispatch = async (req, res) => {
         } else {
             order.NoOfPackage = req.body.NoOfPackage
         }
-        order.status = "Dispatch"
+        // order.status = "Dispatch"
         await order.save();
         return res.status(200).json({ message: "Order Dispatch Seccessfull!", Order: order, status: true });
     } catch (error) {

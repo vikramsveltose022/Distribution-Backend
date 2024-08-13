@@ -312,7 +312,7 @@ export const ViewWarehouseByOrder = async (req, res, next) => {
 }
 export const ViewWarehouseOrderCancel = async (req, res, next) => {
     try {
-        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Cancel in processs" })
+        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Cancel in process" })
         if (!order) {
             return res.status(404).json({ message: "warehouse stock not found", status: false })
         }
