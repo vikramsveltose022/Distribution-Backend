@@ -336,8 +336,8 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                 productFound = true;
                 const product = await Product.findById({ _id: item.productId });
                 if (product) {
-                    // const warehouse = await Warehouse.findById(item.warehouse)
-                    const warehouse = await Warehouse.findById(product.warehouse)
+                    const warehouse = await Warehouse.findById(item.warehouse)
+                    // const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
                         const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString())
                         pro.currentStock += (item.qty);
@@ -366,6 +366,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+// Billing time
 export const ProductInWarehouse = async (req, res, next) => {
     try {
         const warehouse = await Warehouse.find({ "productItems.productId": req.params.productId, status: "Active" }).select('warehouseName')
