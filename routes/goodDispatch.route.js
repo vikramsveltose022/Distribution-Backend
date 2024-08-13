@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { OrderCancelWarehouse, ProductInWarehouse, ViewOtp, ViewWarehouseByOrder, deleteGoodDispatch, saveGoodDispatch, sendOtp, updateGoodDispatch, updateOrderStatusByDeliveryBoy, viewGoodDispatch, viewGoodDispatchById, viewOrderForDeliveryBoy } from "../controller/goodDispatch.controller.js";
+import { OrderCancelWarehouse, ProductInWarehouse, ViewOtp, ViewWarehouseByOrder, ViewWarehouseOrderCancel, deleteGoodDispatch, saveGoodDispatch, sendOtp, updateGoodDispatch, updateOrderStatusByDeliveryBoy, viewGoodDispatch, viewGoodDispatchById, viewOrderForDeliveryBoy } from "../controller/goodDispatch.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -28,6 +28,7 @@ router.post("/send-otp/:id", sendOtp)
 router.get("/view-otp/:id", ViewOtp)
 router.post("/verify-authentication/:id", upload.single("file"), updateOrderStatusByDeliveryBoy);
 router.get("/view-order-warehouse/:id", ViewWarehouseByOrder);
+router.get("/view-cancel-order-warehouse/:id", ViewWarehouseOrderCancel);
 router.get("/cancel-warehouse-order/:id/:productId", OrderCancelWarehouse);
 router.get("/product-warehouse/:productId", ProductInWarehouse);
 
