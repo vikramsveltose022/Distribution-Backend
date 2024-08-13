@@ -82,7 +82,7 @@ export const DeleteProduct = async (req, res, next) => {
     }
     product.status = "Deactive";
     await product.save();
-    await Warehouse.findByIdAndDelete({ "productItems.productId": req.params.id })
+    await Warehouse.findOneAndDelete({ "productItems.productId": req.params.id })
     return res.status(200).json({ message: "delete successful", status: true })
   } catch (err) {
     console.log(err);
@@ -241,7 +241,8 @@ export const saveItemWithExcel = async (req, res) => {
     let database = "database";
     let warehouse = "warehouse"
     let SalesRate = "SalesRate"
-    let Product_MRP = "Product_MRP"
+    let Product_MRP = "Product_MRP";
+    let landedCost = "landedCost";
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -287,6 +288,7 @@ export const saveItemWithExcel = async (req, res) => {
                 document[SalesRate] = document.Purchase_Rate * 1.03;
                 document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate / 100) * (1 + groupDiscount / 100);
               }
+              document[landedCost] = document.Purchase_Rate
               const insertedDocument = await Product.create(document);
               await addProductInWarehouse1(document, insertedDocument.warehouse, insertedDocument)
               insertedDocuments.push(insertedDocument);
