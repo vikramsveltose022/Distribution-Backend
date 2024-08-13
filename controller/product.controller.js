@@ -82,8 +82,10 @@ export const DeleteProduct = async (req, res, next) => {
     }
     product.status = "Deactive";
     await product.save();
-    await Warehouse.findOneAndDelete({ "productItems.productId": req.params.id })
-    return res.status(200).json({ message: "delete successful", status: true })
+    const warehouse = await Warehouse.findOne({ "productItems.productId": req.params.id })
+    warehouse.productItems = warehouse.productItems.filter(sub => sub.productId.toString() !== req.params.id);
+    await warehouse.save();
+    return res.status(200).json({ message: "delete product successfull", status: true })
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: "Internal server error", status: false });

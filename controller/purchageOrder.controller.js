@@ -154,7 +154,7 @@ export const ProductWisePurchaseReport = async (req, res, next) => {
     try {
         const startDate = req.body.startDate ? new Date(req.body.startDate) : null;
         const endDate = req.body.endDate ? new Date(req.body.endDate) : null;
-        const targetQuery = { database: req.params.database };
+        const targetQuery = { database: req.params.database, status: { $ne: "Deactive" } };
         if (startDate && endDate) {
             targetQuery.createdAt = { $gte: startDate, $lte: endDate };
         }
@@ -168,7 +168,7 @@ export const ProductWisePurchaseReport = async (req, res, next) => {
         }
         const uniqueOrdersMap = new Map();
         for (let orderItem of orders) {
-            const key = orderItem.productId._id.toString() + orderItem.HSN_Code;
+            const key = orderItem?.productId?._id.toString() + orderItem.HSN_Code;
             if (uniqueOrdersMap.has(key)) {
                 const existingOrder = uniqueOrdersMap.get(key);
                 existingOrder.taxableAmount += orderItem.taxableAmount;
