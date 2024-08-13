@@ -46,28 +46,28 @@ export const createOrder = async (req, res, next) => {
             const billAmount = orderItems.reduce((total, orderItem) => {
                 return total + (orderItem.price * orderItem.qty);
             }, 0);
-            for (const orderItem of orderItems) {
-                const product = await Product.findById({ _id: orderItem.productId });
-                if (product) {
-                    orderItem.warehouse = product.warehouse;
-                    // ware = product.warehouse
-                    product.salesDate = new Date()
-                    const warehouse = await Warehouse.findById(product.warehouse)
-                    if (warehouse) {
-                        const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                        pro.currentStock -= (orderItem.qty);
-                        product.Opening_Stock -= orderItem.qty;
-                        if (pro.currentStock < 0) {
-                            return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
-                        }
-                        pro.pendingStock += (orderItem.qty)
-                        await warehouse.save();
-                        await product.save()
-                    }
-                } else {
-                    console.error(`Product with ID ${orderItem.productId} not found`);
-                }
-            }
+            // for (const orderItem of orderItems) {
+            //     const product = await Product.findById({ _id: orderItem.productId });
+            //     if (product) {
+            //         orderItem.warehouse = product.warehouse;
+            //         // ware = product.warehouse
+            //         product.salesDate = new Date()
+            //         const warehouse = await Warehouse.findById(product.warehouse)
+            //         if (warehouse) {
+            //             const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
+            //             pro.currentStock -= (orderItem.qty);
+            //             product.Opening_Stock -= orderItem.qty;
+            //             if (pro.currentStock < 0) {
+            //                 return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
+            //             }
+            //             pro.pendingStock += (orderItem.qty)
+            //             await warehouse.save();
+            //             await product.save()
+            //         }
+            //     } else {
+            //         console.error(`Product with ID ${orderItem.productId} not found`);
+            //     }
+            // }
             req.body.userId = party.created_by
             req.body.database = user.database
             req.body.orderNo = orderNo
@@ -184,6 +184,43 @@ export const createOrderHistoryByPartyId = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: err });
+    }
+};
+export const OrdertoBilling = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const order = await CreateOrder.findById({ _id: orderId })
+        if (!order) {
+            return res.status(404).json({ message: 'Sales Order Not Found', status: false });
+        }
+        for (const orderItem of req.body.orderItems) {
+            const product = await Product.findById({ _id: orderItem.productId });
+            if (product) {
+                product.salesDate = new Date(new Date())
+                const warehouse = await Warehouse.findById(orderItem.warehouse)
+                if (warehouse) {
+                    const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
+                    pro.currentStock -= (orderItem.qty);
+                    product.Opening_Stock -= orderItem.qty;
+                    if (pro.currentStock < 0) {
+                        return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
+                    }
+                    pro.pendingStock += (orderItem.qty)
+                    await warehouse.save();
+                    await product.save()
+                    // await ClosingSales(orderItem, product.warehouse)
+                }
+            } else {
+                console.error(`Product with ID ${orderItem.productId._id} not found`);
+            }
+        }
+        order.orderItems = req.body.orderItems;
+        order.status = "Dispatch"
+        await order.save();
+        return res.status(200).json({ message: "Order Dispatch Seccessfull!", Order: order, status: true });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
 // Order To Dispatch
