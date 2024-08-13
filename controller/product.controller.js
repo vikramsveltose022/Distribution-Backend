@@ -117,10 +117,11 @@ export const UpdateProduct = async (req, res, next) => {
       }
       const updatedProduct = req.body;
       const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
-      // if (req.body.warehouse) {
-      //   const warehouse = { productId: product._id, unitType: product.unitType, currentStock: product.qty, transferQty: product.qty, price: product.Product_MRP, totalPrice: (product.Product_MRP * product.qty), Size: req.body.unitQty }
-      //   await addProductInWarehouse(warehouse, req.body.warehouse)
-      // }
+      if (req.body.warehouse) {
+        // const warehouse = { productId: product._id, unitType: product.unitType, currentStock: product.qty, transferQty: product.qty, price: product.Product_MRP, totalPrice: (product.Product_MRP * product.qty), Size: req.body.unitQty }
+        await addProductInWarehouse1(req.body, product.warehouse, product)
+        // await addProductInWarehouse(warehouse, req.body.warehouse)
+      }
       return res.status(200).json({ message: "Product Updated Successfully", status: true });
     }
   } catch (err) {
