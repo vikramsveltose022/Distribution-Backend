@@ -283,6 +283,19 @@ export const warehouseProductItem1 = async (body, lastStock) => {
             matchingStocks[id.productId._id].warehouseStock += id.currentStock;
             matchingStocks[id.productId._id].damageItem += id?.damageItem?.transferQty || 0;
 
+        } else {
+            if (!matchingStocks[id.productId._id]) {
+                matchingStocks[id.productId._id] = {
+                    productId: id.productId,
+                    openingStock: 0,
+                    warehouseStock: 0,
+                    damageItem: 0,
+                    difference: 0
+                };
+            }
+            // matchingStocks[id.productId._id].openingStock += stock.currentStock;
+            matchingStocks[id.productId._id].warehouseStock += id.currentStock;
+            matchingStocks[id.productId._id].damageItem += id?.damageItem?.transferQty || 0;
         }
     }
     return matchingStocks;

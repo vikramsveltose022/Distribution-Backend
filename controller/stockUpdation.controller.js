@@ -9,6 +9,7 @@ import { Product } from "../model/product.model.js";
 import { Customer } from "../model/customer.model.js";
 import { Receipt } from "../model/receipt.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
+import { warehouseNo } from "../service/invoice.js";
 
 export const viewInWardStockToWarehouse = async (req, res, next) => {
     try {
@@ -36,10 +37,18 @@ export const viewOutWardStockToWarehouse = async (req, res, next) => {
 };
 export const stockTransferToWarehouse = async (req, res) => {
     try {
-        const user = await User.findById({ _id: req.body.created_by })
-        if (!user) {
-            return res.status(400).json({ message: "User Not Found", status: false })
+        const warehousefrom = await Warehouse.findOne({ _id: req.body.warehouseFromId });
+        if (!warehousefrom) {
+            return res.status(400).json({ message: "Warehouse From Not Found", status: false })
         }
+        const warehouseno = await warehouseNo(warehousefrom.database)
+        warehousefrom.warehouseNo = warehousefrom.id + warehouseno
+        const warehouseto = await Warehouse.findOne({ _id: req.body.warehouseToId });
+        if (!warehouseto) {
+            return res.status(400).json({ message: "Warehouse To Not Found", status: false })
+        }
+        const warehouse1 = await warehouseNo(warehouseto.database)
+        warehouseto.warehouseNo = warehouseto.id + warehouse1
         const { warehouseToId, warehouseFromId, stockTransferDate, productItems, grandTotal, transferStatus, created_by, InwardStatus, OutwardStatus } = req.body;
         for (const item of productItems) {
             const sourceProduct = await Warehouse.findOne({
@@ -55,7 +64,7 @@ export const stockTransferToWarehouse = async (req, res) => {
                     sourceProductItem.pendingStock += (item.transferQty);
                     sourceProductItem.totalPrice -= item.totalPrice;
                     sourceProduct.markModified('productItems');
-                    await sourceProduct.save();
+                    // await sourceProduct.save();
                     // const destinationProduct = await Warehouse.findOne({
                     //     _id: warehouseToId,
                     //     'productItems.productId': item.productId,
@@ -86,9 +95,13 @@ export const stockTransferToWarehouse = async (req, res) => {
             transferStatus,
             InwardStatus,
             OutwardStatus,
-            database: user.database
+            database: warehouseto.database,
+            warehouseFromNo: warehousefrom.warehouseNo,
+            warehouseToNo: warehouseto.warehouseNo
         });
         await stockTransfer.save();
+        await warehousefrom.save();
+        await warehouseto.save();
         return res.status(201).json({ message: 'Stock transfer successfull', status: true });
     } catch (error) {
         console.error(error);

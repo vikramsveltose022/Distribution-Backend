@@ -91,6 +91,12 @@ const StockUpdationSchema = new mongoose.Schema({
     OutwardStatus: {
         type: String
     },
+    warehouseToNo: {
+        type: String
+    },
+    warehouseFromNo: {
+        type: String
+    },
     status: {
         type: String,
         default: "Active"
