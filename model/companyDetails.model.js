@@ -95,6 +95,10 @@ const CompanySchema = new mongoose.Schema({
     orderNo: {
         type: Number,
         default: 0
+    },
+    warehouseDummy: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true })
 export const CompanyDetails = mongoose.model("companyDetail", CompanySchema)

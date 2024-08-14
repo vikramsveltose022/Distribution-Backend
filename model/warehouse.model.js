@@ -101,6 +101,9 @@ const WarehouseSchema = new mongoose.Schema({
   assignStatus: {
     type: Boolean,
     default: false
+  },
+  warehouseNo: {
+    type: String
   }
 }, { timestamps: true })
 

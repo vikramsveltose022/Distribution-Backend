@@ -366,7 +366,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
-// Billing time
+// Billing Time
 export const ProductInWarehouse = async (req, res, next) => {
     try {
         const warehouse = await Warehouse.find({ "productItems.productId": req.params.productId, status: "Active" }).select('warehouseName')
