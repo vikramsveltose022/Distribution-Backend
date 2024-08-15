@@ -77,7 +77,9 @@ export const createOrder = async (req, res, next) => {
             req.body.database = user.database;
             req.body.totalAmount = req.body.grandTotal;
             req.body.orderId = savedOrder._id;
-            await checkLimit(req.body)
+            if (party.paymentTerm === "credit") {
+                await checkLimit(req.body)
+            }
             return res.status(200).json({ orderDetail: savedOrder, status: true });
         }
     } catch (err) {
@@ -256,7 +258,7 @@ export const OrdertoDispatch = async (req, res) => {
             } else if (orderItem.status === "Dispatch") {
                 order.status = "Dispatch"
             } else {
-                order.status = "Billing"
+                order.status = "Dispatch"
             }
         }
         if (order.NoOfPackage) {

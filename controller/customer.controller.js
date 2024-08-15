@@ -12,9 +12,10 @@ import { OverDueReport } from "../model/overDue.mode.js";
 import { User } from "../model/user.model.js";
 import { PaymentDueReport } from "../model/payment.due.report.js";
 import { Role } from "../model/role.model.js";
-import { UpdateCheckLimit } from "../service/checkLimit.js";
+import { UpdateCheckLimit, checkLimit } from "../service/checkLimit.js";
 import { CustomerGroup } from "../model/customerGroup.model.js";
 import { Receipt } from "../model/receipt.model.js";
+import { CreateOrder } from "../model/createOrder.model.js";
 dotenv.config();
 
 export const SaveCustomer = async (req, res, next) => {
@@ -953,3 +954,17 @@ export const ViewDeadParty = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
+
+export const Check = async (req, res, next) => {
+    try {
+        const party = await Customer.findById(req.body.partyId)
+        if (party.paymentTerm === "credit") {
+            await checkLimit(req.body)
+        } else {
+            return res.send("OK")
+        }
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
