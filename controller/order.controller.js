@@ -254,11 +254,10 @@ export const OrdertoDispatch = async (req, res) => {
                 console.error(`Product with ID ${orderItem.productId._id} not found`);
             }
             if (orderItem.warehouse.toString() === req.body.warehouse.toString()) {
-                orderItem.status = "Dispatch"
-            } else if (orderItem.status === "Dispatch") {
+                orderItem.status = "Dispatch";
                 order.status = "Dispatch"
             } else {
-                order.status = "Dispatch"
+                order.status = "Billing"
             }
         }
         if (order.NoOfPackage) {
