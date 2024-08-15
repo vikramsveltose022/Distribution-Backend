@@ -856,27 +856,27 @@ export const VerifyPartyPayment = async (req, res, next) => {
         req.body.paymentMode = existingParty.paymentMode
         req.body.amount = existingParty.amount
         if (req.body.type === "receipt" && req.body.paymentMode !== "Cash") {
-            const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+            const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
             if (rece.length > 0) {
                 const latestReceipt = rece[rece.length - 1];
-                req.body.runningAmount = latestReceipt.runningAmount + req.body.amount
-                req.body.voucherType = "receipt"
+                // req.body.runningAmount = latestReceipt.runningAmount + req.body.amount
+                // req.body.voucherType = "receipt"
                 req.body.voucherNo = latestReceipt.voucherNo + 1
             } else {
-                req.body.runningAmount = req.body.amount
-                req.body.voucherType = "receipt"
+                // req.body.runningAmount = req.body.amount
+                // req.body.voucherType = "receipt"
                 req.body.voucherNo = 1
             }
         } else {
-            const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+            const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
             if (rece.length > 0) {
                 const latestReceipt = rece[rece.length - 1];
-                req.body.cashRunningAmount = latestReceipt.cashRunningAmount + req.body.amount
-                req.body.voucherType = "receipt"
+                // req.body.cashRunningAmount = latestReceipt.cashRunningAmount + req.body.amount
+                // req.body.voucherType = "receipt"
                 req.body.voucherNo = latestReceipt.voucherNo + 1
             } else {
-                req.body.cashRunningAmount = req.body.amount
-                req.body.voucherType = "receipt"
+                // req.body.cashRunningAmount = req.body.amount
+                // req.body.voucherType = "receipt"
                 req.body.voucherNo = 1
             }
         }
