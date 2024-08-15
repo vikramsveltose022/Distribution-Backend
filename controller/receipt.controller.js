@@ -860,11 +860,11 @@ export const VerifyPartyPayment = async (req, res, next) => {
             if (rece.length > 0) {
                 const latestReceipt = rece[rece.length - 1];
                 // req.body.runningAmount = latestReceipt.runningAmount + req.body.amount
-                // req.body.voucherType = "receipt"
+                req.body.voucherType = "receipt"
                 req.body.voucherNo = latestReceipt.voucherNo + 1
             } else {
                 // req.body.runningAmount = req.body.amount
-                // req.body.voucherType = "receipt"
+                req.body.voucherType = "receipt"
                 req.body.voucherNo = 1
             }
         } else {
@@ -883,7 +883,7 @@ export const VerifyPartyPayment = async (req, res, next) => {
         // const receipt = await Receipt.create(req.body);
         await existingParty.save()
         if (req.body.type === "receipt") {
-            let particular = "receipt";
+            let particular = req.body.paymentMode + " receipt";
             await ledgerPartyForCredit(req.body, particular)
         }
         await overDue1(req.body)
