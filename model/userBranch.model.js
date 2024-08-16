@@ -28,6 +28,10 @@ const BranchSchema = new mongoose.Schema({
   pincode: {
     type: String,
   },
+  status: {
+    type: String,
+    default: "Active"
+  }
 },
   { timestamps: true }
 );

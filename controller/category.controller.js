@@ -12,7 +12,7 @@ export const saveCategory = async (req, res) => {
         if (req.file) {
             req.body.image = req.file.filename
         }
-        const existingCategory = await Category.findOne({ name: req.body.name, database: req.body.database })
+        const existingCategory = await Category.findOne({ name: req.body.name, database: req.body.database, status: "Active" })
         if (existingCategory) {
             return res.status(400).json({ message: "category already existing", status: false })
         }

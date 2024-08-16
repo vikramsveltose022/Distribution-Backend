@@ -75,6 +75,10 @@ const stockSchema = new mongoose.Schema({
             type: Number,
             default: 0
         },
+        pRate: {
+            type: Number,
+            default: 0
+        },
         pBAmount: {
             type: Number,
             default: 0
@@ -91,6 +95,10 @@ const stockSchema = new mongoose.Schema({
             type: Number,
             default: 0
         },
+        sRate: {
+            type: Number,
+            default: 0
+        },
         sBAmount: {
             type: Number,
             default: 0
@@ -104,6 +112,10 @@ const stockSchema = new mongoose.Schema({
             default: 0
         },
         cQty: {
+            type: Number,
+            default: 0
+        },
+        cRate: {
             type: Number,
             default: 0
         },

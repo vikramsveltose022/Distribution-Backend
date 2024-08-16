@@ -32,7 +32,7 @@ export const SignIn = async (req, res, next) => {
 export const SaveWarehouse = async (req, res, next) => {
     try {
         if (req.body.id) {
-            const existing = await Warehouse.findOne({ database: req.body.database, id: req.body.id })
+            const existing = await Warehouse.findOne({ status: "Active", database: req.body.database, id: req.body.id })
             if (existing) {
                 return res.status(404).json({ message: "id already exist", status: false })
             }

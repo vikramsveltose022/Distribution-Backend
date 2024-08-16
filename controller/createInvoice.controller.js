@@ -272,25 +272,26 @@ export const ClosingPurchase = async (orderItem, warehouse) => {
         let sgstRate = 0;
         let igstRate = 0;
         let tax = 0
-        // const rate = parseInt(orderItem.gstPercentage) / 2;
-        // if (orderItem.igstTaxType === false) {
-        //     cgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
-        //     sgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
-        //     tax = cgstRate + sgstRate
-        // } else {
-        //     igstRate = (((orderItem.qty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
-        //     tax = igstRate
-        // }
-        tax = (orderItem.igstRate + orderItem.cgstRate + orderItem.sgstRate)
+        const rate = parseInt(orderItem.gstPercentage) / 2;
+        if (orderItem.igstTaxType === false) {
+            cgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
+            sgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
+            tax = cgstRate + sgstRate
+        } else {
+            igstRate = (((orderItem.qty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
+            tax = igstRate
+        }
+        // tax = (orderItem.igstRate + orderItem.cgstRate + orderItem.sgstRate)
         const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: orderItem.productId })
         if (stock) {
             stock.pQty += (orderItem.qty);
+            stock.pRate += (orderItem.price);
             stock.pBAmount += orderItem.totalPrice;
             stock.pTaxAmount += tax;
             stock.pTotal += (orderItem.totalPrice + tax)
             await stock.save()
         } else {
-            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, pQty: (orderItem.qty), pBAmount: orderItem.totalPrice, pTaxAmount: tax, pTotal: (orderItem.totalPrice + tax) })
+            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, pQty: (orderItem.qty), pRate: orderItem.price, pBAmount: orderItem.totalPrice, pTaxAmount: tax, pTotal: (orderItem.totalPrice + tax) })
             await closing.save()
         }
         return true
@@ -305,25 +306,26 @@ export const ClosingSales = async (orderItem, warehouse) => {
         let sgstRate = 0;
         let igstRate = 0;
         let tax = 0
-        // const rate = parseInt(orderItem.gstPercentage) / 2;
-        // if (orderItem.igstTaxType === false) {
-        //     cgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
-        //     sgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
-        //     tax = cgstRate + sgstRate.sgstRate
-        // } else {
-        //     igstRate = (((orderItem.qty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
-        //     tax = igstRate
-        // }
-        tax = (orderItem.igstRate + orderItem.cgstRate + orderItem.sgstRate)
+        const rate = parseInt(orderItem.gstPercentage) / 2;
+        if (orderItem.igstTaxType === false) {
+            cgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
+            sgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
+            tax = cgstRate + sgstRate.sgstRate
+        } else {
+            igstRate = (((orderItem.qty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
+            tax = igstRate
+        }
+        // tax = (orderItem.igstRate + orderItem.cgstRate + orderItem.sgstRate)
         const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: orderItem.productId })
         if (stock) {
             stock.sQty += (orderItem.qty);
+            stock.sRate += (orderItem.price);
             stock.sBAmount += orderItem.totalPrice;
             stock.sTaxAmount += tax;
             stock.sTotal += (orderItem.totalPrice + tax)
             await stock.save()
         } else {
-            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, sQty: (orderItem.qty), sBAmount: orderItem.totalPrice, sTaxAmount: tax, sTotal: (orderItem.totalPrice + tax) })
+            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, sQty: (orderItem.qty), sRate: orderItem.price, sBAmount: orderItem.totalPrice, sTaxAmount: tax, sTotal: (orderItem.totalPrice + tax) })
             await closing.save()
         }
         return true
