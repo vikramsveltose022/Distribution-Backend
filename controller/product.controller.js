@@ -374,7 +374,7 @@ export const updateItemWithExcel = async (req, res) => {
               document[SalesRate] = document.Purchase_Rate * 1.03;
               document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate / 100) * (1 + groupDiscount / 100);
             } else {
-              document[SalesRate] = (document.Purchase_Rate * 100 + document.ProfitPercentage) / 100;
+              document[SalesRate] = (document.Purchase_Rate * (100 + document.ProfitPercentage)) / 100;
               document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate / 100) * (1 + groupDiscount / 100);
             }
             document[warehouse] = existingWarehouse._id.toString()
