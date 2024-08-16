@@ -9,7 +9,7 @@ export const SaveProduct = async (req, res) => {
   try {
     let groupDiscount = 0;
     if (req.body.id) {
-      const existing = await Product.findOne({ status: "Active" , database: req.body.database, id: req.body.id })
+      const existing = await Product.findOne({ status: "Active", database: req.body.database, id: req.body.id })
       if (existing) {
         return res.status(404).json({ message: "id already exist", status: false })
       }
@@ -245,6 +245,8 @@ export const saveItemWithExcel = async (req, res) => {
     let SalesRate = "SalesRate"
     let Product_MRP = "Product_MRP";
     let landedCost = "landedCost";
+    let category = "category";
+    let SubCategory = "SubCategory";
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -291,6 +293,8 @@ export const saveItemWithExcel = async (req, res) => {
                 document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate / 100) * (1 + groupDiscount / 100);
               }
               document[landedCost] = document.Purchase_Rate
+              document[category] = document.category?.toUpperCase()
+              document[SubCategory] = document.SubCategory?.toUpperCase()
               const insertedDocument = await Product.create(document);
               await addProductInWarehouse1(document, insertedDocument.warehouse, insertedDocument)
               insertedDocuments.push(insertedDocument);
@@ -326,6 +330,8 @@ export const updateItemWithExcel = async (req, res) => {
     let Product_MRP = "Product_MRP"
     let database = "database";
     let warehouse = "warehouse"
+    let category = "category";
+    let SubCategory = "SubCategory";
     const filePath = await req.file.path;
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -369,6 +375,8 @@ export const updateItemWithExcel = async (req, res) => {
               document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate / 100) * (1 + groupDiscount / 100);
             }
             document[warehouse] = existingWarehouse._id.toString()
+            document[category] = document.category?.toUpperCase()
+            document[SubCategory] = document.SubCategory?.toUpperCase()
             const filter = { id: document.id, database: req.params.database };
             const options = { new: true, upsert: true };
             const insertedDocument = await Product.findOneAndUpdate(filter, document, options);
