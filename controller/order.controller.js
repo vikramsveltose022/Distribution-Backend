@@ -463,7 +463,7 @@ export const ProductWiseSalesReport = async (req, res, next) => {
 // Order History App
 export const ViewOrderHistoryForPartySalesPerson = async (req, res, next) => {
     try {
-        const orders = CreateOrder.find({ partyId: req.params.id, status: { $ne: "Deactive" } }).populate({ path: 'orderItems.productId', model: 'product' }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).populate({ path: "warehouseId", model: "warehouse" })
+        const orders = await CreateOrder.find({ partyId: req.params.id, status: { $ne: "Deactive" } }).populate({ path: 'orderItems.productId', model: 'product' }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" })
         return res.status(200).json({ orderHistory: orders, status: true })
     }
     catch (err) {
