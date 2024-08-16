@@ -23,7 +23,7 @@ dotenv.config();
 export const SaveUser = async (req, res, next) => {
   try {
     if (req.body.id) {
-      const existing = await User.findOne({ database: req.body.database, id: req.body.id })
+      const existing = await User.findOne({ status: "Active", database: req.body.database, id: req.body.id })
       if (existing) {
         return res.status(404).json({ message: "id already exist", status: false })
       }
@@ -385,7 +385,7 @@ export const saveUserWithExcel = async (req, res) => {
         if (!role) {
           roles.push(document.id)
         } else {
-          const shifts = await WorkingHours.findOne({ id: document.shift, database: document.database })
+          const shifts = await WorkingHours.findOne({ status: "Active", id: document.shift, database: document.database })
           if (!shifts) {
             shiftss.push(document.id)
           } else {
@@ -397,14 +397,14 @@ export const saveUserWithExcel = async (req, res) => {
               document[shift] = shifts._id.toString()
               document[branch] = branchs._id.toString()
               if (document.id) {
-                const existingId = await User.findOne({ id: document.id, database: document.database });
+                const existingId = await User.findOne({ id: document.id, database: document.database, status: "Active" });
                 if (existingId) {
                   existingIds.push(document.id)
                 } else {
                   if (document.Pan_No) {
                     // document[code] = document.Pan_No;
                     const existingRecord = await User.findOne({
-                      Pan_No: document.Pan_No, database: document.database
+                      Pan_No: document.Pan_No, database: document.database, status: "Active"
                     });
                     if (!existingRecord) {
                       const insertedDocument = await User.create(document);
@@ -417,7 +417,7 @@ export const saveUserWithExcel = async (req, res) => {
                       // const codes = document.Aadhar_No;
                       // document[code] = codes;
                       const existingRecord = await User.findOne({
-                        Aadhar_No: document.Aadhar_No, database: document.database
+                        Aadhar_No: document.Aadhar_No, database: document.database, status: "Active"
                       });
                       if (!existingRecord) {
                         const insertedDocument = await User.create(document);
@@ -506,7 +506,7 @@ export const updateUserWithExcel = async (req, res) => {
       if (!role) {
         roles.push(document.id)
       } else {
-        const shifts = await WorkingHours.findOne({ id: document.shift, database: document.database })
+        const shifts = await WorkingHours.findOne({ id: document.shift, database: document.database, status: "Active" })
         if (!shifts) {
           shiftss.push(document.id)
         } else {
@@ -514,7 +514,7 @@ export const updateUserWithExcel = async (req, res) => {
           if (!branchs) {
             branchss.push(document.id)
           } else {
-            const existUser = await User.findOne({ id: document.id, database: document.database })
+            const existUser = await User.findOne({ id: document.id, database: document.database, status: "Active" })
             if (!existUser) {
               IdNotExisting.push(document.id)
             } else {

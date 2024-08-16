@@ -21,7 +21,7 @@ dotenv.config();
 export const SaveCustomer = async (req, res, next) => {
     try {
         if (req.body.id) {
-            const existing = await Customer.findOne({ database: req.body.database, id: req.body.id })
+            const existing = await Customer.findOne({ status: "Active", database: req.body.database, id: req.body.id })
             if (existing) {
                 return res.status(404).json({ message: "id already exist", status: false })
             }
@@ -427,13 +427,13 @@ export const saveExcelFile = async (req, res) => {
                     roles.push(document.firstName)
                 } else {
                     document[rolename] = role._id.toString()
-                    const existCustomerGroup = await CustomerGroup.findOne({ id: document.category, database: document.database })
+                    const existCustomerGroup = await CustomerGroup.findOne({ id: document.category, database: document.database, status: "Active" })
                     if (!existCustomerGroup) {
                         group.push(document.id)
                     } else {
                         document[category] = await existCustomerGroup._id.toString()
                         if (document.id) {
-                            const existingId = await Customer.findOne({ id: document.id, database: document.database });
+                            const existingId = await Customer.findOne({ id: document.id, database: document.database, status: "Active" });
                             if (existingId) {
                                 existingIds.push(document.id)
                             } else {
@@ -441,7 +441,7 @@ export const saveExcelFile = async (req, res) => {
                                     const codes = document.panNo;
                                     document[code] = codes;
                                     const existingRecord = await Customer.findOne({
-                                        panNo: document.panNo, database: document.database
+                                        panNo: document.panNo, database: document.database, status: "Active"
                                     });
                                     if (!existingRecord) {
                                         const insertedDocument = await Customer.create(document);
@@ -454,7 +454,7 @@ export const saveExcelFile = async (req, res) => {
                                         const codes = document.aadharNo;
                                         document[code] = codes;
                                         const existingRecord = await Customer.findOne({
-                                            aadharNo: document.aadharNo, database: document.database
+                                            aadharNo: document.aadharNo, database: document.database, status: "Active"
                                         });
                                         if (!existingRecord) {
                                             const insertedDocument = await Customer.create(document);
@@ -538,11 +538,11 @@ export const updateExcelFile = async (req, res) => {
             if (!role) {
                 roles.push(document.firstName)
             } else {
-                const existCustomerGroup = await CustomerGroup.findOne({ id: document.category, database: document.database })
+                const existCustomerGroup = await CustomerGroup.findOne({ id: document.category, database: document.database, status: "Active" })
                 if (!existCustomerGroup) {
                     group.push(document.id)
                 } else {
-                    const existCustomer = await Customer.findOne({ id: document.id, database: document.database })
+                    const existCustomer = await Customer.findOne({ id: document.id, database: document.database, status: "Active" })
                     if (!existCustomer) {
                         IdNotExisting.push(document.id)
                     } else {

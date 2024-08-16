@@ -6,7 +6,7 @@ import { Role } from '../model/role.model.js';
 export const SaveTransporter = async (req, res) => {
     try {
         if (req.body.id) {
-            const existing = await Transporter.findOne({ database: req.body.database, id: req.body.id })
+            const existing = await Transporter.findOne({ status: "Active", database: req.body.database, id: req.body.id })
             if (existing) {
                 return res.status(404).json({ message: "id already exist", status: false })
             }
@@ -127,7 +127,7 @@ export const saveExcelFile = async (req, res) => {
                 } else {
                     document[rolename] = role._id.toString()
                     if (document.id) {
-                        const existingId = await Transporter.findOne({ id: document.id, database: document.database });
+                        const existingId = await Transporter.findOne({ id: document.id, database: document.database, status: "Active" });
                         if (existingId) {
                             existingIds.push(document.id)
                         } else {
@@ -187,7 +187,7 @@ export const UpdateExcelTransporter = async (req, res) => {
             if (!role) {
                 roles.push(document.id)
             } else {
-                const existTransporter = await Transporter.findOne({ id: document.id, database: document.database })
+                const existTransporter = await Transporter.findOne({ id: document.id, database: document.database, status: "Active" })
                 if (!existTransporter) {
                     IdNotExisting.push(document.id)
                 } else {

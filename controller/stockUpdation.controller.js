@@ -376,7 +376,7 @@ export const updateTypeStatus = async (req, res, next) => {
     }
 };
 //--------------------------------------------------------------------------
-export const ViewAllWarehouse = async () => {
+export const ViewAllWarehouse1 = async () => {
     try {
         let array = []
         const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
@@ -603,7 +603,7 @@ export const partyHierarchy = async function partyHierarchy(userId, database, pr
 };
 
 
-export const ViewAllWarehouse1 = async (req, res, next) => {
+export const ViewAllWarehouse = async (req, res, next) => {
     try {
         let array = []
         const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
@@ -643,10 +643,12 @@ export const ClosingStocks = async (warehouse, productItem) => {
         let igstRate = 0;
         let tax = 0
         let pQty = 0;
+        let pRate = 0;
         let pBAmount = 0
         let pTaxAmount = 0
         let pTotal = 0
         let sQty = 0;
+        let sRate = 0;
         let sBAmount = 0
         let sTaxAmount = 0
         let sTotal = 0
@@ -654,10 +656,12 @@ export const ClosingStocks = async (warehouse, productItem) => {
             const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: item.productId })
             if (stock) {
                 pQty = stock.pQty || 0;
+                pRate = stock.pRate || 0;
                 pBAmount = stock.pBAmount || 0
                 pTaxAmount = stock.pTaxAmount || 0
                 pTotal = stock.pTotal || 0
                 sQty = stock.sQty || 0;
+                sRate = stock.sRate || 0;
                 sBAmount = stock.sBAmount || 0
                 sTaxAmount = stock.sTaxAmount || 0
                 sTotal = stock.sTotal || 0
@@ -683,14 +687,17 @@ export const ClosingStocks = async (warehouse, productItem) => {
                 gstPercentage: item.gstPercentage,
                 damageItem: item.damageItem,
                 cQty: item.currentStock || 0,
+                cRate: item.price || 0,
                 cBAmount: item.totalPrice || 0,
                 cTaxAmount: tax || 0,
                 cTotal: (item.totalPrice + tax) || 0,
                 pQty: pQty || 0,
+                pRate: pRate || 0,
                 pBAmount: pBAmount || 0,
                 pTaxAmount: pTaxAmount || 0,
                 pTotal: pTotal || 0,
                 sQty: sQty || 0,
+                sRate: sRate || 0,
                 sBAmount: sBAmount || 0,
                 sTaxAmount: sTaxAmount || 0,
                 sTotal: sTotal || 0

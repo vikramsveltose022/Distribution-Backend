@@ -9,7 +9,7 @@ export const SaveProduct = async (req, res) => {
   try {
     let groupDiscount = 0;
     if (req.body.id) {
-      const existing = await Product.findOne({ database: req.body.database, id: req.body.id })
+      const existing = await Product.findOne({ status: "Active" , database: req.body.database, id: req.body.id })
       if (existing) {
         return res.status(404).json({ message: "id already exist", status: false })
       }
@@ -269,13 +269,13 @@ export const saveItemWithExcel = async (req, res) => {
       }
       document[database] = req.params.database
       if (document.HSN_Code) {
-        const existingWarehouse = await Warehouse.findOne({ id: document.warehouse, database: document.database })
+        const existingWarehouse = await Warehouse.findOne({ id: document.warehouse, database: document.database, status: "Active" })
         if (!existingWarehouse) {
           WarehouseNotExisting.push(document.warehouse)
         } else {
           document[warehouse] = existingWarehouse._id.toString()
           if (document.id) {
-            const existingId = await Product.findOne({ id: document.id, database: document.database });
+            const existingId = await Product.findOne({ id: document.id, database: document.database, status: "Active" });
             if (existingId) {
               existingIds.push(document.Product_Title)
             } else {
@@ -349,11 +349,11 @@ export const updateItemWithExcel = async (req, res) => {
       }
       document[database] = req.params.database
       if (document.HSN_Code) {
-        const existingWarehouse = await Warehouse.findOne({ id: document.warehouse, database: document.database })
+        const existingWarehouse = await Warehouse.findOne({ id: document.warehouse, database: document.database, status: "Active" })
         if (!existingWarehouse) {
           WarehouseNotExisting.push(document.warehouse)
         } else {
-          const existProduct = await Product.findOne({ id: document.id, database: document.database })
+          const existProduct = await Product.findOne({ id: document.id, database: document.database, status: "Active" })
           if (!existProduct) {
             IdNotExisting.push(document.id)
           } else {

@@ -62,9 +62,10 @@ export const updatedHoliday = async (req, res, next) => {
 
 export const saveWorkingHours = async (req, res, next) => {
     try {
-        // const check = await WorkingHours.findOne({ database: req.body.database })
-        // if (!check) {
-        // }
+        const check = await WorkingHours.findOne({ id: req.body.id, shiftName: req.body.shiftName, database: req.body.database })
+        if (check) {
+            return res.status(404).json({ message: "shift id already exist", status: false })
+        }
         const time = await WorkingHours.create(req.body)
         return time ? res.status(200).json({ message: "saved successfully", time, status: true }) : res.status(400).json({ message: "something went wrong", status: false })
     }
