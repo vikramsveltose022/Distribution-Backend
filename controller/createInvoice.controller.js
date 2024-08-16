@@ -272,15 +272,16 @@ export const ClosingPurchase = async (orderItem, warehouse) => {
         let sgstRate = 0;
         let igstRate = 0;
         let tax = 0
-        const rate = parseInt(orderItem.gstPercentage) / 2;
-        if (orderItem.igstTaxType === false) {
-            cgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
-            sgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
-            tax = cgstRate + sgstRate
-        } else {
-            igstRate = (((orderItem.qty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
-            tax = igstRate
-        }
+        // const rate = parseInt(orderItem.gstPercentage) / 2;
+        // if (orderItem.igstTaxType === false) {
+        //     cgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
+        //     sgstRate = (((orderItem.qty) * orderItem.price) * rate) / 100;
+        //     tax = cgstRate + sgstRate
+        // } else {
+        //     igstRate = (((orderItem.qty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
+        //     tax = igstRate
+        // }
+        tax = (orderItem.igstRate + orderItem.cgstRate + orderItem.sgstRate)
         const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: orderItem.productId })
         if (stock) {
             stock.pQty += (orderItem.qty);

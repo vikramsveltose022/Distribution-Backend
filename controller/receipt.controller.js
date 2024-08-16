@@ -822,8 +822,8 @@ export const PartySendOtp = async (req, res, next) => {
             }
             const receipt = await Receipt.create(req.body);
             if (receipt.type === "receipt") {
-                let particular = req.body.paymentMode + " receipt";
-                await ledgerPartyForCredit(req.body, particular)
+                let particular = req.body.paymentMode + " " + "receipt";
+                await ledgerPartyForCredit(receipt, particular)
             }
             req.body.orderId = receipt._id.toString()
             await overDue1(req.body)
