@@ -796,40 +796,40 @@ export const PartySendOtp = async (req, res, next) => {
         // req.body.status = "Deactive"
         if (req.body.partyId) {
             if (req.body.type === "receipt" && req.body.paymentMode !== "Cash") {
-                const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
                 if (rece.length > 0) {
                     const latestReceipt = rece[rece.length - 1];
-                    req.body.runningAmount = latestReceipt.runningAmount + req.body.amount
+                    // req.body.runningAmount = latestReceipt.runningAmount + req.body.amount
                     req.body.voucherType = "receipt"
                     req.body.voucherNo = latestReceipt.voucherNo + 1
                 } else {
-                    req.body.runningAmount = req.body.amount
+                    // req.body.runningAmount = req.body.amount
                     req.body.voucherType = "receipt"
                     req.body.voucherNo = 1
                 }
             } else {
-                const rece = await Receipt.find({ status: "Active", paymentMode: "Cash", partyId: { $ne: null } }).sort({ sortorder: -1 })
+                const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
                 if (rece.length > 0) {
                     const latestReceipt = rece[rece.length - 1];
-                    req.body.cashRunningAmount = latestReceipt.cashRunningAmount + req.body.amount
+                    // req.body.cashRunningAmount = latestReceipt.cashRunningAmount + req.body.amount
                     req.body.voucherType = "receipt"
                     req.body.voucherNo = latestReceipt.voucherNo + 1
                 } else {
-                    req.body.cashRunningAmount = req.body.amount
+                    // req.body.cashRunningAmount = req.body.amount
                     req.body.voucherType = "receipt"
                     req.body.voucherNo = 1
                 }
             }
             const receipt = await Receipt.create(req.body);
             if (receipt.type === "receipt") {
-                let particular = "receipt";
+                let particular = req.body.paymentMode + " receipt";
                 await ledgerPartyForCredit(req.body, particular)
             }
+            req.body.orderId = receipt._id.toString()
             await overDue1(req.body)
             req.body.voucherDate = new Date(new Date())
             req.body.lockStatus = "No"
             await PaymentDueReport.create(req.body)
-            await OtpVerify.create(req.body)
             return receipt ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
         } else {
             return res.status(404).json({ message: "PartyId Required..", status: false })
