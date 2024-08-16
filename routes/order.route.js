@@ -1,5 +1,5 @@
 import express from "express";
-import { DebitorCalculate, OrdertoBilling, OrdertoDispatch, PartyPurchaseqty, ProductWiseSalesReport, SalesOrderCalculate, SalesOrderList, checkPartyOrderLimit, createOrder, createOrderHistory, createOrderHistoryById, createOrderHistoryByPartyId, createOrderHistoryByUserId, deleteSalesOrder, deletedSalesOrder, updateCreateOrder, updateCreateOrderStatus } from "../controller/order.controller.js";
+import { DebitorCalculate, OrdertoBilling, OrdertoDispatch, PartyPurchaseqty, ProductWiseSalesReport, SalesOrderCalculate, SalesOrderList, ViewOrderHistoryForPartySalesPerson, checkPartyOrderLimit, createOrder, createOrderHistory, createOrderHistoryById, createOrderHistoryByPartyId, createOrderHistoryByUserId, deleteSalesOrder, deletedSalesOrder, updateCreateOrder, updateCreateOrderStatus } from "../controller/order.controller.js";
 
 const router = express.Router();
 
@@ -14,6 +14,7 @@ router.post("/order-billing/:id", OrdertoBilling)
 router.post("/order-dispatch/:id", OrdertoDispatch)
 router.get("/sales-order-by-id/:id", createOrderHistoryById)
 router.get("/view-sales-order/:id/:database", SalesOrderList);
+router.get("/view-order-party/:id", ViewOrderHistoryForPartySalesPerson);
 
 router.get("/check-party-limit/:id", checkPartyOrderLimit)
 router.post("/product-sales-report/:database", ProductWiseSalesReport)

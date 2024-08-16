@@ -460,6 +460,17 @@ export const ProductWiseSalesReport = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
+// Order History App
+export const ViewOrderHistoryForPartySalesPerson = async (req, res, next) => {
+    try {
+        const orders = CreateOrder.find({ partyId: req.params.id, status: { $ne: "Deactive" } }).populate({ path: 'orderItems.productId', model: 'product' }).populate({ path: "userId", model: "user" }).populate({ path: "partyId", model: "customer" }).populate({ path: "warehouseId", model: "warehouse" })
+        return res.status(200).json({ orderHistory: orders, status: true })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
 
 //  For DashBoard
 export const SalesOrderCalculate111 = async (req, res, next) => {
