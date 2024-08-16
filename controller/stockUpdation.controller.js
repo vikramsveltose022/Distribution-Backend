@@ -376,7 +376,7 @@ export const updateTypeStatus = async (req, res, next) => {
     }
 };
 //--------------------------------------------------------------------------
-export const ViewAllWarehouse1 = async () => {
+export const ViewAllWarehouse = async () => {
     try {
         let array = []
         const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
@@ -603,7 +603,7 @@ export const partyHierarchy = async function partyHierarchy(userId, database, pr
 };
 
 
-export const ViewAllWarehouse = async (req, res, next) => {
+export const ViewAllWarehouse1 = async (req, res, next) => {
     try {
         let array = []
         const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
