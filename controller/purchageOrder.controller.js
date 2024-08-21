@@ -154,7 +154,9 @@ export const updatePurchaseOrder = async (req, res, next) => {
                     product.SalesRate = (product.Purchase_Rate * (100 + product.ProfitPercentage)) / 100;
                     product.Product_MRP = (product.SalesRate * ((100 + product.GSTRate) / 100) * ((100 + groupDiscount) / 100));
                 }
+                // console.log("SalesRate", product.SalesRate, "Product_MRP", product.Product_MRP, "landedCost", product.landedCost, "Purchase_Rate", product.Purchase_Rate, "groupDiscount", groupDiscount, "GSTRate", product.GSTRate, "ProfitPercentage", product.ProfitPercentage);
                 await product.save();
+                // console.log("product", product);
                 //this line
 
                 // product.basicPrice = await newOrderItem.basicPrice;
