@@ -142,7 +142,7 @@ export const updatePurchaseOrder = async (req, res, next) => {
                 }
                 //     product.Size -= quantityChange;
 
-                //change this line to 
+                //change this line to -------------------
                 product.basicPrice = await newOrderItem.basicPrice;
                 product.landedCost = await newOrderItem.landedCost;
                 product.Purchase_Rate = await newOrderItem.landedCost;
@@ -156,10 +156,8 @@ export const updatePurchaseOrder = async (req, res, next) => {
                 }
                 // console.log("SalesRate", product.SalesRate, "Product_MRP", product.Product_MRP, "landedCost", product.landedCost, "Purchase_Rate", product.Purchase_Rate, "groupDiscount", groupDiscount, "GSTRate", product.GSTRate, "ProfitPercentage", product.ProfitPercentage);
                 await product.save();
-
-                
                 // console.log("product", product);
-                //this line
+                //this line ---------------------
 
                 // product.basicPrice = await newOrderItem.basicPrice;
                 // product.landedCost = await newOrderItem.landedCost;
