@@ -117,11 +117,13 @@ export const UpdateProduct = async (req, res, next) => {
         req.body.SalesRate = req.body.Purchase_Rate * 1.03;
         req.body.landedCost = req.body.Purchase_Rate;
         req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.GSTRate / 100) * (1 + groupDiscount / 100);
+        console.log("SalesRate", SalesRate, "landedCost", landedCost, "Purchase_Rate", Purchase_Rate, "Product_MRP", Product_MRP, "GSTRate", GSTRate, "groupDiscount", groupDiscount);
       } else {
         let ProfitPercentage = Number(((100 + existingProduct?.ProfitPercentage ? existingProduct?.ProfitPercentage : 0) / 100).toString(2))
         req.body.SalesRate = req.body.Purchase_Rate * ProfitPercentage;
         req.body.landedCost = req.body.Purchase_Rate;
         req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.GSTRate / 100) * (1 + groupDiscount / 100);
+        console.log("SalesRate", SalesRate, "landedCost", landedCost, "Purchase_Rate", Purchase_Rate, "Product_MRP", Product_MRP, "GSTRate", GSTRate, "groupDiscount", groupDiscount);
       }
       const updatedProduct = req.body;
       const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
