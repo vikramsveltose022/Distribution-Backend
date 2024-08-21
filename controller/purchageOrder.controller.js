@@ -9,6 +9,7 @@ import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js
 import { generateInvoice } from "../service/invoice.js";
 import { addProductInWarehouse } from "./product.controller.js";
 import { Receipt } from "../model/receipt.model.js";
+import { CustomerGroup } from "../model/customerGroup.model.js";
 
 export const purchaseOrder = async (req, res, next) => {
     try {
@@ -110,6 +111,7 @@ export const updatePurchaseOrderStatus = async (req, res) => {
 
 export const updatePurchaseOrder = async (req, res, next) => {
     try {
+        let groupDiscount = 0;
         const orderId = req.params.id;
         // req.body.orderItem = req.body.orderItems
         const updatedFields = req.body;
@@ -131,10 +133,33 @@ export const updatePurchaseOrder = async (req, res, next) => {
             // if (quantityChange !== 0) {
             const product = await Product.findById({ _id: newOrderItem.productId });
             if (product) {
+                const group = await CustomerGroup.find({ database: req.body.database, status: "Active" })
+                if (group.length > 0) {
+                    const maxDiscount = group.reduce((max, group) => {
+                        return group.discount > max.discount ? group : max;
+                    });
+                    groupDiscount = maxDiscount.discount;
+                }
                 //     product.Size -= quantityChange;
+
+                //change this line to 
                 product.basicPrice = await newOrderItem.basicPrice;
                 product.landedCost = await newOrderItem.landedCost;
+                product.Purchase_Rate = await newOrderItem.landedCost;
+                if (!product.ProfitPercentage || product.ProfitPercentage === 0) {
+                    product.SalesRate = product.Purchase_Rate * 1.03;
+                    product.Product_MRP = (product.SalesRate) * ((100 + product.GSTRate) / 100) * ((100 + groupDiscount) / 100);
+                } else {
+
+                    product.SalesRate = (product.Purchase_Rate * (100 + product.ProfitPercentage)) / 100;
+                    product.Product_MRP = (product.SalesRate * ((100 + product.GSTRate) / 100) * ((100 + groupDiscount) / 100));
+                }
                 await product.save();
+                //this line
+
+                // product.basicPrice = await newOrderItem.basicPrice;
+                // product.landedCost = await newOrderItem.landedCost;
+                // await product.save();
             } else {
                 console.error(`Product with ID ${newOrderItem.productId} not found`);
             }
