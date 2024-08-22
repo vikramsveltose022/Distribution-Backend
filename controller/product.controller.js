@@ -115,11 +115,14 @@ export const UpdateProduct = async (req, res, next) => {
       }
       console.log("existingProduct", existingProduct);
       if (!req.body.ProfitPercentage || req.body.ProfitPercentage === 0) {
+        console.log("if zero profit % --called");
         req.body.SalesRate = req.body.Purchase_Rate * 1.03;
+        console.log("SalesRate", req.body.SalesRate);
         req.body.landedCost = req.body.Purchase_Rate;
         req.body.ProfitPercentage = 3;
         req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.GSTRate / 100) * (1 + groupDiscount / 100);
       } else {
+        console.log("if profit % --called");
         req.body.SalesRate = req.body.Purchase_Rate * (1 + req.body.ProfitPercentage / 100);
         req.body.landedCost = req.body.Purchase_Rate;
         req.body.Product_MRP = (req.body.SalesRate) * (1 + (req.body.GSTRate / 100)) * (1 + (groupDiscount / 100));
