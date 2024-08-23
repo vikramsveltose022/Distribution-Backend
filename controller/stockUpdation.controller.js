@@ -152,6 +152,8 @@ export const updateWarehousetoWarehouse = async (req, res, next) => {
                         await Warehouse.updateOne({ _id: existingFactory.warehouseToId },
                             { $push: { productItems: item }, $set: { stockTransferDate: existingFactory.stockTransferDate, transferStatus: existingFactory.transferStatus, grandTotal: existingFactory.grandTotal, warehouseFromId: existingFactory.warehouseFromId } }, { upsert: true });
                     }
+                    await ClosingSales(item, existingFactory.warehouseFromId)
+                    await ClosingPurchase(item, existingFactory.warehouseToId)
                 } else {
                     // return res.status(400).json({ error: 'Insufficient quantity in the source warehouse or product not found' });
                 }
@@ -717,5 +719,75 @@ export const deleteModel = async () => {
         return true
     } catch (error) {
         console.error('Error deleting data:', error);
+    }
+}
+
+// InWard And OutWard
+export const ClosingPurchase = async (orderItem, warehouse) => {
+    try {
+        let cgstRate = 0;
+        let sgstRate = 0;
+        let igstRate = 0;
+        let tax = 0
+        const rate = parseInt(orderItem.gstPercentage) / 2;
+        if (orderItem.igstTaxType === false) {
+            cgstRate = (((orderItem.transferQty) * orderItem.price) * rate) / 100;
+            sgstRate = (((orderItem.transferQty) * orderItem.price) * rate) / 100;
+            tax = cgstRate + sgstRate
+        } else {
+            igstRate = (((orderItem.transferQty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
+            tax = igstRate
+        }
+        // tax = (orderItem.igstRate + orderItem.cgstRate + orderItem.sgstRate)
+        const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: orderItem.productId })
+        if (stock) {
+            stock.pQty += (orderItem.transferQty);
+            stock.pRate += (orderItem.price);
+            stock.pBAmount += orderItem.totalPrice;
+            stock.pTaxAmount += tax;
+            stock.pTotal += (orderItem.totalPrice + tax)
+            await stock.save()
+        } else {
+            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, pQty: (orderItem.transferQty), pRate: orderItem.price, pBAmount: orderItem.totalPrice, pTaxAmount: tax, pTotal: (orderItem.totalPrice + tax) })
+            await closing.save()
+        }
+        return true
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+export const ClosingSales = async (orderItem, warehouse) => {
+    try {
+        let cgstRate = 0;
+        let sgstRate = 0;
+        let igstRate = 0;
+        let tax = 0
+        const rate = parseInt(orderItem.gstPercentage) / 2;
+        if (orderItem.igstTaxType === false) {
+            cgstRate = (((orderItem.transferQty) * orderItem.price) * rate) / 100;
+            sgstRate = (((orderItem.transferQty) * orderItem.price) * rate) / 100;
+            tax = cgstRate + sgstRate.sgstRate
+        } else {
+            igstRate = (((orderItem.transferQty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
+            tax = igstRate
+        }
+        // tax = (orderItem.igstRate + orderItem.cgstRate + orderItem.sgstRate)
+        const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: orderItem.productId })
+        if (stock) {
+            stock.sQty += (orderItem.transferQty);
+            stock.sRate += (orderItem.price);
+            stock.sBAmount += orderItem.totalPrice;
+            stock.sTaxAmount += tax;
+            stock.sTotal += (orderItem.totalPrice + tax)
+            await stock.save()
+        } else {
+            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, sQty: (orderItem.transferQty), sRate: orderItem.price, sBAmount: orderItem.totalPrice, sTaxAmount: tax, sTotal: (orderItem.totalPrice + tax) })
+            await closing.save()
+        }
+        return true
+    }
+    catch (err) {
+        console.log(err)
     }
 }
