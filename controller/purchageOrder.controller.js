@@ -65,9 +65,12 @@ export const PurchaseOrderDispatch = async (req, res, next) => {
                         orderItem.ReceiveQty = item.ReceiveQty
                         orderItem.DamageQty = item.DamageQty
                         orderItem.status = "Dispatch"
+                        order.status = "Dispatch"
                     } else {
                         if (orderItem.status === "Dispatch") {
                             order.status = "Dispatch"
+                        } else {
+                            order.status = "pending"
                         }
                     }
                 }
