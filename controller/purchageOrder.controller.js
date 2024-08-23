@@ -61,7 +61,7 @@ export const PurchaseOrderDispatch = async (req, res, next) => {
         } else {
             for (const orderItem of order.orderItems) {
                 for (let item of req.body.DispatchItem) {
-                    if (item.productId === orderItem.productId) {
+                    if (item.productId.toString() === orderItem.productId.toString()) {
                         orderItem.ReceiveQty = item.ReceiveQty
                         orderItem.DamageQty = item.DamageQty
                         orderItem.status = "Dispatch"
