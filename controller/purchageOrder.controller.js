@@ -53,6 +53,21 @@ export const purchaseOrder = async (req, res, next) => {
         return res.status(500).json({ error: err, status: false })
     }
 };
+export const PurchaseOrderDispatch = async (req, res, next) => {
+    try {
+        const order = await PurchaseOrder.findById({ _id: req.params.id });
+        if (!order) {
+            return res.status(401).json({ message: "Purchase Order Not Found", status: false });
+        } else {
+            const updatedOrder = await PurchaseOrder.findByIdAndUpdate(req.params.id, req.body, { new: true })
+            return updatedOrder ? res.status(200).json({ orderDetail: updatedOrder, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+};
 export const purchaseOrderHistoryByOrderId = async (req, res, next) => {
     try {
         const orderId = req.params.id;

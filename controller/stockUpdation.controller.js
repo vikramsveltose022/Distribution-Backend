@@ -603,15 +603,15 @@ export const partyHierarchy = async function partyHierarchy(userId, database, pr
 };
 
 
-export const ViewAllWarehouse1 = async (req, res, next) => {
+export const ViewAllWarehouse1 = async () => {
     try {
         let array = []
         const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
         if (!ware) {
-            return res.status(404).json({ message: "Not Found", status: false })
+            // return res.status(404).json({ message: "Not Found", status: false })
         }
         for (let id of ware) {
-            let userData = await Warehouse.findById({ _id: id._id }).sort({ sortorder: -1 }).populate({ path: "productItems.productId", model: "product" }).populate({ path: "damageItem.productId", model: "product" })
+            let userData = await Warehouse.findById({ _id: id._id }).sort({ sortorder: -1 }).populate({ path: "productItems.productId", model: "product" })
             const { _id, warehouseName, address, mobileNo, landlineNumber, productItems, damageItem, database } = userData
             const stocks = await ClosingStocks(id._id, productItems)
             const warehouse = {
@@ -630,10 +630,10 @@ export const ViewAllWarehouse1 = async (req, res, next) => {
             }
         }
         // }
-        return res.status(200).json({ message: "data saved successful", status: true });
+        // return res.status(200).json({ message: "data saved successful", status: true });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ error: "Internal Server Error", status: false });
+        // return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
 export const ClosingStocks = async (warehouse, productItem) => {
