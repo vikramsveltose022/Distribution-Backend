@@ -266,7 +266,8 @@ const PurchaseOrderSchema = new mongoose.Schema({
         default: false
     },
     NoOfPackage: {
-        type: String
+        type: String,
+        default: 0
     }
 }, { timestamps: true });
 
