@@ -113,7 +113,6 @@ export const UpdateProduct = async (req, res, next) => {
         });
         groupDiscount = maxDiscount?.discount ? maxDiscount?.discount : 0;
       }
-      console.log("existingProduct", existingProduct);
       if (!req.body.ProfitPercentage || req.body.ProfitPercentage === 0) {
         req.body.SalesRate = req.body.Purchase_Rate * 1.03;
         req.body.landedCost = req.body.Purchase_Rate;
@@ -126,10 +125,10 @@ export const UpdateProduct = async (req, res, next) => {
       }
       const updatedProduct = req.body;
       const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
-      // if (req.body.warehouse) {
-      // const warehouse = { productId: product._id, unitType: product.unitType, currentStock: product.qty, transferQty: product.qty, price: product.Product_MRP, totalPrice: (product.Product_MRP * product.qty), Size: req.body.unitQty }
-      // await addProductInWarehouse(warehouse, req.body.warehouse)
-      // }
+      if (req.body.warehouse) {
+        // const warehouse = { productId: product._id, unitType: product.unitType, currentStock: product.qty, transferQty: product.qty, price: product.Product_MRP, totalPrice: (product.Product_MRP * product.qty), Size: req.body.unitQty }
+        await addProductInWarehouse(req.body, req.body.warehouse)
+      }
       return res.status(200).json({ message: "Product Updated Successfully", status: true });
     }
   } catch (err) {
@@ -458,21 +457,14 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
     if (!user) {
       return console.log("warehouse not found")
     }
-    const sourceProductItem = user.productItems.find(
-      (pItem) => pItem.productId.toString() === warehouse.productId._id.toString());
+    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse.productId._id.toString());
     if (sourceProductItem) {
       // sourceProductItem.Size += warehouse.Size;
-      sourceProductItem.currentStock += warehouse.transferQty
-      sourceProductItem.totalPrice += warehouse.totalPrice;
-      sourceProductItem.transferQty += warehouse.transferQty;
+      sourceProductItem.currentStock = warehouse.Opening_Stock
+      sourceProductItem.totalPrice = warehouse.Purchase_Rate;
+      sourceProductItem.transferQty = warehouse.Opening_Stock;
       user.markModified('productItems');
       await user.save();
-    } else {
-      await Warehouse.updateOne({ _id: warehouseId },
-        {
-          $push: { productItems: warehouse },
-        },
-        { upsert: true });
     }
   } catch (error) {
     console.error(error);
