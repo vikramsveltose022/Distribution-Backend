@@ -59,7 +59,17 @@ export const PurchaseOrderDispatch = async (req, res, next) => {
         if (!order) {
             return res.status(401).json({ message: "Purchase Order Not Found", status: false });
         } else {
-            const updatedOrder = await PurchaseOrder.findByIdAndUpdate(req.params.id, req.body, { new: true })
+            for (const orderItem of order.orderItems) {
+                for (let item of req.body.DispatchItem) {
+                    if (item.productId === orderItem.productId) {
+                        orderItem.ReceiveQty = item.ReceiveQty
+                        orderItem.DamageQty = item.DamageQty
+                        orderItem.status = "Dispatch"
+                    }
+                }
+            }
+            order.NoOfPackage += req.body.NoOfPackage;
+            const updatedOrder = order.save()
             return updatedOrder ? res.status(200).json({ orderDetail: updatedOrder, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
         }
     }
