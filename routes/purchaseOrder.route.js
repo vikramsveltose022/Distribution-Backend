@@ -6,7 +6,7 @@ const router = express.Router();
 const upload = multer({ dest: "public/Images/" })
 
 router.post("/save-purchase-order", purchaseOrder)
-router.post("/dipatch-purchase-order", PurchaseOrderDispatch)
+router.post("/dipatch-purchase-order/:id", PurchaseOrderDispatch)
 router.get("/view-purchase-order-history/:id/:database", purchaseOrderHistory)
 router.get("/view-purchase-order-history-by-id/:id", purchaseOrderHistoryByOrderId);
 router.put("/update-purchase-order/:id", updatePurchaseOrder);
