@@ -127,7 +127,7 @@ export const UpdateProduct = async (req, res, next) => {
       const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
       // if (req.body.warehouse) {
       // const warehouse = { productId: product._id, unitType: product.unitType, currentStock: product.qty, transferQty: product.qty, price: product.Product_MRP, totalPrice: (product.Product_MRP * product.qty), Size: req.body.unitQty }
-      await addProductInWarehouse(req.body, req.body.warehouse)
+      await addProductInWarehouse(product, req.body.warehouse)
       // }
       return res.status(200).json({ message: "Product Updated Successfully", status: true });
     }
@@ -457,10 +457,8 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
     if (!user) {
       return console.log("warehouse not found")
     }
-    console.log("called....")
-    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse.productId._id.toString());
+    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
     if (sourceProductItem) {
-      console.log("calling-1")
       // sourceProductItem.Size += warehouse.Size;
       sourceProductItem.currentStock = warehouse.Opening_Stock
       sourceProductItem.totalPrice = warehouse.Purchase_Rate;
