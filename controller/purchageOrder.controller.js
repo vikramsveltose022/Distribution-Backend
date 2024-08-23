@@ -65,12 +65,16 @@ export const PurchaseOrderDispatch = async (req, res, next) => {
                         orderItem.ReceiveQty = item.ReceiveQty
                         orderItem.DamageQty = item.DamageQty
                         orderItem.status = "Dispatch"
+                    } else {
+                        if (orderItem.status === "Dispatch") {
+                            order.status = "Dispatch"
+                        }
                     }
                 }
             }
             order.NoOfPackage += req.body.NoOfPackage;
             const updatedOrder = order.save()
-            return updatedOrder ? res.status(200).json({ orderDetail: updatedOrder, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
+            return updatedOrder ? res.status(200).json({ message: "Updated Successfull!", orderDetail: updatedOrder, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
         }
     }
     catch (err) {
