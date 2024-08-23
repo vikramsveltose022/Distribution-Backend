@@ -421,9 +421,10 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
       (pItem) => pItem.productId === id.productId);
     if (sourceProductItem) {
       // sourceProductItem.Size += warehouse.Size;
-      sourceProductItem.currentStock += warehouse.Opening_Stock
-      sourceProductItem.totalPrice += warehouse.Purchase_Rate;
-      sourceProductItem.transferQty += warehouse.Opening_Stock;
+      sourceProductItem.currentStock = warehouse.Opening_Stock
+      sourceProductItem.price = warehouse.Purchase_Rate;
+      sourceProductItem.totalPrice = (warehouse.Opening_Stock * warehouse.Purchase_Rate);
+      sourceProductItem.transferQty = warehouse.Opening_Stock;
       user.markModified('productItems');
       await user.save();
     } else {
@@ -436,8 +437,8 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
         secondarySize: warehouse.secondarySize,
         currentStock: warehouse.Opening_Stock,
         transferQty: warehouse.Opening_Stock,
-        price: warehouse.price,
-        totalPrice: warehouse.Purchase_Rate,
+        price: warehouse.Purchase_Rate,
+        totalPrice: (warehouse.Opening_Stock * warehouse.Purchase_Rate),
         gstPercentage: warehouse.gstPercentage,
         igstType: warehouse.igstType
       }
@@ -461,7 +462,8 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
     if (sourceProductItem) {
       // sourceProductItem.Size += warehouse.Size;
       sourceProductItem.currentStock = warehouse.Opening_Stock
-      sourceProductItem.totalPrice = warehouse.Purchase_Rate;
+      sourceProductItem.price = warehouse.Purchase_Rate;
+      sourceProductItem.totalPrice = (warehouse.Opening_Stock * warehouse.Purchase_Rate);
       sourceProductItem.transferQty = warehouse.Opening_Stock;
       user.markModified('productItems');
       await user.save();
