@@ -55,20 +55,26 @@ const orderItemsSchema = new mongoose.Schema({
     igstTaxType: {
         type: Boolean
     },
-    basicPrice:{
-        type:Number
+    basicPrice: {
+        type: Number
     },
-    landedCost:{
-        type:Number
+    landedCost: {
+        type: Number
     },
-    primaryUnit:{
-        type:String
+    primaryUnit: {
+        type: String
     },
-    secondaryUnit:{
-        type:String
+    secondaryUnit: {
+        type: String
     },
-    secondarySize:{
-        type:Number
+    secondarySize: {
+        type: Number
+    },
+    ReceiveQty: {
+        type: String
+    },
+    DamageQty: {
+        type: String
     }
 }, { timestamps: true })
 const PurchaseOrderSchema = new mongoose.Schema({
@@ -79,28 +85,28 @@ const PurchaseOrderSchema = new mongoose.Schema({
     partyId: {
         type: String
     },
-    coolieAndCartage:{
-        type:Number
+    coolieAndCartage: {
+        type: Number
     },
-    transportationCost:{
-        type:Number
+    transportationCost: {
+        type: Number
     },
-    labourCost:{
-        type:Number
-    } ,
-    localFreight:{
-        type:Number
+    labourCost: {
+        type: Number
     },
-    miscellaneousCost:{
-        type:Number
-    } ,
-    tax:{
-        type:Number
+    localFreight: {
+        type: Number
     },
-    maxGstPercentage:{
-        type:Number
+    miscellaneousCost: {
+        type: Number
     },
-    database:{
+    tax: {
+        type: Number
+    },
+    maxGstPercentage: {
+        type: Number
+    },
+    database: {
         type: String
     },
     invoiceId: {
@@ -258,6 +264,9 @@ const PurchaseOrderSchema = new mongoose.Schema({
     invoiceStatus: {
         type: Boolean,
         default: false
+    },
+    NoOfPackage: {
+        type: String
     }
 }, { timestamps: true });
 

@@ -207,43 +207,52 @@ export const SavePurchaseInvoice = async (req, res, next) => {
         if (existingInvoice) {
             return res.status(400).json({ message: "Invoice already created for this order", status: false });
         }
-        for (const orderItem of purchase.orderItems) {
-            const product = await Product.findOne({ _id: orderItem.productId });
-            if (product) {
-                const group = await CustomerGroup.find({ database: product.database, status: "Active" })
-                if (group.length > 0) {
-                    const maxDiscount = group.reduce((max, group) => {
-                        return group.discount > max.discount ? group : max;
-                    });
-                    groupDiscount = maxDiscount.discount;
+        if (req.body.status === "cancelled") {
+            purchase.orderId = orderId
+            purchase.invoiceType = "purchase"
+            // purchase.invoiceStatus = true
+            purchase.status = req.body.status;
+            const invoiceList = await purchase.save()
+            return res.status(201).json({ message: "Purchase Status Update Successfully", Invoice: invoiceList, status: true });
+        } else {
+            for (const orderItem of purchase.orderItems) {
+                const product = await Product.findOne({ _id: orderItem.productId });
+                if (product) {
+                    const group = await CustomerGroup.find({ database: product.database, status: "Active" })
+                    if (group.length > 0) {
+                        const maxDiscount = group.reduce((max, group) => {
+                            return group.discount > max.discount ? group : max;
+                        });
+                        groupDiscount = maxDiscount.discount;
+                    }
+                    product.Purchase_Rate = orderItem.landedCost;
+                    if (!product.ProfitPercentage || product.ProfitPercentage === 0) {
+                        product.SalesRate = product.Purchase_Rate * 1.03;
+                        product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
+                    }
+                    const current = new Date(new Date())
+                    product.purchaseDate = current
+                    product.partyId = purchase.partyId;
+                    product.purchaseStatus = true
+                    product.Opening_Stock += orderItem.qty;
+                    const warehouse = { productId: orderItem.productId, currentStock: (orderItem.qty), transferQty: (orderItem.qty), price: orderItem.price, totalPrice: orderItem.totalPrice, gstPercentage: orderItem.gstPercentage, igstTaxType: orderItem.igstTaxType, primaryUnit: orderItem.primaryUnit, secondaryUnit: orderItem.secondaryUnit, secondarySize: orderItem.secondarySize, landedCost: orderItem.landedCost }
+                    await product.save();
+                    await addProductInWarehouse(warehouse, product.warehouse)
+                    await ClosingPurchase(orderItem, product.warehouse)
+                } else {
+                    return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
                 }
-                product.Purchase_Rate = orderItem.landedCost;
-                if (!product.ProfitPercentage || product.ProfitPercentage === 0) {
-                    product.SalesRate = product.Purchase_Rate * 1.03;
-                    product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
-                }
-                const current = new Date(new Date())
-                product.purchaseDate = current
-                product.partyId = purchase.partyId;
-                product.purchaseStatus = true
-                product.Opening_Stock += orderItem.qty;
-                const warehouse = { productId: orderItem.productId, currentStock: (orderItem.qty), transferQty: (orderItem.qty), price: orderItem.price, totalPrice: orderItem.totalPrice, gstPercentage: orderItem.gstPercentage, igstTaxType: orderItem.igstTaxType, primaryUnit: orderItem.primaryUnit, secondaryUnit: orderItem.secondaryUnit, secondarySize: orderItem.secondarySize, landedCost: orderItem.landedCost }
-                await product.save();
-                await addProductInWarehouse(warehouse, product.warehouse)
-                await ClosingPurchase(orderItem, product.warehouse)
-            } else {
-                return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
             }
+            purchase.orderId = orderId
+            purchase.invoiceType = "purchase"
+            purchase.invoiceStatus = true
+            purchase.status = req.body.status;
+            const invoiceList = await purchase.save()
+            if (invoiceList) {
+                await ledgerPartyForCredit(invoiceList, particular)
+            }
+            return res.status(201).json({ message: "InvoiceList created successfully", Invoice: invoiceList, status: true });
         }
-        purchase.orderId = orderId
-        purchase.invoiceType = "purchase"
-        purchase.invoiceStatus = true
-        purchase.status = req.body.status;
-        const invoiceList = await purchase.save()
-        if (invoiceList) {
-            await ledgerPartyForCredit(invoiceList, particular)
-        }
-        return res.status(201).json({ message: "InvoiceList created successfully", Invoice: invoiceList, status: true });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
