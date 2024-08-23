@@ -66,12 +66,12 @@ import TerminationRouter from "./routes/termination.route.js";
 import BonusRouter from "./routes/bonus.route.js"
 import UserBranchRouter from "./routes/userBranch.route.js";
 import mongoose from "mongoose";
-const app = express();
 import cors from "cors";
-import { closingStockUpdated, increaseTargetCreation, viewOpeningStockWarehouse } from "./cron-node/cron-node-service.js";
 import { increasePercentage } from "./controller/targetCreation.controller.js";
+import { closingStockUpdated, increaseTargetCreation, viewOpeningStockWarehouse } from "./cron-node/cron-node-service.js";
 import customerCheckRouter from "./routes/customerCheck.route.js";
 import { ViewAllWarehouse } from "./controller/stockUpdation.controller.js";
+const app = express();
 app.use(cors());
 dotenv.config();
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
