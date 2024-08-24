@@ -152,8 +152,8 @@ export const updateWarehousetoWarehouse = async (req, res, next) => {
                         await Warehouse.updateOne({ _id: existingFactory.warehouseToId },
                             { $push: { productItems: item }, $set: { stockTransferDate: existingFactory.stockTransferDate, transferStatus: existingFactory.transferStatus, grandTotal: existingFactory.grandTotal, warehouseFromId: existingFactory.warehouseFromId } }, { upsert: true });
                     }
-                    await ClosingSales(item, existingFactory.warehouseFromId)
-                    await ClosingPurchase(item, existingFactory.warehouseToId)
+                    // await ClosingSales(item, existingFactory.warehouseFromId)
+                    // await ClosingPurchase(item, existingFactory.warehouseToId)
                 } else {
                     // return res.status(400).json({ error: 'Insufficient quantity in the source warehouse or product not found' });
                 }
@@ -378,7 +378,7 @@ export const updateTypeStatus = async (req, res, next) => {
     }
 };
 //--------------------------------------------------------------------------
-export const ViewAllWarehouse = async () => {
+export const ViewAllWarehouse1 = async () => {
     try {
         let array = []
         const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
@@ -605,7 +605,7 @@ export const partyHierarchy = async function partyHierarchy(userId, database, pr
 };
 
 
-export const ViewAllWarehouse1 = async () => {
+export const ViewAllWarehouse = async () => {
     try {
         let array = []
         const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
