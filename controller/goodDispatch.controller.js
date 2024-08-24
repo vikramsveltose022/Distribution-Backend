@@ -332,7 +332,8 @@ export const OrderCancelWarehouse = async (req, res, next) => {
         let productFound = false;
         for (const item of existingOrder.orderItems) {
             if (item.productId.toString() === req.params.productId) {
-                item.status = "Cancelled"
+                item.status = "Cancelled";
+                existingOrder.status = "Cancelled"
                 productFound = true;
                 const product = await Product.findById({ _id: item.productId });
                 if (product) {
@@ -349,10 +350,12 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
                 }
-            } else if (item.status === "Cancelled") {
-                existingOrder.status = "Cancelled"
             } else {
-                existingOrder.status = "Cancel in process"
+                if (item.status === "Cancelled") {
+                    existingOrder.status = "Cancelled"
+                } else {
+                    existingOrder.status = "Cancel in process"
+                }
             }
         }
         if (!productFound) {

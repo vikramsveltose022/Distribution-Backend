@@ -64,11 +64,11 @@ export const PurchaseOrderDispatch = async (req, res, next) => {
                     if (item.productId.toString() === orderItem.productId.toString()) {
                         orderItem.ReceiveQty = item.ReceiveQty
                         orderItem.DamageQty = item.DamageQty
-                        orderItem.status = "Dispatch"
-                        order.status = "Dispatch"
+                        orderItem.status = "Received"
+                        order.status = "Received"
                     } else {
-                        if (orderItem.status === "Dispatch") {
-                            order.status = "Dispatch"
+                        if (orderItem.status === "Received") {
+                            order.status = "Received"
                         } else {
                             order.status = "pending"
                         }
