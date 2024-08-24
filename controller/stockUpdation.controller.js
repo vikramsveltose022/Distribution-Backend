@@ -632,6 +632,7 @@ export const ViewAllWarehouse = async () => {
             }
         }
         // }
+        await deleteModel()
         // return res.status(200).json({ message: "data saved successful", status: true });
     } catch (err) {
         console.error(err);
