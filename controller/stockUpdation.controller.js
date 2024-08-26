@@ -656,7 +656,7 @@ export const ClosingStocks = async (warehouse, productItem) => {
         let sTaxAmount = 0
         let sTotal = 0
         for (let item of productItem) {
-            const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: item.productId })
+            const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: item.productId._id.toString() })
             if (stock) {
                 pQty = stock.pQty || 0;
                 pRate = stock.pRate || 0;
@@ -678,7 +678,7 @@ export const ClosingStocks = async (warehouse, productItem) => {
                 tax = igstRate
             }
             const gst = {
-                productId: item.productId._id,
+                productId: item.productId._id.toString(),
                 unitType: item.unitType,
                 Size: item.Size,
                 currentStock: item.currentStock,
@@ -707,6 +707,16 @@ export const ClosingStocks = async (warehouse, productItem) => {
 
             };
             gstDetails.push(gst);
+            pQty = 0;
+            pRate = 0;
+            pBAmount = 0
+            pTaxAmount = 0
+            pTotal = 0
+            sQty = 0;
+            sRate = 0;
+            sBAmount = 0
+            sTaxAmount = 0
+            sTotal = 0
         }
         return gstDetails;
     }
