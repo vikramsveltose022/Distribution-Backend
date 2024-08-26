@@ -77,7 +77,8 @@ const CustomerSchema = new mongoose.Schema({
     type: Number
   },
   remainingLimit: {
-    type: Number
+    type: Number,
+    default: 0
   },
   paymentTerm: {
     type: String

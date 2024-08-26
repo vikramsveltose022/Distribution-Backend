@@ -75,33 +75,13 @@ export const UpdateCheckLimit = async (body, limit) => {
         console.log(err)
     }
 };
-export const UpdateCheckLimitSales = async (body) => {
-    try {
-        const over = await PartyOrderLimit.findOne({ partyId: body.partyId, activeStatus: "Active" })
-        if (over) {
-            over.remainingAmount += body.grandTotal
-            over.totalAmount -= body.grandTotal
-            // console.log("partylist : " + over)
-            await over.save()
-        }
-        const existOver = await OverDueReport.findOne({ partyId: body.partyId, activeStatus: "Active" })
-        if (existOver) {
-            existOver.remainingAmount -= body.grandTotal;
-            existOver.totalOrderAmount -= body.grandTotal
-            // console.log("ovr : " + existOver)
-            await existOver.save()
-        }
-    }
-    catch (err) {
-        console.log(err)
-    }
-};
 
+// used
 export const checkLimit = async (body) => {
     try {
         const party = await Customer.findById(body.partyId)
         if (party) {
-            if (party.remainingLimit) {
+            if (party.remainingLimit > 0) {
                 party.remainingLimit = party.remainingLimit - body.grandTotal
                 // over.totalAmount = over.totalAmount + body.grandTotal
                 // over.remainingAmount = remainingAmount;
@@ -133,6 +113,25 @@ export const checkLimit = async (body) => {
             }
         } else {
             console.log("Party Not Found")
+        }
+    }
+    catch (err) {
+        console.log(err)
+    }
+};
+export const UpdateCheckLimitSales = async (body) => {
+    try {
+        const over = await Customer.findById({ _id: body.partyId, status: "Active" })
+        if (over) {
+            over.remainingLimit += body.grandTotal
+            await over.save()
+        }
+        const existOver = await OverDueReport.findOne({ partyId: body.partyId, activeStatus: "Active" })
+        if (existOver) {
+            existOver.remainingAmount -= body.grandTotal;
+            existOver.totalOrderAmount -= body.grandTotal
+            // console.log("ovr : " + existOver)
+            await existOver.save()
         }
     }
     catch (err) {

@@ -144,8 +144,10 @@ export const UpdateCustomer = async (req, res, next) => {
                 req.body.assignTransporter = JSON.parse(req.body.assignTransporter)
             }
             const updatedCustomer = req.body;
-            if (req.body.limit) {
-                await UpdateCheckLimit(customerId, req.body.limit)
+            const existOver = await OverDueReport.findOne({ partyId: customerId, activeStatus: "Active" })
+            if (existOver) {
+                existOver.lockingAmount = req.body.limit
+                await existOver.save()
             }
             await Customer.findByIdAndUpdate(customerId, updatedCustomer, { new: true });
             return res.status(200).json({ message: 'Customer Updated Successfully', status: true });
@@ -584,7 +586,7 @@ export const updateExcelFile = async (req, res) => {
 
 export const dueParty = async (req, res) => {
     try {
-        const dues = await OverDueReport.find({ database: req.params.database }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
+        const dues = await OverDueReport.find({ database: req.params.database, activeStatus: "Active" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
         if (!dues.length > 0) {
             return res.status(404).json({ message: "due not found", status: false })
         }
@@ -599,7 +601,7 @@ export const dueParty = async (req, res) => {
                 await id.save()
             }
         }
-        const due = await OverDueReport.find({ database: req.params.database, dueStatus: "due" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
+        const due = await OverDueReport.find({ database: req.params.database, dueStatus: "due", activeStatus: "Active" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
         if (!due.length > 0) {
             return res.status(404).json({ message: "due not found", status: false })
         }
@@ -613,7 +615,7 @@ export const dueParty = async (req, res) => {
 
 export const overDueReport = async (req, res) => {
     try {
-        const due = await OverDueReport.find({ database: req.params.database, dueStatus: "overDue" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
+        const due = await OverDueReport.find({ database: req.params.database, dueStatus: "overDue",activeStatus: "Active" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
         if (!due.length > 0) {
             return res.status(404).json({ message: "due not found", status: false })
         }
@@ -892,8 +894,10 @@ export const UpdateSalesLead = async (req, res, next) => {
                 req.body.assignTransporter = JSON.parse(req.body.assignTransporter)
             }
             const updatedCustomer = req.body;
-            if (req.body.limit) {
-                await UpdateCheckLimit(customerId, req.body.limit)
+            const existOver = await OverDueReport.findOne({ partyId: customerId, activeStatus: "Active" })
+            if (existOver) {
+                existOver.lockingAmount = req.body.limit
+                await existOver.save()
             }
             await Customer.findByIdAndUpdate(customerId, updatedCustomer, { new: true });
             return res.status(200).json({ message: 'Customer Updated Successfully', status: true });

@@ -159,6 +159,7 @@ export const deleteSalesOrder = async (req, res, next) => {
         if (order.status === "completed") {
             return res.status(400).json({ error: "this order not deleted", status: false });
         }
+        await UpdateCheckLimitSales(order)
         order.status = "Deactive";
         await order.save();
         return res.status(200).json({ message: "delete successfull!", status: true })
@@ -410,7 +411,7 @@ export const checkPartyOrderLimit = async (req, res, next) => {
         // const party = await PartyOrderLimit.findOne({ partyId: req.params.id })
         const party = await Customer.findById(req.params.id)
         if (party) {
-            const CustomerLimit = (party.remainingLimit) ? party.remainingLimit : party.limit;
+            const CustomerLimit = (party.remainingLimit > 0) ? party.remainingLimit : party.limit;
             return res.status(200).json({ CustomerLimit, message: `The limit on your order amount is ${CustomerLimit}`, status: true })
         } else {
             return res.status(404).json({ message: "Party Not Found", status: true })
