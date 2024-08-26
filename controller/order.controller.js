@@ -230,6 +230,7 @@ export const OrdertoBilling = async (req, res) => {
 // Order To Dispatch
 export const OrdertoDispatch = async (req, res) => {
     try {
+        const Checked = []
         const orderId = req.params.id;
         const order = await CreateOrder.findById({ _id: orderId })
         if (!order) {
@@ -262,7 +263,8 @@ export const OrdertoDispatch = async (req, res) => {
                 order.status = "Dispatch"
             }
             else {
-                order.status = "Billing"
+                Checked.push(orderItem)
+                // order.status = "Billing"
             }
         }
         if (order.NoOfPackage) {
@@ -270,7 +272,9 @@ export const OrdertoDispatch = async (req, res) => {
         } else {
             order.NoOfPackage = req.body.NoOfPackage
         }
-        // order.status = "Dispatch"
+        if (Checked.length > 0) {
+            order.status = "Billing"
+        }
         await order.save();
         return res.status(200).json({ message: "Order Dispatch Seccessfull!", Order: order, status: true });
     } catch (error) {
