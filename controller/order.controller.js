@@ -407,14 +407,13 @@ export const updateCreateOrderStatus = async (req, res) => {
 };
 export const checkPartyOrderLimit = async (req, res, next) => {
     try {
-        const party = await PartyOrderLimit.findOne({ partyId: req.params.id }).sort({ sortorder: -1 })
-        if (!party) {
-            const customer = await Customer.findById(req.params.id)
-            const CustomerLimit = customer.limit;
+        // const party = await PartyOrderLimit.findOne({ partyId: req.params.id })
+        const party = await Customer.findById(req.params.id)
+        if (party) {
+            const CustomerLimit = (party.remainingLimit) ? party.remainingLimit : party.limit;
             return res.status(200).json({ CustomerLimit, message: `The limit on your order amount is ${CustomerLimit}`, status: true })
         } else {
-            const CustomerLimit = party.remainingAmount;
-            return res.status(200).json({ CustomerLimit, message: `The limit on your order amount is ${CustomerLimit}`, status: true })
+            return res.status(404).json({ message: "Party Not Found", status: true })
         }
     }
     catch (err) {
