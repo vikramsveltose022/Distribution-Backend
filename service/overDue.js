@@ -27,7 +27,6 @@ export const overDue = async (body) => {
 export const overDue1 = async (body) => {
     try {
         const over = await OverDueReport.findOne({ partyId: body.partyId, activeStatus: "Active" }).sort({ sortorder: -1 })
-        const over1 = await PartyOrderLimit.findOne({ partyId: body.partyId, activeStatus: "Active" })
         if (!over) {
             body.remainingAmount = body.amount;
             body.totalPaidAmount = body.amount
@@ -43,11 +42,10 @@ export const overDue1 = async (body) => {
             if (over.remainingAmount <= 0) {
                 party.autoBillingStatus = "open"
                 await over.save()
-                if (over1) {
+                if (party.remainingLimit > 0) {
                     over.activeStatus = "Deactive"
-                    over1.activeStatus = "Deactive"
+                    party.remainingLimit = 0
                     await over.save()
-                    await over1.save()
                     await party.save()
                 }
             } else {
@@ -62,7 +60,6 @@ export const overDue1 = async (body) => {
 export const DeleteOverDue = async (body) => {
     try {
         const over = await OverDueReport.findOne({ partyId: body.partyId, activeStatus: "Active" }).sort({ sortorder: -1 })
-        const over1 = await PartyOrderLimit.findOne({ partyId: body.partyId, activeStatus: "Active" })
         if (!over) {
             console.log("Over Due Not Found")
         } else {
@@ -73,15 +70,13 @@ export const DeleteOverDue = async (body) => {
             if (over.remainingAmount <= 0) {
                 party.autoBillingStatus = "open"
                 await over.save()
-                if (over1) {
+                if (party.remainingLimit) {
                     over.activeStatus = "Deactive"
-                    over1.activeStatus = "Deactive"
+                    party.remainingLimit = 0
                     await over.save()
-                    await over1.save()
                     await party.save()
                 }
                 await over.save()
-                await over1.save()
             } else {
                 await over.save()
             }
@@ -94,7 +89,6 @@ export const DeleteOverDue = async (body) => {
 export const UpdateOverDue = async (body, previousAmount) => {
     try {
         const over = await OverDueReport.findOne({ partyId: body.partyId, activeStatus: "Active" }).sort({ sortorder: -1 })
-        const over1 = await PartyOrderLimit.findOne({ partyId: body.partyId, activeStatus: "Active" })
         if (!over) {
             console.log("Over Due Not Found")
         } else {
@@ -104,11 +98,10 @@ export const UpdateOverDue = async (body, previousAmount) => {
             if (over.remainingAmount <= 0) {
                 party.autoBillingStatus = "open"
                 await over.save()
-                if (over1) {
+                if (party.remainingLimit > 0) {
                     over.activeStatus = "Deactive"
-                    over1.activeStatus = "Deactive"
+                    party.remainingLimit = 0
                     await over.save()
-                    await over1.save()
                     await party.save()
                 }
             } else {
