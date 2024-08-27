@@ -83,8 +83,10 @@ export const DeleteProduct = async (req, res, next) => {
     product.status = "Deactive";
     await product.save();
     const warehouse = await Warehouse.findOne({ "productItems.productId": req.params.id })
-    warehouse.productItems = warehouse.productItems.filter(sub => sub.productId.toString() !== req.params.id);
-    await warehouse.save();
+    if (warehouse) {
+      warehouse.productItems = warehouse.productItems.filter(sub => sub.productId.toString() !== req.params.id);
+      await warehouse.save();
+    }
     return res.status(200).json({ message: "delete product successfull", status: true })
   } catch (err) {
     console.log(err);
