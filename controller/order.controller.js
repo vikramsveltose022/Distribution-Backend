@@ -56,7 +56,7 @@ export const createOrder = async (req, res, next) => {
             //         if (warehouse) {
             //             const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
             //             pro.currentStock -= (orderItem.qty);
-            //             product.Opening_Stock -= orderItem.qty;
+            //             product.qty -= orderItem.qty;
             //             if (pro.currentStock < 0) {
             //                 return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
             //             }
@@ -204,7 +204,7 @@ export const OrdertoBilling = async (req, res) => {
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     pro.currentStock -= (orderItem.qty);
-                    product.Opening_Stock -= orderItem.qty;
+                    product.qty -= orderItem.qty;
                     if (pro.currentStock < 0) {
                         return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
                     }
@@ -244,7 +244,7 @@ export const OrdertoDispatch = async (req, res) => {
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     pro.currentStock -= (orderItem.qty);
-                    product.Opening_Stock -= orderItem.qty;
+                    product.qty -= orderItem.qty;
                     if (pro.currentStock < 0) {
                         return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
                     }
@@ -616,7 +616,7 @@ export const deletedSalesOrder = async (req, res, next) => {
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
                     pro.currentStock += (orderItem.qty);
-                    product.Opening_Stock += orderItem.qty;
+                    product.qty += orderItem.qty;
                     if (pro.currentStock < 0) {
                         return res.status(404).json({ message: "Product Out Of Stock", status: false })
                     }

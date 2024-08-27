@@ -393,7 +393,7 @@ export const StockCalculate11 = async (req, res, next) => {
             WarehouseStock.ClosingStock += item.currentStock
         }
         for (let item of product) {
-            WarehouseStock.OpeningStock += item.Opening_Stock
+            WarehouseStock.OpeningStock += item.qty
         }
         WarehouseStock.DamageStock = (WarehouseStock.DamageStock == NaN) ? 0 : WarehouseStock.DamageStock
         WarehouseStock.DeadStock = await ViewOverDueStock(req.params.database)
@@ -435,7 +435,7 @@ export const StockCalculate = async (req, res, next) => {
             });
         });
         products.forEach(product => {
-            WarehouseStock.OpeningStock += product.Opening_Stock || 0;
+            WarehouseStock.OpeningStock += product.qty || 0;
         });
         WarehouseStock.DamageStock = isNaN(WarehouseStock.DamageStock) ? 0 : WarehouseStock.DamageStock;
         WarehouseStock.DeadStock = await ViewOverDueStock(req.params.database);

@@ -36,6 +36,9 @@ export const SaveProduct = async (req, res) => {
       // const latest = (req.body.SalesRate + (req.body.SalesRate * req.body.GSTRate / 100))
       // req.body.Product_MRP = latest + (latest * (groupDiscount) / 100);
     }
+    if (req.body.Opening_Stock) {
+      req.body.qty = req.body.Opening_Stock
+    }
     const product = await Product.create(req.body);
     await addProductInWarehouse1(req.body, product.warehouse, product)
     return product ? res.status(200).json({ message: "product save successfully", status: true }) : res.status(400).json({ message: "something went wrong", status: false });
@@ -200,7 +203,7 @@ export const StockAlert = async (req, res) => {
       return res.status(404).json({ message: "product not found", status: false })
     }
     product.forEach(item => {
-      if (item.Opening_Stock < item.MIN_stockalert) {
+      if (item.qty < item.MIN_stockalert) {
         let StockAlerts = {
           productId: item._id.toString(),
           HSN_Code: item.HSN_Code,
@@ -210,9 +213,9 @@ export const StockAlert = async (req, res) => {
           Product_MRP: item.Product_MRP,
           GSTRate: item.GSTRate,
           Size: item.Size,
-          taxableAmount: (item.Opening_Stock * item.Product_MRP).toFixed(2),
-          Total: (((item.Opening_Stock * item.Product_MRP) * (100 + parseInt(item.GSTRate))) / 100).toFixed(2),
-          currentStock: item.Opening_Stock,
+          taxableAmount: (item.qty * item.Product_MRP).toFixed(2),
+          Total: (((item.qty * item.Product_MRP) * (100 + parseInt(item.GSTRate))) / 100).toFixed(2),
+          currentStock: item.qty,
           MIN_stockalert: item.MIN_stockalert,
           warehouseName: item.warehouse.warehouseName,
           warehosueAddress: item.warehouse.address,
@@ -423,10 +426,10 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
       (pItem) => pItem.productId === id.productId);
     if (sourceProductItem) {
       // sourceProductItem.Size += warehouse.Size;
-      sourceProductItem.currentStock = warehouse.Opening_Stock
+      sourceProductItem.currentStock = warehouse.qty
       sourceProductItem.price = warehouse.Purchase_Rate;
-      sourceProductItem.totalPrice = (warehouse.Opening_Stock * warehouse.Purchase_Rate);
-      sourceProductItem.transferQty = warehouse.Opening_Stock;
+      sourceProductItem.totalPrice = (warehouse.qty * warehouse.Purchase_Rate);
+      sourceProductItem.transferQty = warehouse.qty;
       user.markModified('productItems');
       await user.save();
     } else {
@@ -437,10 +440,10 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
         primaryUnit: warehouse.primaryUnit,
         secondaryUnit: warehouse.secondaryUnit,
         secondarySize: warehouse.secondarySize,
-        currentStock: warehouse.Opening_Stock,
-        transferQty: warehouse.Opening_Stock,
+        currentStock: warehouse.qty,
+        transferQty: warehouse.qty,
         price: warehouse.Purchase_Rate,
-        totalPrice: (warehouse.Opening_Stock * warehouse.Purchase_Rate),
+        totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
         gstPercentage: warehouse.gstPercentage,
         igstType: warehouse.igstType
       }
@@ -463,10 +466,10 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
     const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
     if (sourceProductItem) {
       // sourceProductItem.Size += warehouse.Size;
-      sourceProductItem.currentStock = warehouse.Opening_Stock
+      sourceProductItem.currentStock = warehouse.qty
       sourceProductItem.price = warehouse.Purchase_Rate;
-      sourceProductItem.totalPrice = (warehouse.Opening_Stock * warehouse.Purchase_Rate);
-      sourceProductItem.transferQty = warehouse.Opening_Stock;
+      sourceProductItem.totalPrice = (warehouse.qty * warehouse.Purchase_Rate);
+      sourceProductItem.transferQty = warehouse.qty;
       user.markModified('productItems');
       await user.save();
     }
@@ -478,10 +481,10 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
     //     primaryUnit: warehouse.primaryUnit,
     //     secondaryUnit: warehouse.secondaryUnit,
     //     secondarySize: warehouse.secondarySize,
-    //     currentStock: warehouse.Opening_Stock,
-    //     transferQty: warehouse.Opening_Stock,
+    //     currentStock: warehouse.qty,
+    //     transferQty: warehouse.qty,
     //     price: warehouse.Purchase_Rate,
-    //     totalPrice: (warehouse.Opening_Stock * warehouse.Purchase_Rate),
+    //     totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
     //     gstPercentage: warehouse.gstPercentage,
     //     igstType: warehouse.igstType
     //   }
