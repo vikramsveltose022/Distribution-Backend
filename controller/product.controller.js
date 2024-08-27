@@ -469,27 +469,28 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
       sourceProductItem.transferQty = warehouse.Opening_Stock;
       user.markModified('productItems');
       await user.save();
-    } else {
-      let ware = {
-        productId: id._id,
-        // Size: warehouse.Size,
-        // unitType: warehouse.unitType,
-        primaryUnit: warehouse.primaryUnit,
-        secondaryUnit: warehouse.secondaryUnit,
-        secondarySize: warehouse.secondarySize,
-        currentStock: warehouse.Opening_Stock,
-        transferQty: warehouse.Opening_Stock,
-        price: warehouse.Purchase_Rate,
-        totalPrice: (warehouse.Opening_Stock * warehouse.Purchase_Rate),
-        gstPercentage: warehouse.gstPercentage,
-        igstType: warehouse.igstType
-      }
-      const updated = await Warehouse.updateOne({ _id: warehouseId },
-        {
-          $push: { productItems: ware },
-        },
-        { upsert: true });
     }
+    // else {
+    //   let ware = {
+    //     productId: id._id,
+    //     // Size: warehouse.Size,
+    //     // unitType: warehouse.unitType,
+    //     primaryUnit: warehouse.primaryUnit,
+    //     secondaryUnit: warehouse.secondaryUnit,
+    //     secondarySize: warehouse.secondarySize,
+    //     currentStock: warehouse.Opening_Stock,
+    //     transferQty: warehouse.Opening_Stock,
+    //     price: warehouse.Purchase_Rate,
+    //     totalPrice: (warehouse.Opening_Stock * warehouse.Purchase_Rate),
+    //     gstPercentage: warehouse.gstPercentage,
+    //     igstType: warehouse.igstType
+    //   }
+    //   const updated = await Warehouse.updateOne({ _id: warehouseId },
+    //     {
+    //       $push: { productItems: ware },
+    //     },
+    //     { upsert: true });
+    // }
   } catch (error) {
     console.error(error);
   }
