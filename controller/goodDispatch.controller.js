@@ -343,7 +343,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                     if (warehouse) {
                         const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString())
                         pro.currentStock += (item.qty);
-                        product.Opening_Stock += item.qty;
+                        product.qty += item.qty;
                         pro.pendingStock -= (item.qty)
                         await warehouse.save();
                         await product.save()
