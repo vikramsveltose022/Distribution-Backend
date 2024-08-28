@@ -434,7 +434,7 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
       await user.save();
     } else {
       let ware = {
-        productId: id._id,
+        productId: id._id.toString(),
         // Size: warehouse.Size,
         // unitType: warehouse.unitType,
         primaryUnit: warehouse.primaryUnit,
@@ -444,8 +444,13 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
         transferQty: warehouse.qty,
         price: warehouse.Purchase_Rate,
         totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
-        gstPercentage: warehouse.gstPercentage,
-        igstType: warehouse.igstType
+        gstPercentage: warehouse.GSTRate,
+        igstType: warehouse.igstType,
+        oQty: warehouse.qty,
+        oRate: warehouse.Purchase_Rate,
+        oBAmount: (warehouse.qty * warehouse.Purchase_Rate),
+        oTaxAmount: ((warehouse.qty * warehouse.Purchase_Rate) * 18 / 100),
+        oTotal: ((warehouse.qty * warehouse.Purchase_Rate) + ((warehouse.qty * warehouse.Purchase_Rate) * 18 / 100)),
       }
       const updated = await Warehouse.updateOne({ _id: warehouseId },
         {

@@ -509,17 +509,37 @@ export const ViewOverDueStock = async (body) => {
 // }
 export const savedd = async (req, res, next) => {
     try {
-        const rolesss = []
-        const role = await Role.find({ database: req.params.database })
-        // const roles = await Role.find({ database: req.params.database })
-        if (role.length === 0) {
-            return res.status(404).json({ message: "Not Found", status: false })
+        let count = 0
+        const exist = await Product.find({ database: "111", status: "Deactive" })
+        if (exist.length === 0) {
+            return res.status(404).json({ message: "warehouse not found", status: false })
         }
-        console.log(role.length)
-        for (let item of role) {
-            await Role.findByIdAndDelete(item._id.toString())
+        for (let item of exist) {
+            const warehouse = await Warehouse.findOne({ "productItems.productId": item._id.toString() })
+            // if (warehouse) {
+            //     count++
+            //     warehouse.productItems = warehouse.productItems.filter(sub => sub.productId.toString() !== item._id.toString());
+            //     await warehouse.save();
+            // }
+
+            // const warehouse = await Warehouse.findById(item.warehouse)
+            // if (warehouse) {
+            //     let ware = {
+            //         productId: item._id.toString(),
+            //         primaryUnit: item.primaryUnit,
+            //         secondaryUnit: item.secondaryUnit,
+            //         secondarySize: item.secondarySize,
+            //         currentStock: item.qty,
+            //         transferQty: item.qty,
+            //         price: item.Purchase_Rate,
+            //         totalPrice: (item.qty * item.Purchase_Rate),
+            //         gstPercentage: item.GSTRate,
+            //         igstType: item.igstType
+            //     }
+            //     const updated = await Warehouse.updateOne({ _id: item.warehouse },{$push: { productItems: ware },},{ upsert: true });
+            // }
         }
-        res.status(200).json({ message: "suceess", status: true })
+        return res.status(200).json({ message: "success", count, status: true })
     }
     catch (err) {
         console.log(err)
