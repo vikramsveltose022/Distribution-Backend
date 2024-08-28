@@ -86,6 +86,66 @@ const WarehouseSchema = new mongoose.Schema({
     },
     damageItem: {
       type: Object
+    },
+    oQty: {
+      type: Number,
+      default: 0
+    },
+    oRate: {
+      type: Number,
+      default: 0
+    },
+    oBAmount: {
+      type: Number,
+      default: 0
+    },
+    oTaxAmount: {
+      type: Number,
+      default: 0
+    },
+    oTotal: {
+      type: Number,
+      default: 0
+    },
+    pQty: {
+      type: Number,
+      default: 0
+    },
+    pRate: {
+      type: Number,
+      default: 0
+    },
+    pBAmount: {
+      type: Number,
+      default: 0
+    },
+    pTaxAmount: {
+      type: Number,
+      default: 0
+    },
+    pTotal: {
+      type: Number,
+      default: 0
+    },
+    sQty: {
+      type: Number,
+      default: 0
+    },
+    sRate: {
+      type: Number,
+      default: 0
+    },
+    sBAmount: {
+      type: Number,
+      default: 0
+    },
+    sTaxAmount: {
+      type: Number,
+      default: 0
+    },
+    sTotal: {
+      type: Number,
+      default: 0
     }
   }],
   grandTotal: {

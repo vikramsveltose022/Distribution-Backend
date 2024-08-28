@@ -46,28 +46,28 @@ export const createOrder = async (req, res, next) => {
             const billAmount = orderItems.reduce((total, orderItem) => {
                 return total + (orderItem.price * orderItem.qty);
             }, 0);
-            // for (const orderItem of orderItems) {
-            //     const product = await Product.findById({ _id: orderItem.productId });
-            //     if (product) {
-            //         orderItem.warehouse = product.warehouse;
-            //         // ware = product.warehouse
-            //         product.salesDate = new Date()
-            //         const warehouse = await Warehouse.findById(product.warehouse)
-            //         if (warehouse) {
-            //             const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-            //             pro.currentStock -= (orderItem.qty);
-            //             product.qty -= orderItem.qty;
-            //             if (pro.currentStock < 0) {
-            //                 return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
-            //             }
-            //             pro.pendingStock += (orderItem.qty)
-            //             await warehouse.save();
-            //             await product.save()
-            //         }
-            //     } else {
-            //         console.error(`Product with ID ${orderItem.productId} not found`);
-            //     }
-            // }
+            for (const orderItem of orderItems) {
+                const product = await Product.findById({ _id: orderItem.productId });
+                if (product) {
+                    // orderItem.warehouse = product.warehouse;
+                    // ware = product.warehouse
+                    product.salesDate = new Date()
+                    // const warehouse = await Warehouse.findById(product.warehouse)
+                    // if (warehouse) {
+                    // const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
+                    // pro.currentStock -= (orderItem.qty);
+                    product.qty -= orderItem.qty;
+                    // if (pro.currentStock < 0) {
+                    //     return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
+                    // }
+                    // pro.pendingStock += (orderItem.qty)
+                    // await warehouse.save();
+                    await product.save()
+                    // }
+                } else {
+                    console.error(`Product with ID ${orderItem.productId} not found`);
+                }
+            }
             req.body.userId = party.created_by
             req.body.database = user.database
             req.body.orderNo = orderNo
@@ -159,6 +159,26 @@ export const deleteSalesOrder = async (req, res, next) => {
         if (order.status === "completed") {
             return res.status(400).json({ error: "this order not deleted", status: false });
         }
+        for (const orderItem of order.orderItems) {
+            const product = await Product.findById({ _id: orderItem.productId });
+            if (product) {
+                // ware = product.warehouse
+                // product.salesDate = new Date()
+                // const warehouse = await Warehouse.findById(product.warehouse)
+                // if (warehouse) {
+                //     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
+                //     pro.currentStock += (orderItem.qty);
+                product.qty += orderItem.qty;
+                //     if (pro.currentStock < 0) {
+                //         return res.status(404).json({ message: "Product Out Of Stock", status: false })
+                //     }
+                // await warehouse.save();
+                await product.save()
+                // }
+            } else {
+                console.error(`Product With ID ${orderItem.productId} Not Found`);
+            }
+        }
         await UpdateCheckLimitSales(order)
         order.status = "Deactive";
         await order.save();
@@ -206,7 +226,7 @@ export const OrdertoBilling = async (req, res) => {
                     pro.currentStock -= (orderItem.qty);
                     product.qty -= orderItem.qty;
                     if (pro.currentStock < 0) {
-                        return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
+                        // return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
                     }
                     pro.pendingStock += (orderItem.qty)
                     // await warehouse.save();
@@ -239,18 +259,18 @@ export const OrdertoDispatch = async (req, res) => {
         for (const orderItem of order.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId });
             if (product) {
-                product.salesDate = new Date(new Date())
+                // product.salesDate = new Date(new Date())
                 const warehouse = await Warehouse.findById(orderItem.warehouse)
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     pro.currentStock -= (orderItem.qty);
-                    product.qty -= orderItem.qty;
+                    // product.qty -= orderItem.qty;
                     if (pro.currentStock < 0) {
                         return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
                     }
                     pro.pendingStock += (orderItem.qty)
                     await warehouse.save();
-                    await product.save()
+                    // await product.save()
                     await ClosingSales(orderItem, orderItem.warehouse)
                 }
             } else {
@@ -612,7 +632,7 @@ export const deletedSalesOrder = async (req, res, next) => {
             if (product) {
                 // ware = product.warehouse
                 // product.salesDate = new Date()
-                const warehouse = await Warehouse.findById(product.warehouse)
+                const warehouse = await Warehouse.findById(orderItem.warehouse)
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
                     pro.currentStock += (orderItem.qty);
@@ -622,7 +642,7 @@ export const deletedSalesOrder = async (req, res, next) => {
                     }
                     await warehouse.save();
                     await product.save()
-                    await DeleteClosingSales(orderItem, product.warehouse)
+                    await DeleteClosingSales(orderItem, orderItem.warehouse)
                 }
             } else {
                 console.error(`Product With ID ${orderItem.productId} Not Found`);
