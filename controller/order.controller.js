@@ -223,8 +223,8 @@ export const OrdertoBilling = async (req, res) => {
                 const warehouse = await Warehouse.findById(orderItem.warehouse)
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                    pro.currentStock -= (orderItem.qty);
-                    product.qty -= orderItem.qty;
+                    // pro.currentStock -= (orderItem.qty);
+                    // product.qty -= orderItem.qty;
                     if (pro.currentStock < 0) {
                         // return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
                     }
@@ -260,7 +260,8 @@ export const OrdertoDispatch = async (req, res) => {
             const product = await Product.findById({ _id: orderItem.productId });
             if (product) {
                 // product.salesDate = new Date(new Date())
-                const warehouse = await Warehouse.findById(orderItem.warehouse)
+                // const warehouse = await Warehouse.findById(orderItem.warehouse)
+                const warehouse = await Warehouse.findById(req.body.warehouse.toString())
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     pro.currentStock -= (orderItem.qty);
@@ -642,6 +643,7 @@ export const deletedSalesOrder = async (req, res, next) => {
                     if (pro.currentStock < 0) {
                         return res.status(404).json({ message: "Product Out Of Stock", status: false })
                     }
+                    pro.pendingStock -= (orderItem.qty)
                     await warehouse.save();
                     await product.save()
                     await DeleteClosingSales(orderItem, orderItem.warehouse)
