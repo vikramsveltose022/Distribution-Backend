@@ -448,8 +448,8 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
         igstType: warehouse.igstType,
         oQty: warehouse.qty,
         oRate: warehouse.Purchase_Rate,
-        oBAmount: ((warehouse.qty * warehouse.Purchase_Rate) - ((warehouse.qty * warehouse.Purchase_Rate) * 18 / 100)),
-        oTaxAmount: ((warehouse.qty * warehouse.Purchase_Rate) * 18 / 100),
+        oBAmount: (((warehouse.qty * warehouse.Purchase_Rate) * 100) / (warehouse.GSTRate + 100)),
+        oTaxAmount: ((((warehouse.qty * warehouse.Purchase_Rate) * 100) / (warehouse.GSTRate + 100)) - (warehouse.qty * warehouse.Purchase_Rate)),
         oTotal: (warehouse.qty * warehouse.Purchase_Rate),
       }
       const updated = await Warehouse.updateOne({ _id: warehouseId }, { $push: { productItems: ware }, }, { upsert: true });

@@ -1,12 +1,9 @@
 import dotenv from "dotenv";
 import moment from "moment"
 import ExcelJS from 'exceljs'
-import path from "path"
-import axios from 'axios';
 import Jwt from "jsonwebtoken";
 import { Customer } from '../model/customer.model.js';
 import { getCustomerHierarchy } from '../rolePermission/RolePermission.js';
-import { generateRandomOTP } from "../service/generate.js";
 import transporter from "../service/email.js";
 import { OverDueReport } from "../model/overDue.mode.js";
 import { User } from "../model/user.model.js";
@@ -15,7 +12,6 @@ import { Role } from "../model/role.model.js";
 import { UpdateCheckLimit, checkLimit } from "../service/checkLimit.js";
 import { CustomerGroup } from "../model/customerGroup.model.js";
 import { Receipt } from "../model/receipt.model.js";
-import { CreateOrder } from "../model/createOrder.model.js";
 dotenv.config();
 
 export const SaveCustomer = async (req, res, next) => {
@@ -37,9 +33,6 @@ export const SaveCustomer = async (req, res, next) => {
                 return res.status(400).json({ message: "It is necessary to insert aadhar or pan no.", status: false })
             }
         }
-        const use = await generateRandomOTP(6)
-        const { firstName, email, password } = req.body;
-        req.body.userName = firstName + use
         if (req.files) {
             let images = [];
             req.files.map(file => {
@@ -51,22 +44,12 @@ export const SaveCustomer = async (req, res, next) => {
                 }
             })
             req.body.shopPhoto = images;
-            // req.body.photo = images
         }
-        // var mailOptions = {
-        //     from: {
-        //         name: "Distribution Management System",
-        //         address: "vikramsveltose022@gmail.com",
-        //     },
-        //     to: email,
-        //     subject: "Account Created Successfully",
-        //     text: `userName : ${req.body.userName}  Password : ${password}`,
-        // };
-        // await transporter.sendMail(mailOptions, (error, info) => {
-        //     !error ? res.status(201).json({ message: "send otp on email", status: true }) : console.log(error) || res.json({ error: "something went wrong" });
-        // });
         if (req.body.assignTransporter) {
             req.body.assignTransporter = JSON.parse(req.body.assignTransporter)
+        }
+        if (req.body.limit) {
+            req.body.remainingLimit = req.body.limit
         }
         const customer = await Customer.create(req.body)
         return customer ? res.status(200).json({ message: "Data Save Successfully", Customer: customer, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
@@ -142,6 +125,10 @@ export const UpdateCustomer = async (req, res, next) => {
         else {
             if (req.body.assignTransporter) {
                 req.body.assignTransporter = JSON.parse(req.body.assignTransporter)
+            }
+            if (existingCustomer.limit !== req.body.limit) {
+                const diff = req.body.limit - existingCustomer.limit
+                req.body.remainingLimit = (existingCustomer.remainingLimit + diff);
             }
             const updatedCustomer = req.body;
             const existOver = await OverDueReport.findOne({ partyId: customerId, activeStatus: "Active" })
@@ -392,6 +379,7 @@ export const saveExcelFile = async (req, res) => {
         let category = "category";
         let database = "database";
         let rolename = "rolename";
+        let remainingLimit = "remainingLimit";
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -424,6 +412,9 @@ export const saveExcelFile = async (req, res) => {
             }
             document[database] = req.params.database
             if (document.database) {
+                if (document.limit) {
+                    document[remainingLimit] = document.limit
+                }
                 const role = await Role.findOne({ id: document.rolename, database: document.database })
                 if (!role) {
                     roles.push(document.firstName)
@@ -506,6 +497,7 @@ export const updateExcelFile = async (req, res) => {
         let database = "database";
         let category = "category";
         let rolename = "rolename";
+        let remainingLimit = "remainingLimit";
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -548,6 +540,10 @@ export const updateExcelFile = async (req, res) => {
                     if (!existCustomer) {
                         IdNotExisting.push(document.id)
                     } else {
+                        if (document.limit !== existCustomer.limit) {
+                            const diff = document.limit - existCustomer.limit
+                            document[remainingLimit] = (existCustomer.remainingLimit + diff);
+                        }
                         document[rolename] = role._id.toString()
                         document[category] = await existCustomerGroup._id.toString()
                         const filter = { id: document.id, database: req.params.database };
@@ -597,7 +593,7 @@ export const dueParty = async (req, res) => {
             const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
             if (days >= 30) {
                 id.dueStatus = "overDue",
-                    id.overDueDate = new Date(new Date())
+                id.overDueDate = new Date(new Date())
                 await id.save()
             }
         }
@@ -615,7 +611,7 @@ export const dueParty = async (req, res) => {
 
 export const overDueReport = async (req, res) => {
     try {
-        const due = await OverDueReport.find({ database: req.params.database, dueStatus: "overDue",activeStatus: "Active" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
+        const due = await OverDueReport.find({ database: req.params.database, dueStatus: "overDue", activeStatus: "Active" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
         if (!due.length > 0) {
             return res.status(404).json({ message: "due not found", status: false })
         }

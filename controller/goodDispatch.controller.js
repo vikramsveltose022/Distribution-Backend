@@ -185,6 +185,10 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             if (!orders) {
                 return res.status(404).json({ message: "Order Not Found", status: false });
             }
+            const customer = await Customer.findById(partyId);
+            if (!customer) {
+                return res.status(404).json({ message: "Party Not Found", status: false })
+            }
             const user = await User.findById(orders.userId);
             if (!user) {
                 return res.status(404).json({ message: "Party Not Found", status: false })
@@ -193,6 +197,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                 return res.status(400).json({ message: "Incorrect OTP", status: false });
             }
             user.otpVerify = undefined
+            customer.remainingLimit += orders.grandTotal
             let invoiceId = orders.challanNo || orders.invoiceId
             const commonUpdate = { status, paymentMode, CNUpload, invoiceId, CNDetails };
             if (reason) {
@@ -202,6 +207,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                 Object.assign(orders, commonUpdate);
                 await orders.save();
                 await user.save();
+                await customer.save();
             }
         } else {
             const user = await Customer.findById(partyId);
