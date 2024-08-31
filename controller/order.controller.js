@@ -265,7 +265,7 @@ export const OrdertoDispatch = async (req, res) => {
                 // const warehouse = await Warehouse.findById(orderItem.warehouse)
                 const warehouse = await Warehouse.findById(req.body.warehouse.toString())
                 if (warehouse) {
-                    const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
+                    // const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     // pro.currentStock -= (orderItem.qty);
                     // product.qty -= orderItem.qty;
                     // if (pro.currentStock < 0) {
@@ -280,7 +280,7 @@ export const OrdertoDispatch = async (req, res) => {
                     // pro.sTotal += (orderItem.totalPrice + tax)
                     // await warehouse.save();
                     // await product.save()
-                    await ClosingSales(orderItem, orderItem.warehouse)
+                    // await ClosingSales(orderItem, orderItem.warehouse)
                 }
             } else {
                 console.error(`Product with ID ${orderItem.productId._id} not found`);

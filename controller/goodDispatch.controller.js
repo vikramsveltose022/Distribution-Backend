@@ -9,6 +9,7 @@ import { Warehouse } from "../model/warehouse.model.js";
 import { Product } from "../model/product.model.js";
 import { ledgerPartyForDebit } from "../service/ledger.js";
 import { OtpVerify } from "../model/otpVerify.model.js";
+import { ClosingSales } from "./createInvoice.controller.js";
 
 
 export const saveGoodDispatch = async (req, res) => {
@@ -237,11 +238,20 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                 if (product) {
                     const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
+                        let tax = 0;
+                        tax = (orderItem.igstRate + orderItem.sgstRate + orderItem.cgstRate)
                         const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                         pro.currentStock -= (orderItem.qty)
                         product.pendingQty -= (orderItem.qty)
+                        pro.sQty += (orderItem.qty);
+                        pro.sRate += (orderItem.price);
+                        pro.sBAmount += orderItem.totalPrice;
+                        pro.sTaxRate += tax;
+                        pro.sTotal += (orderItem.totalPrice + tax)
                         await warehouse.save();
                         await product.save()
+                        await ClosingSales(orderItem, orderItem.warehouse)
+                        tax = 0
                     }
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
