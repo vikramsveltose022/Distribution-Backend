@@ -99,7 +99,7 @@ const WarehouseSchema = new mongoose.Schema({
       type: Number,
       default: 0
     },
-    oTaxAmount: {
+    oTaxRate: {
       type: Number,
       default: 0
     },
@@ -119,7 +119,7 @@ const WarehouseSchema = new mongoose.Schema({
       type: Number,
       default: 0
     },
-    pTaxAmount: {
+    pTaxRate: {
       type: Number,
       default: 0
     },
@@ -139,7 +139,7 @@ const WarehouseSchema = new mongoose.Schema({
       type: Number,
       default: 0
     },
-    sTaxAmount: {
+    sTaxRate: {
       type: Number,
       default: 0
     },

@@ -130,9 +130,11 @@ export const UpdateProduct = async (req, res, next) => {
       }
       const updatedProduct = req.body;
       const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
-      // if (req.body.warehouse) {
-      // const warehouse = { productId: product._id, unitType: product.unitType, currentStock: product.qty, transferQty: product.qty, price: product.Product_MRP, totalPrice: (product.Product_MRP * product.qty), Size: req.body.unitQty }
-      await addProductInWarehouse(product, req.body.warehouse)
+      if (existingProduct.Opening_Stock !== req.body.Opening_Stock) {
+        req.body.qty = req.body.Opening_Stock - existingProduct.Opening_Stock
+        await addProductInWarehouse(req.body, req.body.warehouse)
+      }
+
       // }
       return res.status(200).json({ message: "Product Updated Successfully", status: true });
     }
@@ -449,7 +451,7 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
         oQty: warehouse.qty,
         oRate: warehouse.Purchase_Rate,
         oBAmount: (((warehouse.qty * warehouse.Purchase_Rate) * 100) / (warehouse.GSTRate + 100)),
-        oTaxAmount: ((((warehouse.qty * warehouse.Purchase_Rate) * 100) / (warehouse.GSTRate + 100)) - (warehouse.qty * warehouse.Purchase_Rate)),
+        oTaxRate: (warehouse.GSTRate),
         oTotal: (warehouse.qty * warehouse.Purchase_Rate),
       }
       const updated = await Warehouse.updateOne({ _id: warehouseId }, { $push: { productItems: ware }, }, { upsert: true });
@@ -458,7 +460,7 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
     console.error(error);
   }
 };
-export const addProductInWarehouse = async (warehouse, warehouseId) => {
+export const addProductInWarehouse = async (warehouse, warehouseId, orderItem) => {
   try {
     const user = await Warehouse.findById({ _id: warehouseId })
     if (!user) {
@@ -466,35 +468,21 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
     }
     const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
     if (sourceProductItem) {
-      // sourceProductItem.Size += warehouse.Size;
-      sourceProductItem.currentStock = warehouse.qty
-      sourceProductItem.price = warehouse.Purchase_Rate;
-      sourceProductItem.totalPrice = (warehouse.qty * warehouse.Purchase_Rate);
-      sourceProductItem.transferQty = warehouse.qty;
+      if (orderItem) {
+        sourceProductItem.pQty += (orderItem.qty);
+        sourceProductItem.pRate += (orderItem.price);
+        sourceProductItem.pBAmount += (orderItem.totalPrice)
+        sourceProductItem.pTaxRate += warehouse.GSTRate;
+        sourceProductItem.pTotal += (orderItem.totalPrice)
+      }
+      sourceProductItem.gstPercentage = warehouse.GSTRate
+      sourceProductItem.currentStock += warehouse.qty
+      sourceProductItem.price += warehouse.Purchase_Rate;
+      sourceProductItem.totalPrice += (warehouse.qty * warehouse.Purchase_Rate);
+      sourceProductItem.transferQty += warehouse.qty;
       user.markModified('productItems');
       await user.save();
     }
-    // else {
-    //   let ware = {
-    //     productId: id._id,
-    //     // Size: warehouse.Size,
-    //     // unitType: warehouse.unitType,
-    //     primaryUnit: warehouse.primaryUnit,
-    //     secondaryUnit: warehouse.secondaryUnit,
-    //     secondarySize: warehouse.secondarySize,
-    //     currentStock: warehouse.qty,
-    //     transferQty: warehouse.qty,
-    //     price: warehouse.Purchase_Rate,
-    //     totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
-    //     gstPercentage: warehouse.gstPercentage,
-    //     igstType: warehouse.igstType
-    //   }
-    //   const updated = await Warehouse.updateOne({ _id: warehouseId },
-    //     {
-    //       $push: { productItems: ware },
-    //     },
-    //     { upsert: true });
-    // }
   } catch (error) {
     console.error(error);
   }

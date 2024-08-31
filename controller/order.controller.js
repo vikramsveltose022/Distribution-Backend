@@ -57,6 +57,7 @@ export const createOrder = async (req, res, next) => {
                     // const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     // pro.currentStock -= (orderItem.qty);
                     product.qty -= orderItem.qty;
+                    product.pendingQty += orderItem.qty;
                     // if (pro.currentStock < 0) {
                     //     return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
                     // }
@@ -169,6 +170,7 @@ export const deleteSalesOrder = async (req, res, next) => {
                 //     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
                 //     pro.currentStock += (orderItem.qty);
                 product.qty += orderItem.qty;
+                product.pendingQty += orderItem.qty;
                 //     if (pro.currentStock < 0) {
                 //         return res.status(404).json({ message: "Product Out Of Stock", status: false })
                 //     }
@@ -225,10 +227,10 @@ export const OrdertoBilling = async (req, res) => {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     // pro.currentStock -= (orderItem.qty);
                     // product.qty -= orderItem.qty;
-                    if (pro.currentStock < 0) {
-                        // return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
-                    }
-                    pro.pendingStock += (orderItem.qty)
+                    // if (pro.currentStock < 0) {
+                    // return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
+                    // }
+                    // pro.pendingStock += (orderItem.qty)
                     // await warehouse.save();
                     // await product.save()
                     // await ClosingSales(orderItem, orderItem.warehouse)
@@ -264,13 +266,19 @@ export const OrdertoDispatch = async (req, res) => {
                 const warehouse = await Warehouse.findById(req.body.warehouse.toString())
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                    pro.currentStock -= (orderItem.qty);
+                    // pro.currentStock -= (orderItem.qty);
                     // product.qty -= orderItem.qty;
-                    if (pro.currentStock < 0) {
-                        return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
-                    }
-                    pro.pendingStock += (orderItem.qty)
-                    await warehouse.save();
+                    // if (pro.currentStock < 0) {
+                    //     return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
+                    // }
+                    // pro.pendingStock += (orderItem.qty)
+                    // tax = (orderItem.sgstRate + orderItem.cgstRate + orderItem.igstRate)
+                    // pro.sQty += (orderItem.qty);
+                    // pro.sRate += (orderItem.price);
+                    // pro.sBAmount += (orderItem.totalPrice)
+                    // pro.sTaxRate += tax;
+                    // pro.sTotal += (orderItem.totalPrice + tax)
+                    // await warehouse.save();
                     // await product.save()
                     await ClosingSales(orderItem, orderItem.warehouse)
                 }
@@ -326,6 +334,7 @@ export const updateCreateOrder = async (req, res, next) => {
                     const product = await Product.findById({ _id: newOrderItem.productId });
                     if (product) {
                         product.qty -= quantityChange;
+                        product.pendingQty += quantityChange;
                         // const warehouse = await Warehouse.findById({ _id: product.warehouse })
                         // if (warehouse) {
                         //     const pro = warehouse.productItems.find((item) => item.productId === newOrderItem.productId)
@@ -640,10 +649,11 @@ export const deletedSalesOrder = async (req, res, next) => {
                     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
                     pro.currentStock += (orderItem.qty);
                     product.qty += orderItem.qty;
+                    product.pendingQty -= orderItem.qty;
                     if (pro.currentStock < 0) {
                         return res.status(404).json({ message: "Product Out Of Stock", status: false })
                     }
-                    pro.pendingStock -= (orderItem.qty)
+                    // pro.pendingStock -= (orderItem.qty)
                     await warehouse.save();
                     await product.save()
                     await DeleteClosingSales(orderItem, orderItem.warehouse)
@@ -681,7 +691,7 @@ export const DeleteClosingSales = async (orderItem, warehouse) => {
         if (stock) {
             stock.sQty -= (orderItem.qty);
             stock.sBAmount -= orderItem.totalPrice;
-            stock.sTaxAmount -= tax;
+            stock.sTaxRate -= tax;
             stock.sTotal -= (orderItem.totalPrice + tax)
             await stock.save()
             // console.log("ClosingSales : " + stock)

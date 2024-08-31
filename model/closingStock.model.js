@@ -22,7 +22,7 @@ const ClosingSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    cTaxAmount: {
+    cTaxRate: {
         type: Number,
         default: 0
     },
@@ -42,7 +42,7 @@ const ClosingSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    pTaxAmount: {
+    pTaxRate: {
         type: Number,
         default: 0
     },
@@ -62,7 +62,7 @@ const ClosingSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    sTaxAmount: {
+    sTaxRate: {
         type: Number,
         default: 0
     },
