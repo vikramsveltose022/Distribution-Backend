@@ -6,7 +6,7 @@ import { ledgerPartyForCredit, ledgerPartyForDebit } from "../service/ledger.js"
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
 import { OverDueReport } from "../model/overDue.mode.js";
 import { Product } from "../model/product.model.js";
-import { addProductInWarehouse } from "./product.controller.js";
+import { addProductInWarehouse, addProductInWarehouse2 } from "./product.controller.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
 import { create } from "html-pdf";
@@ -237,7 +237,7 @@ export const SavePurchaseInvoice = async (req, res, next) => {
                     product.purchaseStatus = true
                     product.qty += orderItem.qty;
                     await product.save();
-                    await addProductInWarehouse(product, product.warehouse, orderItem)
+                    await addProductInWarehouse2(product, product.warehouse, orderItem)
                     await ClosingPurchase(orderItem, product.warehouse)
                 } else {
                     return res.status(404).json(`Product with ID ${orderItem.productId} not found`);

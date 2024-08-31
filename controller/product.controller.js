@@ -472,9 +472,34 @@ export const addProductInWarehouse = async (warehouse, warehouseId, orderItem) =
         sourceProductItem.pQty += (orderItem.qty);
         sourceProductItem.pRate += (orderItem.price);
         sourceProductItem.pBAmount += (orderItem.totalPrice)
-        sourceProductItem.pTaxRate += warehouse.GSTRate;
+        sourceProductItem.pTaxRate = warehouse.GSTRate;
         sourceProductItem.pTotal += (orderItem.totalPrice)
       }
+      sourceProductItem.gstPercentage = warehouse.GSTRate
+      sourceProductItem.currentStock += warehouse.qty
+      sourceProductItem.price += warehouse.Purchase_Rate;
+      sourceProductItem.totalPrice += (warehouse.qty * warehouse.Purchase_Rate);
+      sourceProductItem.transferQty += warehouse.qty;
+      user.markModified('productItems');
+      await user.save();
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+export const addProductInWarehouse2 = async (warehouse, warehouseId, orderItem) => {
+  try {
+    const user = await Warehouse.findById({ _id: warehouseId })
+    if (!user) {
+      return console.log("warehouse not found")
+    }
+    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
+    if (sourceProductItem) {
+      sourceProductItem.pQty += (orderItem.qty);
+      sourceProductItem.pRate += (orderItem.price);
+      sourceProductItem.pBAmount += (orderItem.totalPrice)
+      sourceProductItem.pTaxRate = warehouse.GSTRate;
+      sourceProductItem.pTotal += (orderItem.totalPrice)
       sourceProductItem.gstPercentage = warehouse.GSTRate
       sourceProductItem.currentStock += warehouse.qty
       sourceProductItem.price += warehouse.Purchase_Rate;
