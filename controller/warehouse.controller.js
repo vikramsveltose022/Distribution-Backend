@@ -510,7 +510,7 @@ export const ViewOverDueStock = async (body) => {
 export const savedd = async (req, res, next) => {
     try {
         let count = 0
-        const exist = await Product.find({ database: req.params.database, status: "Deactive" })
+        const exist = await Product.find({ database: req.params.database, status: "Active" })
         if (exist.length === 0) {
             return res.status(404).json({ message: "warehouse not found", status: false })
         }
@@ -521,6 +521,9 @@ export const savedd = async (req, res, next) => {
             //     warehouse.productItems = warehouse.productItems.filter(sub => sub.productId.toString() !== item._id.toString());
             //     await warehouse.save();
             // }
+            // item.qty = item.Opening_Stock
+            // item.pendingQty = 0
+            // await item.save()
 
             const warehouse = await Warehouse.findById(item.warehouse)
             if (warehouse) {
