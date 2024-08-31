@@ -288,6 +288,7 @@ export const deletedPurchase = async (req, res, next) => {
                 // product.purchaseStatus = true
                 // product.landedCost = orderItem.landedCost;
                 product.qty -= orderItem.qty;
+                product.pendingQty += orderItem.qty;
                 const warehouse = { productId: orderItem.productId, currentStock: (orderItem.qty), transferQty: (orderItem.qty), price: orderItem.price, totalPrice: orderItem.totalPrice, gstPercentage: orderItem.gstPercentage, igstTaxType: orderItem.igstTaxType, primaryUnit: orderItem.primaryUnit, secondaryUnit: orderItem.secondaryUnit, secondarySize: orderItem.secondarySize, landedCost: orderItem.landedCost }
                 await product.save();
                 await deleteAddProductInWarehouse(warehouse, product.warehouse)
@@ -350,7 +351,7 @@ export const DeleteClosingPurchase = async (orderItem, warehouse) => {
         if (stock) {
             stock.pQty -= (orderItem.qty);
             stock.pBAmount -= orderItem.totalPrice;
-            stock.pTaxAmount -= tax;
+            stock.pTaxRate -= tax;
             stock.pTotal -= (orderItem.totalPrice + tax)
             // console.log("stock : " + stock)
             await stock.save()

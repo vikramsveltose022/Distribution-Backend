@@ -648,12 +648,12 @@ export const ClosingStocks = async (warehouse, productItem) => {
         let pQty = 0;
         let pRate = 0;
         let pBAmount = 0
-        let pTaxAmount = 0
+        let pTaxRate = 0
         let pTotal = 0
         let sQty = 0;
         let sRate = 0;
         let sBAmount = 0
-        let sTaxAmount = 0
+        let sTaxRate = 0
         let sTotal = 0
         for (let item of productItem) {
             const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: item.productId._id.toString() })
@@ -661,12 +661,12 @@ export const ClosingStocks = async (warehouse, productItem) => {
                 pQty = stock.pQty || 0;
                 pRate = stock.pRate || 0;
                 pBAmount = stock.pBAmount || 0
-                pTaxAmount = stock.pTaxAmount || 0
+                pTaxRate = stock.pTaxRate || 0
                 pTotal = stock.pTotal || 0
                 sQty = stock.sQty || 0;
                 sRate = stock.sRate || 0;
                 sBAmount = stock.sBAmount || 0
-                sTaxAmount = stock.sTaxAmount || 0
+                sTaxRate = stock.sTaxRate || 0
                 sTotal = stock.sTotal || 0
             }
             const rate = item.gstPercentage / 2;
@@ -692,17 +692,17 @@ export const ClosingStocks = async (warehouse, productItem) => {
                 cQty: item.currentStock || 0,
                 cRate: item.price || 0,
                 cBAmount: item.totalPrice || 0,
-                cTaxAmount: tax || 0,
+                cTaxRate: tax || 0,
                 cTotal: (item.totalPrice + tax) || 0,
                 pQty: pQty || 0,
                 pRate: pRate || 0,
                 pBAmount: pBAmount || 0,
-                pTaxAmount: pTaxAmount || 0,
+                pTaxRate: pTaxRate || 0,
                 pTotal: pTotal || 0,
                 sQty: sQty || 0,
                 sRate: sRate || 0,
                 sBAmount: sBAmount || 0,
-                sTaxAmount: sTaxAmount || 0,
+                sTaxRate: sTaxRate || 0,
                 sTotal: sTotal || 0
 
             };
@@ -710,12 +710,12 @@ export const ClosingStocks = async (warehouse, productItem) => {
             pQty = 0;
             pRate = 0;
             pBAmount = 0
-            pTaxAmount = 0
+            pTaxRate = 0
             pTotal = 0
             sQty = 0;
             sRate = 0;
             sBAmount = 0
-            sTaxAmount = 0
+            sTaxRate = 0
             sTotal = 0
         }
         return gstDetails;
@@ -755,11 +755,11 @@ export const ClosingPurchase = async (orderItem, warehouse) => {
             stock.pQty += (orderItem.transferQty);
             stock.pRate += (orderItem.price);
             stock.pBAmount += orderItem.totalPrice;
-            stock.pTaxAmount += tax;
+            stock.pTaxRate += tax;
             stock.pTotal += (orderItem.totalPrice + tax)
             await stock.save()
         } else {
-            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, pQty: (orderItem.transferQty), pRate: orderItem.price, pBAmount: orderItem.totalPrice, pTaxAmount: tax, pTotal: (orderItem.totalPrice + tax) })
+            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, pQty: (orderItem.transferQty), pRate: orderItem.price, pBAmount: orderItem.totalPrice, pTaxRate: tax, pTotal: (orderItem.totalPrice + tax) })
             await closing.save()
         }
         return true
@@ -789,11 +789,11 @@ export const ClosingSales = async (orderItem, warehouse) => {
             stock.sQty += (orderItem.transferQty);
             stock.sRate += (orderItem.price);
             stock.sBAmount += orderItem.totalPrice;
-            stock.sTaxAmount += tax;
+            stock.sTaxRate += tax;
             stock.sTotal += (orderItem.totalPrice + tax)
             await stock.save()
         } else {
-            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, sQty: (orderItem.transferQty), sRate: orderItem.price, sBAmount: orderItem.totalPrice, sTaxAmount: tax, sTotal: (orderItem.totalPrice + tax) })
+            const closing = ClosingStock({ warehouseId1: warehouse, productId: orderItem.productId, sQty: (orderItem.transferQty), sRate: orderItem.price, sBAmount: orderItem.totalPrice, sTaxRate: tax, sTotal: (orderItem.totalPrice + tax) })
             await closing.save()
         }
         return true

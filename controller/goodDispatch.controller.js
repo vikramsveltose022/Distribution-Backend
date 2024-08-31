@@ -47,7 +47,7 @@ export const saveGoodDispatch = async (req, res) => {
                     // if (pro.currentStock < 0) {
                     //     return res.status(404).json({ message: "out of stock", status: false })
                     // }
-                    pro.pendingStock -= (orderItem.qty)
+                    // pro.pendingStock -= (orderItem.qty)
                     await warehouse.save();
                     // await product.save()
                 }
@@ -238,9 +238,10 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                     const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
                         const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                        pro.pendingStock -= (orderItem.qty)
+                        pro.currentStock -= (orderItem.qty)
+                        product.pendingQty -= (orderItem.qty)
                         await warehouse.save();
-                        // await product.save()
+                        await product.save()
                     }
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
@@ -305,7 +306,7 @@ export const ViewOtp = async (req, res) => {
 };
 export const ViewWarehouseByOrder = async (req, res, next) => {
     try {
-        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Billing" }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" })
+        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Billing", status: { $ne: "Deactive" } }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" })
         if (order.length === 0) {
             return res.status(404).json({ message: "warehouse stock not found", status: false })
         }
@@ -318,7 +319,7 @@ export const ViewWarehouseByOrder = async (req, res, next) => {
 }
 export const ViewWarehouseOrderCancel = async (req, res, next) => {
     try {
-        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Cancel in process" }).populate({ path: "orderItems.productId", model: "product" })
+        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Cancel in process", status: { $ne: "Deactive" } }).populate({ path: "orderItems.productId", model: "product" })
         if (order.length === 0) {
             return res.status(404).json({ message: "warehouse stock not found", status: false })
         }
@@ -350,7 +351,8 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                         const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString())
                         pro.currentStock += (item.qty);
                         product.qty += item.qty;
-                        pro.pendingStock -= (item.qty)
+                        product.pendingQty -= item.qty;
+                        // pro.pendingStock -= (item.qty)
                         await warehouse.save();
                         await product.save()
                     }

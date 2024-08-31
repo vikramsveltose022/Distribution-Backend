@@ -34,8 +34,9 @@ const ProductSchema = new mongoose.Schema({
     warehouse: {
         type: String
     },
-    warehouse1: {
-        type: String
+    pendingQty: {
+        type: Number,
+        default: 0
     },
     Unit: {
         type: String
