@@ -608,7 +608,7 @@ export const partyHierarchy = async function partyHierarchy(userId, database, pr
 export const ViewAllWarehouse = async () => {
     try {
         let array = []
-        const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
+        const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');    
         if (!ware) {
             // return res.status(404).json({ message: "Not Found", status: false })
         }

@@ -359,7 +359,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                     // const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
                         const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString())
-                        pro.currentStock += (item.qty);
+                        // pro.currentStock += (item.qty);
                         product.qty += item.qty;
                         product.pendingQty -= item.qty;
                         // pro.pendingStock -= (item.qty)

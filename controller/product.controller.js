@@ -222,7 +222,8 @@ export const StockAlert = async (req, res) => {
           warehouseName: item.warehouse.warehouseName,
           warehosueAddress: item.warehouse.address,
           SupplierName: item?.partyId?.ownerName || null,
-          SupplierGST: item?.partyId?.gstNumber || null
+          SupplierGST: item?.partyId?.gstNumber || null,
+          partyId: item.partyId
         };
         Stock.push(StockAlerts)
       }
