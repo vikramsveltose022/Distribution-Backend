@@ -461,7 +461,7 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
     console.error(error);
   }
 };
-export const addProductInWarehouse = async (warehouse, warehouseId, orderItem) => {
+export const addProductInWarehouse = async (warehouse, warehouseId) => {
   try {
     const user = await Warehouse.findById({ _id: warehouseId })
     if (!user) {
@@ -469,13 +469,6 @@ export const addProductInWarehouse = async (warehouse, warehouseId, orderItem) =
     }
     const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
     if (sourceProductItem) {
-      if (orderItem) {
-        sourceProductItem.pQty += (orderItem.qty);
-        sourceProductItem.pRate += (orderItem.price);
-        sourceProductItem.pBAmount += (orderItem.totalPrice)
-        sourceProductItem.pTaxRate = warehouse.GSTRate;
-        sourceProductItem.pTotal += (orderItem.totalPrice)
-      }
       sourceProductItem.gstPercentage = warehouse.GSTRate
       sourceProductItem.currentStock += warehouse.qty
       sourceProductItem.price += warehouse.Purchase_Rate;
