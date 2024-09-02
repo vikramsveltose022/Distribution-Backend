@@ -555,71 +555,71 @@ export const savedd = async (req, res, next) => {
     }
 }
 
-const StockClose = async () => {
+export const StockClose = async () => {
     try {
-        const warehouse = await Warehouse.find().sort({ sortorder: -1 })
-        if (warehouse.length === 0) {
-            console.log("warehouse not found")
+        const warehouses = await Warehouse.find({ status: "Active" }).sort({ sortorder: -1 });
+        if (warehouses.length === 0) {
+            console.log("Warehouse not found");
+            return;
         }
-        for (let item of warehouse) {
-            const closingStock = await ClosingStock(item.productItems)
-            const warehouse = {
-                warehouseId: item._id.toString(),
-                warehouseName: item.warehouseName,
-                mobileNumber: item.mobileNo,
-                landlineNumber: item.landlineNumber,
-                address: item.address,
+        for (let warehouse of warehouses) {
+            const closingStock = await ClosingStock(warehouse.productItems);
+            const warehouseData = {
+                warehouseId: warehouse._id.toString(),
+                warehouseName: warehouse.warehouseName,
+                mobileNumber: warehouse.mobileNo,
+                landlineNumber: warehouse.landlineNumber,
+                address: warehouse.address,
                 productItems: closingStock,
-                damageItem: item.damageItem,
-                database: item.database,
+                database: warehouse.database,
                 closingStatus: "closing"
+            };
+
+            await Stock.create(warehouseData);
+
+            for (let productItem of warehouse.productItems) {
+                productItem.pQty = 0;
+                productItem.pRate = 0;
+                productItem.pTaxRate = 0;
+                productItem.pTotal = 0;
+                productItem.sQty = 0;
+                productItem.sRate = 0;
+                productItem.sTaxRate = 0;
+                productItem.sTotal = 0;
+                await productItem.save();
             }
         }
-    }
-    catch (err) {
-        console.log(err)
+    } catch (err) {
+        console.error("Error in StockClose function:", err);
     }
 }
 const ClosingStock = async (productItems) => {
     try {
-        const stock = []
+        const stock = [];
         for (let item of productItems) {
             let warehouseStock = {
-                productId: "",
-                currentStock: "",
-                price: "",
-                totalPrice: "",
-                gstPercentage: "",
-                oQty: "",
-                oRate: "",
-                oTaxRate: "",
-                oTotal: "",
-                pQty: "",
-                pRate: "",
-                pTaxRate: "",
-                pTotal: "",
-                sQty: "",
-                sRate: "",
-                sTaxRate: "",
-                sTotal: "",
-            }
-            stock.push(gst);
-            oQty = 0;
-            oRate = 0;
-            oTaxRate = 0;
-            oTotal = 0;
-            pQty = 0;
-            pRate = 0;
-            pTaxRate = 0
-            pTotal = 0
-            sQty = 0;
-            sRate = 0;
-            sTaxRate = 0
-            sTotal = 0
+                productId: item.productId,
+                currentStock: item.currentStock,
+                price: item.price,
+                totalPrice: item.totalPrice,
+                gstPercentage: item.gstPercentage,
+                oQty: item.oQty,
+                oRate: item.oRate,
+                oTaxRate: item.oTaxRate,
+                oTotal: item.oTotal,
+                pQty: item.pQty,
+                pRate: item.pRate,
+                pTaxRate: item.pTaxRate,
+                pTotal: item.pTotal,
+                sQty: item.sQty,
+                sRate: item.sRate,
+                sTaxRate: item.sTaxRate,
+                sTotal: item.sTotal,
+            };
+            stock.push(warehouseStock);
         }
         return stock;
-    }
-    catch (err) {
-        console.log(err)
+    } catch (err) {
+        console.error("Error in ClosingStock function:", err);
     }
 }

@@ -126,9 +126,11 @@ export const UpdateCustomer = async (req, res, next) => {
             if (req.body.assignTransporter) {
                 req.body.assignTransporter = JSON.parse(req.body.assignTransporter)
             }
-            if (existingCustomer.limit !== req.body.limit) {
-                const diff = req.body.limit - existingCustomer.limit
-                req.body.remainingLimit = (existingCustomer.remainingLimit + diff);
+            if (req.body.paymentTerm !== "cash") {
+                if (existingCustomer.limit !== req.body.limit) {
+                    const diff = req.body.limit - existingCustomer.limit
+                    req.body.remainingLimit = (existingCustomer.remainingLimit + diff);
+                }
             }
             const updatedCustomer = req.body;
             const existOver = await OverDueReport.findOne({ partyId: customerId, activeStatus: "Active" })
@@ -593,7 +595,7 @@ export const dueParty = async (req, res) => {
             const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
             if (days >= 30) {
                 id.dueStatus = "overDue",
-                id.overDueDate = new Date(new Date())
+                    id.overDueDate = new Date(new Date())
                 await id.save()
             }
         }
