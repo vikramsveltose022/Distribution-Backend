@@ -71,6 +71,26 @@ const stockSchema = new mongoose.Schema({
         igstTaxType: {
             type: Boolean
         },
+        oQty: {
+            type: Number,
+            default: 0
+        },
+        oRate: {
+            type: Number,
+            default: 0
+        },
+        oBAmount: {
+            type: Number,
+            default: 0
+        },
+        oTaxRate: {
+            type: Number,
+            default: 0
+        },
+        oTotal: {
+            type: Number,
+            default: 0
+        },
         pQty: {
             type: Number,
             default: 0

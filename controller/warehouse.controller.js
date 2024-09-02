@@ -554,3 +554,72 @@ export const savedd = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+
+const StockClose = async () => {
+    try {
+        const warehouse = await Warehouse.find().sort({ sortorder: -1 })
+        if (warehouse.length === 0) {
+            console.log("warehouse not found")
+        }
+        for (let item of warehouse) {
+            const closingStock = await ClosingStock(item.productItems)
+            const warehouse = {
+                warehouseId: item._id.toString(),
+                warehouseName: item.warehouseName,
+                mobileNumber: item.mobileNo,
+                landlineNumber: item.landlineNumber,
+                address: item.address,
+                productItems: closingStock,
+                damageItem: item.damageItem,
+                database: item.database,
+                closingStatus: "closing"
+            }
+        }
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+const ClosingStock = async (productItems) => {
+    try {
+        const stock = []
+        for (let item of productItems) {
+            let warehouseStock = {
+                productId: "",
+                currentStock: "",
+                price: "",
+                totalPrice: "",
+                gstPercentage: "",
+                oQty: "",
+                oRate: "",
+                oTaxRate: "",
+                oTotal: "",
+                pQty: "",
+                pRate: "",
+                pTaxRate: "",
+                pTotal: "",
+                sQty: "",
+                sRate: "",
+                sTaxRate: "",
+                sTotal: "",
+            }
+            stock.push(gst);
+            oQty = 0;
+            oRate = 0;
+            oTaxRate = 0;
+            oTotal = 0;
+            pQty = 0;
+            pRate = 0;
+            pTaxRate = 0
+            pTotal = 0
+            sQty = 0;
+            sRate = 0;
+            sTaxRate = 0
+            sTotal = 0
+        }
+        return stock;
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
