@@ -128,12 +128,13 @@ export const UpdateProduct = async (req, res, next) => {
         req.body.landedCost = req.body.Purchase_Rate;
         req.body.Product_MRP = (req.body.SalesRate) * (1 + (req.body.GSTRate / 100)) * (1 + (groupDiscount / 100));
       }
-      const updatedProduct = req.body;
-      const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
       if (existingProduct.Opening_Stock !== req.body.Opening_Stock) {
-        req.body.qty = req.body.Opening_Stock - existingProduct.Opening_Stock
+        const qty = req.body.Opening_Stock - existingProduct.Opening_Stock
+        req.body.qty = existingProduct.qty + qty
         await addProductInWarehouse(req.body, req.body.warehouse)
       }
+      const updatedProduct = req.body;
+      const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
 
       // }
       return res.status(200).json({ message: "Product Updated Successfully", status: true });
@@ -470,10 +471,10 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
     const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
     if (sourceProductItem) {
       sourceProductItem.gstPercentage = warehouse.GSTRate
-      sourceProductItem.currentStock += warehouse.qty
-      sourceProductItem.price += warehouse.Purchase_Rate;
-      sourceProductItem.totalPrice += (warehouse.qty * warehouse.Purchase_Rate);
-      sourceProductItem.transferQty += warehouse.qty;
+      sourceProductItem.currentStock = warehouse.qty
+      sourceProductItem.price = warehouse.Purchase_Rate;
+      sourceProductItem.totalPrice = (warehouse.qty * warehouse.Purchase_Rate);
+      sourceProductItem.transferQty = warehouse.qty;
       user.markModified('productItems');
       await user.save();
     }
