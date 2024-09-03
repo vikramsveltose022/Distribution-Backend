@@ -251,7 +251,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                         // pro.currentStock -= (orderItem.qty)
                         product.pendingQty -= (orderItem.qty)
                         pro.sQty += (orderItem.qty);
-                        pro.sRate += (orderItem.gstPercentage);
+                        pro.sRate = (orderItem.gstPercentage);
                         pro.sBAmount += orderItem.totalPrice;
                         pro.sTaxRate += tax;
                         pro.sTotal += (orderItem.totalPrice + tax)

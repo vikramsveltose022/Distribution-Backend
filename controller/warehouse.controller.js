@@ -510,12 +510,12 @@ export const ViewOverDueStock = async (body) => {
 export const savedd = async (req, res, next) => {
     try {
         let count = 0
-        const exist = await Product.find({ database: req.params.database, status: "Deactive" })
+        const exist = await Product.find({ database: req.params.database, status: "Active" })
         if (exist.length === 0) {
             return res.status(404).json({ message: "warehouse not found", status: false })
         }
         for (let item of exist) {
-            await Product.findByIdAndDelete(item._id)
+            // await Product.findByIdAndDelete(item._id)
             // const warehouse = await Warehouse.findOne({ "productItems.productId": item._id.toString() })
             // if (warehouse) {
             //     count++
@@ -526,27 +526,27 @@ export const savedd = async (req, res, next) => {
             // item.pendingQty = 0
             // await item.save()
 
-            // const warehouse = await Warehouse.findById(item.warehouse)
-            // if (warehouse) {
-            //     let ware = {
-            //         productId: item._id.toString(),
-            //         primaryUnit: item.primaryUnit,
-            //         secondaryUnit: item.secondaryUnit,
-            //         secondarySize: item.secondarySize,
-            //         currentStock: item.qty,
-            //         transferQty: item.qty,
-            //         price: item.Purchase_Rate,
-            //         totalPrice: (item.qty * item.Purchase_Rate),
-            //         gstPercentage: item.GSTRate,
-            //         igstType: item.igstType,
-            //         oQty: item.Opening_Stock,
-            //         oRate: item.Purchase_Rate,
-            //         oBAmount: (((item.Opening_Stock * item.Purchase_Rate) * 100) / (item.GSTRate + 100)),
-            //         oTaxRate: (item.GSTRate),
-            //         oTotal: (item.Opening_Stock * item.Purchase_Rate),
-            //     }
-            //     const updated = await Warehouse.updateOne({ _id: item.warehouse }, { $push: { productItems: ware }, }, { upsert: true });
-            // }
+            const warehouse = await Warehouse.findById(item.warehouse)
+            if (warehouse) {
+                let ware = {
+                    productId: item._id.toString(),
+                    primaryUnit: item.primaryUnit,
+                    secondaryUnit: item.secondaryUnit,
+                    secondarySize: item.secondarySize,
+                    currentStock: item.qty,
+                    transferQty: item.qty,
+                    price: item.Purchase_Rate,
+                    totalPrice: (item.qty * item.Purchase_Rate),
+                    gstPercentage: item.GSTRate,
+                    igstType: item.igstType,
+                    oQty: item.Opening_Stock,
+                    oRate: item.Purchase_Rate,
+                    oBAmount: (((item.Opening_Stock * item.Purchase_Rate) * 100) / (item.GSTRate + 100)),
+                    oTaxRate: (item.GSTRate),
+                    oTotal: (item.Opening_Stock * item.Purchase_Rate),
+                }
+                const updated = await Warehouse.updateOne({ _id: item.warehouse }, { $push: { productItems: ware }, }, { upsert: true });
+            }
         }
         return res.status(200).json({ message: "success", count, status: true })
     }

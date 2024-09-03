@@ -475,11 +475,11 @@ export const addProductInWarehouse = async (warehouse, warehouseId) => {
       sourceProductItem.price = warehouse.Purchase_Rate;
       sourceProductItem.totalPrice = (warehouse.qty * warehouse.Purchase_Rate);
       sourceProductItem.transferQty = warehouse.qty;
-      sourceProductItem.oQty = warehouse.qty
+      sourceProductItem.oQty = warehouse.Opening_Stock
       sourceProductItem.oRate = warehouse.Purchase_Rate
-      sourceProductItem.oBAmount = (((warehouse.qty * warehouse.Purchase_Rate) * 100) / (warehouse.GSTRate + 100))
+      sourceProductItem.oBAmount = (((warehouse.Opening_Stock * warehouse.Purchase_Rate) * 100) / (warehouse.GSTRate + 100))
       sourceProductItem.oTaxRate = (warehouse.GSTRate)
-      sourceProductItem.oTotal = (warehouse.qty * warehouse.Purchase_Rate)
+      sourceProductItem.oTotal = (warehouse.Opening_Stock * warehouse.Purchase_Rate)
       user.markModified('productItems');
       await user.save();
     }
