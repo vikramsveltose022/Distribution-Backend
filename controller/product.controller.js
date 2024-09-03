@@ -131,7 +131,7 @@ export const UpdateProduct = async (req, res, next) => {
       if (existingProduct.Opening_Stock !== req.body.Opening_Stock) {
         const qty = req.body.Opening_Stock - existingProduct.Opening_Stock
         req.body.qty = existingProduct.qty + qty
-        await addProductInWarehouse(req.body, req.body.warehouse)
+        await addProductInWarehouse(req.body, req.body.warehouse, existingProduct)
       }
       const updatedProduct = req.body;
       const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
@@ -462,13 +462,13 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
     console.error(error);
   }
 };
-export const addProductInWarehouse = async (warehouse, warehouseId) => {
+export const addProductInWarehouse = async (warehouse, warehouseId, productId) => {
   try {
     const user = await Warehouse.findById({ _id: warehouseId })
     if (!user) {
       return console.log("warehouse not found")
     }
-    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
+    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === productId._id.toString());
     if (sourceProductItem) {
       sourceProductItem.gstPercentage = warehouse.GSTRate
       sourceProductItem.currentStock = warehouse.qty
