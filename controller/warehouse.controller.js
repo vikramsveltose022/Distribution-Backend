@@ -586,7 +586,7 @@ export const StockClose = async () => {
                 productItem.sRate = 0;
                 productItem.sTaxRate = 0;
                 productItem.sTotal = 0;
-                await productItem.save();
+                await warehouse.save();
             }
         }
     } catch (err) {
