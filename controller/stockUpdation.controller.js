@@ -10,6 +10,7 @@ import { Customer } from "../model/customer.model.js";
 import { Receipt } from "../model/receipt.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
 import { warehouseNo } from "../service/invoice.js";
+import { PurchaseOrder } from "../model/purchaseOrder.model.js";
 
 export const viewInWardStockToWarehouse = async (req, res, next) => {
     try {
@@ -485,9 +486,10 @@ export const ViewOverDueStock1 = async (req, res, next) => {
 
 export const ViewOverDueStock = async (req, res, next) => {
     try {
+        const allProduct = []
         const currentDate = moment();
         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
-        const productsNotOrderedLastMonth = await Product.find({ database: req.params.database, status: "Active", createdAt: { $lt: startOfLastMonth.toDate() } }).populate({ path: "partyId", model: "customer" });
+        const productsNotOrderedLastMonth = await Product.find({ database: req.params.database, status: "Active", createdAt: { $lt: startOfLastMonth.toDate() } }).populate({ path: "partyId", model: "customer" }).populate({ path: "warehouse", model: "warehouse" });
         if (!productsNotOrderedLastMonth || productsNotOrderedLastMonth.length === 0) {
             return res.status(404).json({ message: "No products found", status: false });
         }
@@ -498,17 +500,31 @@ export const ViewOverDueStock = async (req, res, next) => {
         const orderedProductIdsLastMonth = orderedProductsLastMonth.map(orderItem => orderItem.productId.toString());
         const productsToProcess = productsNotOrderedLastMonth.filter(product =>
             !orderedProductIdsLastMonth.includes(product._id.toString()));
-        const warehouseIds = productsToProcess.map(product => product.warehouse);
-        const warehouses = await Warehouse.find({ _id: { $in: warehouseIds } });
-        const allProduct = productsToProcess.map(product => {
-            const warehouse = warehouses.find(warehouse => warehouse._id.toString() === product.warehouse.toString());
-            const qty = warehouse ? warehouse.productItems.find(item => item.productId === product._id.toString()) : null;
-            return {
-                product,
-                Qty: qty ? qty.currentStock : null
-            };
-        });
+        // const warehouseIds = productsToProcess.map(product => product.warehouse);
+        // const warehouses = await Warehouse.find({ _id: { $in: warehouseIds } });
+        for (let item of productsToProcess) {
+            let partyId = "";
+            let days = 0;
+            const purchase = await PurchaseOrder.find({
+                "orderItems.productId": item._id.toString()
+            }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
 
+            if (purchase.length > 0) {
+                partyId = purchase[purchase.length - 1].partyId.firstName;
+            }
+            const lastDate = item.salesDate || item.createdAt;
+            const lastOrderDate = new Date(lastDate);
+            const currentDates = new Date();
+            const timeDifference = currentDates - lastOrderDate;
+            days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            const products = {
+                product: item,
+                overDue: days,
+                // supplierName: partyId
+            };
+
+            allProduct.push(products);
+        }
         return res.status(200).json({ allProduct, status: true });
     } catch (err) {
         console.error(err);
@@ -517,14 +533,15 @@ export const ViewOverDueStock = async (req, res, next) => {
 };
 
 
-export const ViewDeadParty1 = async (req, res, next) => {
+export const ViewDeadParty = async (req, res, next) => {
     try {
+        const Parties = []
         const userId = req.params.id;
         const database = req.params.database;
         const currentDate = moment();
         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
 
-        const hierarchy = await Customer.find({ database: database, status: 'Active', leadStatusCheck: "false", createdAt: { $lt: startOfLastMonth } })
+        const hierarchy = await Customer.find({ database: database, status: 'Active', leadStatusCheck: "false", createdAt: { $lt: startOfLastMonth } }).populate({ path: "created_by", model: "user" }).populate({ path: "category", model: "customerGroup" })
 
         const allOrderedParties = await CreateOrder.find({ database: database, createdAt: { $gte: startOfLastMonth.toDate() } })
         let allParty = []
@@ -537,45 +554,67 @@ export const ViewDeadParty1 = async (req, res, next) => {
         }
         let lastDays = ""
         for (let id of allParty) {
-            const payment = await Receipt.find({ type: "receipt", partyId: id._id })
-            if (payment.length > 0) {
-                const lastPayment = payment[payment.length - 1]
-                lastDays = lastPayment.createdAt;
-            } else {
-                lastDays = "0"
+            // const payment = await Receipt.find({ type: "receipt", partyId: id._id })
+            // if (payment.length > 0) {
+            //     const lastPayment = payment[payment.length - 1]
+            //     lastDays = lastPayment.createdAt;
+            // } else {
+            //     lastDays = "0"
+            // }
+            let purchaseDate = "";
+            const purchase = await PurchaseOrder.find({ partyId: id._id.toString() }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
+            if (purchase.length > 0) {
+                purchaseDate = purchase[purchase.length - 1].createdAt;
             }
-            const party = await partyHierarchy(id.created_by, database);
-            const resultItem = { id, party, lastDays };
-            result.push(resultItem);
+            const products = {
+                Party: id,
+                purchaseDate: purchaseDate
+            };
+
+            Parties.push(products);
+            // const party = await partyHierarchy(id.created_by, database);
+            // const resultItem = { id, party, lastDays };
+            // result.push(resultItem);
         }
-        return res.status(200).json({ Parties: result, status: true });
+        return res.status(200).json({ Parties: Parties, status: true });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-export const ViewDeadParty = async (req, res, next) => {
+export const ViewDeadParty1 = async (req, res, next) => {
     try {
+        const Parties = []
         const userId = req.params.id;
         const database = req.params.database;
         const currentDate = moment();
         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
-        const hierarchy = await Customer.find({ database: database, status: 'Active', leadStatusCheck: "false", createdAt: { $lt: startOfLastMonth } }).lean();
-
+        const hierarchy = await Customer.find({ database: database, status: 'Active', leadStatusCheck: "false", createdAt: { $lt: startOfLastMonth } }).populate({ path: "created_by", model: "user" }).populate({ path: "category", model: "customerGroup" }).lean();
         const allOrderedParties = await CreateOrder.find({ database: database, createdAt: { $gte: startOfLastMonth.toDate() } }).lean();
-
         const receiptMap = {};
-        await Promise.all(hierarchy.map(async (item) => {
-            const payment = await Receipt.findOne({ type: "receipt", partyId: item._id }).sort({ createdAt: -1 }).lean();
-            receiptMap[item._id] = payment ? payment.createdAt : "0";
-        }));
+        // await Promise.all(hierarchy.map(async (item) => {
+        //     const payment = await Receipt.findOne({ type: "receipt", partyId: item._id }).sort({ createdAt: -1 }).lean();
+        //     receiptMap[item._id] = payment ? payment.createdAt : "0";
+        // }));
+        // const result = await Promise.all(hierarchy.map(async (item) => {
+        //     const party = await partyHierarchy(item.created_by, database);
+        //     return { id: item, party: party, lastDays: receiptMap[item._id] };
+        // }));
+        for (let item of hierarchy) {
+            let purchaseDate = "";
+            const purchase = await PurchaseOrder.find({ partyId: item._id.toString() }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
+            if (purchase.length > 0) {
+                purchaseDate = purchase[purchase.length - 1].createdAt;
+            }
+            const products = {
+                Party: item,
+                purchaseDate: purchaseDate
+            };
 
-        const result = await Promise.all(hierarchy.map(async (item) => {
-            const party = await partyHierarchy(item.created_by, database);
-            return { id: item, party: party, lastDays: receiptMap[item._id] };
-        }));
+            Parties.push(products);
+        }
 
-        return res.status(200).json({ Parties: result, status: true });
+        return res.status(200).json({ Parties: Parties, status: true });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
@@ -608,7 +647,7 @@ export const partyHierarchy = async function partyHierarchy(userId, database, pr
 export const ViewAllWarehouse = async () => {
     try {
         let array = []
-        const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');    
+        const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
         if (!ware) {
             // return res.status(404).json({ message: "Not Found", status: false })
         }
