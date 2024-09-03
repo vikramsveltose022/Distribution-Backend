@@ -496,15 +496,15 @@ export const addProductInWarehouse2 = async (warehouse, warehouseId, orderItem) 
     const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
     if (sourceProductItem) {
       sourceProductItem.pQty += (orderItem.qty);
-      sourceProductItem.pRate += (orderItem.price);
+      sourceProductItem.pRate = (orderItem.price);
       sourceProductItem.pBAmount += (orderItem.totalPrice)
       sourceProductItem.pTaxRate = warehouse.GSTRate;
       sourceProductItem.pTotal += (orderItem.totalPrice)
       sourceProductItem.gstPercentage = warehouse.GSTRate
-      sourceProductItem.currentStock += warehouse.qty
-      sourceProductItem.price += warehouse.Purchase_Rate;
-      sourceProductItem.totalPrice += (warehouse.qty * warehouse.Purchase_Rate);
-      sourceProductItem.transferQty += warehouse.qty;
+      sourceProductItem.currentStock += orderItem.qty
+      sourceProductItem.price = orderItem.price;
+      sourceProductItem.totalPrice += (orderItem.qty * orderItem.price);
+      sourceProductItem.transferQty += orderItem.qty;
       user.markModified('productItems');
       await user.save();
     }
