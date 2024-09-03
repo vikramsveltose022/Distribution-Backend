@@ -10,6 +10,7 @@ import { Product } from "../model/product.model.js";
 import { ledgerPartyForDebit } from "../service/ledger.js";
 import { OtpVerify } from "../model/otpVerify.model.js";
 import { ClosingSales } from "./createInvoice.controller.js";
+import { generateInvoice } from "../service/invoice.js";
 
 
 export const saveGoodDispatch = async (req, res) => {
@@ -222,6 +223,12 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             if (user.otpVerify !== parseInt(otp)) {
                 return res.status(400).json({ message: "Incorrect OTP", status: false });
             }
+            // const result = await generateInvoice(user.database);
+            // if (50000 >= orders.grandTotal) {
+            //     req.body.challanNo = result
+            // } else {
+            //     req.body.invoiceId = result
+            // }
             user.otpVerify = undefined
             let invoiceId = orders.challanNo || orders.invoiceId
             const commonUpdate = { status, paymentMode, CNUpload, invoiceId, CNDetails };
@@ -236,12 +243,12 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             for (const orderItem of orders.orderItems) {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
-                    const warehouse = await Warehouse.findById(product.warehouse)
+                    const warehouse = await Warehouse.findById(orderItem.warehouse)
                     if (warehouse) {
                         let tax = 0;
                         tax = (orderItem.igstRate + orderItem.sgstRate + orderItem.cgstRate)
                         const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                        pro.currentStock -= (orderItem.qty)
+                        // pro.currentStock -= (orderItem.qty)
                         product.pendingQty -= (orderItem.qty)
                         pro.sQty += (orderItem.qty);
                         pro.sRate += (orderItem.gstPercentage);
