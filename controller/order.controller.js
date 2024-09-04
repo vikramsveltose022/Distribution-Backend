@@ -335,12 +335,12 @@ export const updateCreateOrder = async (req, res, next) => {
                     if (product) {
                         product.qty -= quantityChange;
                         product.pendingQty += quantityChange;
-                        // const warehouse = await Warehouse.findById({ _id: product.warehouse })
-                        // if (warehouse) {
-                        //     const pro = warehouse.productItems.find((item) => item.productId === newOrderItem.productId)
-                        //     pro.currentStock -= (quantityChange);
-                        //     await warehouse.save();
-                        // }
+                        const warehouse = await Warehouse.findById({ _id: product.warehouse })
+                        if (warehouse) {
+                            const pro = warehouse.productItems.find((item) => item.productId.toString() === newOrderItem.productId.toString())
+                            pro.currentStock -= (quantityChange);
+                            await warehouse.save();
+                        }
                         await product.save()
                     } else {
                         console.error(`Product with ID ${newOrderItem.productId} not found`);

@@ -243,22 +243,28 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             for (const orderItem of orders.orderItems) {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
-                    const warehouse = await Warehouse.findById(orderItem.warehouse)
+                    const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
                         let tax = 0;
                         tax = (orderItem.igstRate + orderItem.sgstRate + orderItem.cgstRate)
                         const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                        // pro.currentStock -= (orderItem.qty)
-                        product.pendingQty -= (orderItem.qty)
-                        pro.sQty += (orderItem.qty);
-                        pro.sRate = (orderItem.gstPercentage);
-                        pro.sBAmount += orderItem.totalPrice;
-                        pro.sTaxRate += tax;
-                        pro.sTotal += (orderItem.totalPrice + tax)
-                        await warehouse.save();
-                        await product.save()
-                        await ClosingSales(orderItem, orderItem.warehouse)
-                        tax = 0
+                        if (pro) {
+                            // pro.currentStock -= (orderItem.qty)
+                            product.pendingQty -= (orderItem.qty)
+                            pro.sQty += (orderItem.qty);
+                            pro.sRate = (orderItem.price);
+                            pro.sBAmount += orderItem.totalPrice;
+                            pro.sTaxRate = (orderItem.gstPercentage);
+                            pro.sTotal += (orderItem.totalPrice + tax)
+                            await warehouse.save();
+                            await product.save()
+                            await ClosingSales(orderItem, orderItem.warehouse)
+                            tax = 0
+                        } else {
+                            console.error(`Product Not Found In Warehouse ID ${orderItem.productId}`);
+                        }
+                    } else {
+                        console.log("Warehouse Not Found")
                     }
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
@@ -362,11 +368,11 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                 productFound = true;
                 const product = await Product.findById({ _id: item.productId });
                 if (product) {
-                    const warehouse = await Warehouse.findById(item.warehouse)
-                    // const warehouse = await Warehouse.findById(product.warehouse)
+                    // const warehouse = await Warehouse.findById(item.warehouse)
+                    const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
                         const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString())
-                        // pro.currentStock += (item.qty);
+                        pro.currentStock += (item.qty);
                         product.qty += item.qty;
                         product.pendingQty -= item.qty;
                         // pro.pendingStock -= (item.qty)
