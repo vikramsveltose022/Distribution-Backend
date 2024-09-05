@@ -36,12 +36,12 @@ export const createOrder = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
-            const result = await generateInvoice(user.database);
-            if (50000 >= req.body.grandTotal) {
-                req.body.challanNo = result
-            } else {
-                req.body.invoiceId = result
-            }
+            // const result = await generateInvoice(user.database);
+            // if (50000 >= req.body.grandTotal) {
+            //     req.body.challanNo = result
+            // } else {
+            //     req.body.invoiceId = result
+            // }
             const orderNo = await generateOrderNo(user.database);
             const billAmount = orderItems.reduce((total, orderItem) => {
                 return total + (orderItem.price * orderItem.qty);

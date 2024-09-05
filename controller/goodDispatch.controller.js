@@ -223,15 +223,17 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             if (user.otpVerify !== parseInt(otp)) {
                 return res.status(400).json({ message: "Incorrect OTP", status: false });
             }
-            // const result = await generateInvoice(user.database);
+            const result = await generateInvoice(user.database);
             // if (50000 >= orders.grandTotal) {
-            //     req.body.challanNo = result
-            // } else {
+            let challanNo = result
+            let invoiceId = result
+            // }
+            //  else {
             //     req.body.invoiceId = result
             // }
             user.otpVerify = undefined
-            let invoiceId = orders.challanNo || orders.invoiceId
-            const commonUpdate = { status, paymentMode, CNUpload, invoiceId, CNDetails };
+            // let invoiceId = orders.challanNo || orders.invoiceId
+            const commonUpdate = { status, paymentMode, CNUpload, invoiceId, challanNo, CNDetails };
             if (reason) {
                 commonUpdate.reason = reason;
             }
@@ -261,7 +263,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                             await ClosingSales(orderItem, orderItem.warehouse)
                             tax = 0
                         } else {
-                            console.error(`Product Not Found In Warehouse ID ${orderItem.productId}`);
+                            console.error(`Product Not Found In Warehouse Product ID ${orderItem.productId}`);
                         }
                     } else {
                         console.log("Warehouse Not Found")
