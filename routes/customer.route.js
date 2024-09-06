@@ -26,7 +26,7 @@ router.post("/save-customer", upload.any("files"), SaveCustomer);
 router.get("/view-customer/:id/:database", ViewCustomer);
 router.get("/view-customer-by-id/:id", ViewCustomerById);
 router.get("/delete-customer/:id", DeleteCustomer);
-router.get("/delete-bulk-customer/:database", DeleteBulkCustomer);
+router.post("/delete-bulk-customer/:database", DeleteBulkCustomer);
 router.post("/update-customer/:id", upload.any("files"), UpdateCustomer);
 
 router.post("/login", SignInWithMobile)
