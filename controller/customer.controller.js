@@ -92,6 +92,7 @@ export const DeleteCustomer = async (req, res, next) => {
         if (!customer) {
             return res.status(404).json({ error: "Not Found", status: false });
         }
+        customer.created_by = undefined;
         customer.status = "Deactive";
         await customer.save();
         return res.status(200).json({ message: "delete successful", status: true })
@@ -99,6 +100,26 @@ export const DeleteCustomer = async (req, res, next) => {
     catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal server error", status: false });
+    }
+}
+export const DeleteBulkCustomer = async (req, res, next) => {
+    try {
+        const customer = await Customer.find({ database: req.params.database })
+        if (customer.length === 0) {
+            return res.status(404).json({ message: "Customer Not Found", status: false })
+        }
+        for (let id of req.body.customer) {
+            const person = await Customer.findById({ _id: id.id });
+            if (person) {
+                person.created_by = undefined;
+                person.status = "Deactive"
+                await person.save();
+            }
+        }
+        return res.status(200).json({ message: "Delete Successfull!", status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
 export const UpdateCustomer = async (req, res, next) => {
