@@ -150,7 +150,7 @@ export const UpdateCustomer = async (req, res, next) => {
             if (req.body.paymentTerm !== "cash") {
                 if (existingCustomer.limit !== req.body.limit) {
                     const diff = req.body.limit - existingCustomer.limit
-                    req.body.remainingLimit = (existingCustomer.remainingLimit + diff);
+                    req.body.remainingLimit = (existingCustomer.remainingLimit || 0 + diff);
                 }
             }
             const updatedCustomer = req.body;
