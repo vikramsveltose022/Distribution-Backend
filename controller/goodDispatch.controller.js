@@ -396,6 +396,13 @@ export const OrderCancelWarehouse = async (req, res, next) => {
         if (Checked.length > 0) {
             existingOrder.status = "Cancel in process"
         }
+        // for (const item of existingOrder.orderItems) {
+        //     if (item.status === "Cancelled") {
+        //         existingOrder.status = "Cancelled"
+        //     } else {
+        //         existingOrder.status = "Cancel in process"
+        //     }
+        // }
         if (!productFound) {
             return res.status(404).json({ message: "Product Not Found in Order", status: false });
         }

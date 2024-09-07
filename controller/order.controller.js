@@ -301,6 +301,13 @@ export const OrdertoDispatch = async (req, res) => {
         } else {
             order.NoOfPackage = req.body.NoOfPackage
         }
+        // for (const orderItem of order.orderItems) {
+        //     if (orderItem.status === "Dispatch") {
+        //         order.status = "Dispatch"
+        //     } else {
+        //         order.status = "Billing"
+        //     }
+        // }
         if (Checked.length > 0) {
             order.status = "Billing"
         }

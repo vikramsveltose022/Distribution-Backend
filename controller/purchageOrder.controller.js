@@ -77,16 +77,16 @@ export const PurchaseOrderDispatch = async (req, res, next) => {
                     }
                 }
             }
-            for (const orderItem of order.orderItems) {
-                if (orderItem.status === "Received") {
-                    order.status = "Received"
-                } else {
-                    order.status = "pending"
-                }
-            }
-            // if (Checked.length !== 0) {
-            //     order.status = "pending"
+            // for (const orderItem of order.orderItems) {
+            //     if (orderItem.status === "Received") {
+            //         order.status = "Received"
+            //     } else {
+            //         order.status = "pending"
+            //     }
             // }
+            if (Checked.length !== 0) {
+                order.status = "pending"
+            }
             order.NoOfPackage += req.body.NoOfPackage;
             const updatedOrder = order.save()
             return updatedOrder ? res.status(200).json({ message: "Updated Successfull!", orderDetail: updatedOrder, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
