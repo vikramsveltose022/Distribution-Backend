@@ -77,13 +77,6 @@ export const PurchaseOrderDispatch = async (req, res, next) => {
                     }
                 }
             }
-            // for (const orderItem of order.orderItems) {
-            //     if (orderItem.status === "Received") {
-            //         order.status = "Received"
-            //     } else {
-            //         order.status = "pending"
-            //     }
-            // }
             if (Checked.length !== 0) {
                 order.status = "pending"
             }

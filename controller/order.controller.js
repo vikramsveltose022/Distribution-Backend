@@ -259,32 +259,6 @@ export const OrdertoDispatch = async (req, res) => {
             return res.status(404).json({ message: 'Sales Order Not Found', status: false });
         }
         for (const orderItem of order.orderItems) {
-            const product = await Product.findById({ _id: orderItem.productId });
-            if (product) {
-                // product.salesDate = new Date(new Date())
-                // const warehouse = await Warehouse.findById(orderItem.warehouse)
-                const warehouse = await Warehouse.findById(req.body.warehouse.toString())
-                if (warehouse) {
-                    // const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                    // pro.currentStock -= (orderItem.qty);
-                    // product.qty -= orderItem.qty;
-                    // if (pro.currentStock < 0) {
-                    //     return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
-                    // }
-                    // pro.pendingStock += (orderItem.qty)
-                    // tax = (orderItem.sgstRate + orderItem.cgstRate + orderItem.igstRate)
-                    // pro.sQty += (orderItem.qty);
-                    // pro.sRate += (orderItem.price);
-                    // pro.sBAmount += (orderItem.totalPrice)
-                    // pro.sTaxRate += tax;
-                    // pro.sTotal += (orderItem.totalPrice + tax)
-                    // await warehouse.save();
-                    // await product.save()
-                    // await ClosingSales(orderItem, orderItem.warehouse)
-                }
-            } else {
-                console.error(`Product with ID ${orderItem.productId._id} not found`);
-            }
             if (orderItem.warehouse.toString() === req.body.warehouse.toString()) {
                 orderItem.status = "Dispatch";
             }
@@ -293,7 +267,6 @@ export const OrdertoDispatch = async (req, res) => {
             }
             else {
                 Checked.push(orderItem)
-                // order.status = "Billing"
             }
         }
         if (order.NoOfPackage) {
@@ -301,14 +274,7 @@ export const OrdertoDispatch = async (req, res) => {
         } else {
             order.NoOfPackage = req.body.NoOfPackage
         }
-        // for (const orderItem of order.orderItems) {
-        //     if (orderItem.status === "Dispatch") {
-        //         order.status = "Dispatch"
-        //     } else {
-        //         order.status = "Billing"
-        //     }
-        // }
-        if (Checked.length > 0) {
+        if (Checked.length !== 0) {
             order.status = "Billing"
         }
         await order.save();
