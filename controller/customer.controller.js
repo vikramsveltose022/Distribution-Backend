@@ -24,15 +24,6 @@ export const SaveCustomer = async (req, res, next) => {
         } else {
             return res.status(400).json({ message: "customer id required", status: false })
         }
-        if (req.body.panNo) {
-            req.body.code = req.body.panNo
-        } else {
-            if (req.body.aadharNo) {
-                req.body.code = req.body.aadharNo
-            } else {
-                return res.status(400).json({ message: "It is necessary to insert aadhar or pan no.", status: false })
-            }
-        }
         if (req.files) {
             let images = [];
             req.files.map(file => {
@@ -351,17 +342,17 @@ export const saveExcelFile11 = async (req, res) => {
                 if (existingId) {
                     existingIds.push(document.id)
                 } else {
-                    if (document.panNo) {
-                        const codes = document.panNo;
+                    if (document.comPanNo) {
+                        const codes = document.comPanNo;
                         document[code] = codes;
                         const existingRecord = await Customer.findOne({
-                            panNo: document.panNo, database: document.database
+                            comPanNo: document.comPanNo, database: document.database
                         });
                         if (!existingRecord) {
                             const insertedDocument = await Customer.create(document);
                             insertedDocuments.push(insertedDocument);
                         } else {
-                            existingParts.push(document.panNo);
+                            existingParts.push(document.comPanNo);
                         }
                     } else {
                         if (document.aadharNo) {
@@ -383,7 +374,7 @@ export const saveExcelFile11 = async (req, res) => {
                     }
                 }
             } else {
-                dataNotExist.push(document.firstName)
+                dataNotExist.push(document.ownerName)
             }
         }
         let message = 'Data Inserted Successfully';
@@ -446,7 +437,7 @@ export const saveExcelFile = async (req, res) => {
                 }
                 const role = await Role.findOne({ id: document.rolename, database: document.database })
                 if (!role) {
-                    roles.push(document.firstName)
+                    roles.push(document.ownerName)
                 } else {
                     document[rolename] = role._id.toString()
                     const existCustomerGroup = await CustomerGroup.findOne({ id: document.category, database: document.database, status: "Active" })
@@ -459,22 +450,18 @@ export const saveExcelFile = async (req, res) => {
                             if (existingId) {
                                 existingIds.push(document.id)
                             } else {
-                                if (document.panNo) {
-                                    const codes = document.panNo;
-                                    document[code] = codes;
+                                if (document.comPanNo) {
                                     const existingRecord = await Customer.findOne({
-                                        panNo: document.panNo, database: document.database, status: "Active"
+                                        comPanNo: document.comPanNo, database: document.database, status: "Active"
                                     });
                                     if (!existingRecord) {
                                         const insertedDocument = await Customer.create(document);
                                         insertedDocuments.push(insertedDocument);
                                     } else {
-                                        existingParts.push(document.panNo);
+                                        existingParts.push(document.comPanNo);
                                     }
                                 } else {
                                     if (document.aadharNo) {
-                                        const codes = document.aadharNo;
-                                        document[code] = codes;
                                         const existingRecord = await Customer.findOne({
                                             aadharNo: document.aadharNo, database: document.database, status: "Active"
                                         });
@@ -491,12 +478,12 @@ export const saveExcelFile = async (req, res) => {
                                 }
                             }
                         } else {
-                            IdNotExisting.push(document.firstName)
+                            IdNotExisting.push(document.ownerName)
                         }
                     }
                 }
             } else {
-                dataNotExist.push(document.firstName)
+                dataNotExist.push(document.ownerName)
             }
         }
         let message = 'Data Inserted Successfully';
@@ -559,7 +546,7 @@ export const updateExcelFile = async (req, res) => {
             // if (document.database) {
             const role = await Role.findOne({ id: document.rolename, database: document.database })
             if (!role) {
-                roles.push(document.firstName)
+                roles.push(document.ownerName)
             } else {
                 const existCustomerGroup = await CustomerGroup.findOne({ id: document.category, database: document.database, status: "Active" })
                 if (!existCustomerGroup) {
@@ -756,7 +743,7 @@ export const SaveLeadPartyExcel = async (req, res) => {
                     insertedDocuments.push(insertedDocument);
                 }
             } else {
-                dataNotExist.push(document.firstName)
+                dataNotExist.push(document.ownerName)
             }
         }
         let message = 'Data Inserted Successfully';
