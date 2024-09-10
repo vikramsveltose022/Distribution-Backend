@@ -535,6 +535,7 @@ export const ViewOverDueStock = async (req, res, next) => {
 
 export const ViewDeadParty = async (req, res, next) => {
     try {
+        let days = 0
         const Parties = []
         const userId = req.params.id;
         const database = req.params.database;
@@ -565,13 +566,19 @@ export const ViewDeadParty = async (req, res, next) => {
             const purchase = await PurchaseOrder.find({ partyId: id._id.toString() }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
             if (purchase.length > 0) {
                 purchaseDate = purchase[purchase.length - 1].createdAt;
+                const lastDate = purchaseDate;
+                const lastOrderDate = new Date(lastDate);
+                const currentDates = new Date();
+                const timeDifference = currentDates - lastOrderDate;
+                days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
             }
             const products = {
                 Party: id,
-                purchaseDate: purchaseDate
+                purchaseDate: purchaseDate,
+                days: days
             };
-
             Parties.push(products);
+            days = 0;
             // const party = await partyHierarchy(id.created_by, database);
             // const resultItem = { id, party, lastDays };
             // result.push(resultItem);
