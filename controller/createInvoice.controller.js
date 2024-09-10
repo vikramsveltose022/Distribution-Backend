@@ -24,7 +24,10 @@ export const SaveInvoiceList = async (req, res, next) => {
         }
         const { partyId } = createOrder;
         const party = await Customer.findById({ _id: partyId })
-        if (party.paymentTerm !== "Cash") {
+        if (!party) {
+            return res.status(404).json({ message: "party not found", status: false })
+        }
+        if (party.paymentTerm.toLowerCase() !== "cash") {
             const due = await OverDueReport.findOne({ partyId: partyId, activeStatus: "Active" })
             if (due) {
                 const lastOrderDate = due?.createdAt
