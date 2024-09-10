@@ -337,10 +337,6 @@ export const SalesOrderList = async (req, res, next) => {
         if (!adminDetail.length > 0) {
             return res.status(404).json({ error: "Product Not Found", status: false })
         }
-        // const orders = await Order.find({ database: database }).populate({
-        //     path: 'orderItems.productId',
-        //     model: 'product'
-        // }).populate({ path: "partyId", model: "customer" }).exec();
         const createOrder = await CreateOrder.find({ database: database }).populate({
             path: 'orderItems.productId',
             model: 'product'
@@ -348,7 +344,6 @@ export const SalesOrderList = async (req, res, next) => {
         if ((!createOrder || createOrder.length === 0)) {
             return res.status(404).json({ message: "No orders found", status: false });
         }
-        // const ordersDetails = await orders.concat(createOrder)
         return res.status(200).json({ orderHistory: createOrder, status: true });
     } catch (err) {
         console.log(err);

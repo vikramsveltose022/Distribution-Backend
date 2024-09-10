@@ -334,7 +334,6 @@ export const saveExcelFile11 = async (req, res) => {
                 } else {
                     document[heading] = cellValue;
                 }
-                // document[heading] = cellValue;
             }
             document[database] = req.params.database
             if (document.database) {
@@ -368,7 +367,6 @@ export const saveExcelFile11 = async (req, res) => {
                                 existingParts.push(document.aadharNo);
                             }
                         } else {
-                            // const insertedDocument = await Customer.create(document);
                             panMobile.push(document.aadharNo);
                         }
                     }
@@ -540,10 +538,8 @@ export const updateExcelFile = async (req, res) => {
                 } else {
                     document[heading] = cellValue;
                 }
-                // document[heading] = cellValue;
             }
             document[database] = req.params.database
-            // if (document.database) {
             const role = await Role.findOne({ id: document.rolename, database: document.database })
             if (!role) {
                 roles.push(document.ownerName)
@@ -569,13 +565,6 @@ export const updateExcelFile = async (req, res) => {
                     }
                 }
             }
-            // } else {
-            //     dataNotExist.push(document.id)
-            // }
-            // const filter = { id: document.id, database: req.params.database };
-            // const options = { new: true, upsert: true };
-            // const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
-            // insertedDocuments.push(insertedDocument);
         }
         let message = 'Data Inserted Successfully';
         if (existingParts.length > 0) {
