@@ -138,7 +138,7 @@ export const UpdateCustomer = async (req, res, next) => {
             if (req.body.assignTransporter) {
                 req.body.assignTransporter = JSON.parse(req.body.assignTransporter)
             }
-            if (req.body.paymentTerm === existingCustomer.paymentTerm) {
+            if (req.body.paymentTerm === existingCustomer.paymentTerm && req.body.paymentTerm !== "cash") {
                 if (existingCustomer.limit !== req.body.limit) {
                     const diff = req.body.limit - existingCustomer.limit
                     req.body.remainingLimit = (existingCustomer.remainingLimit || 0 + diff);
@@ -146,7 +146,6 @@ export const UpdateCustomer = async (req, res, next) => {
             } else {
                 if (req.body.paymentTerm !== "cash") {
                     if (req.body.limit) {
-                        console.log("calling")
                         req.body.remainingLimit = req.body.limit;
                     }
                 }
@@ -157,7 +156,6 @@ export const UpdateCustomer = async (req, res, next) => {
                 existOver.lockingAmount = req.body.limit
                 await existOver.save()
             }
-            consoel.log(updatedCustomer)
             await Customer.findByIdAndUpdate(customerId, updatedCustomer, { new: true });
             return res.status(200).json({ message: 'Customer Updated Successfully', status: true });
         }
