@@ -73,6 +73,7 @@ export const SaveInvoiceList = async (req, res, next) => {
             }
         }
         createOrder.discountDetails = req.body.discountDetails
+        createOrder.gstOtherCharges = req.body.gstOtherCharges
         createOrder.chargesDetails = req.body.chargesDetails
         createOrder.orderItems = req.body.orderItems
         createOrder.amount = req.body.amount

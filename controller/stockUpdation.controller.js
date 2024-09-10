@@ -510,7 +510,7 @@ export const ViewOverDueStock = async (req, res, next) => {
             }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
 
             if (purchase.length > 0) {
-                partyId = purchase[purchase.length - 1].partyId.firstName;
+                partyId = purchase[purchase.length - 1].partyId.CompanyName;
             }
             const lastDate = item.salesDate || item.createdAt;
             const lastOrderDate = new Date(lastDate);
