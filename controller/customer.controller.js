@@ -393,7 +393,8 @@ export const saveExcelFile11 = async (req, res) => {
 }
 export const saveExcelFile = async (req, res) => {
     try {
-        let code = "code";
+        let id = "id";
+        let comPanNo = "comPanNo";
         let category = "category";
         let database = "database";
         let rolename = "rolename";
@@ -407,7 +408,6 @@ export const saveExcelFile = async (req, res) => {
         headerRow.eachCell((cell) => {
             headings.push(cell.value);
         });
-        const insertedDocuments = [];
         const existingParts = [];
         const panMobile = [];
         const existingIds = []
@@ -415,6 +415,7 @@ export const saveExcelFile = async (req, res) => {
         const group = [];
         const roles = []
         const IdNotExisting = []
+        const GSTPercentage = []
         for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
             const dataRow = worksheet.getRow(rowIndex);
             const document = {};
@@ -443,40 +444,43 @@ export const saveExcelFile = async (req, res) => {
                         group.push(document.id)
                     } else {
                         document[category] = await existCustomerGroup._id.toString()
-                        if (document.id) {
-                            const existingId = await Customer.findOne({ id: document.id, database: document.database, status: "Active" });
-                            if (existingId) {
-                                existingIds.push(document.id)
+                        const existingId = await Customer.findOne({ id: document.id, database: document.database, status: "Activee" });
+                        if (existingId) {
+                            existingIds.push(document.id)
+                        } else {
+                            if (document.gstNumber) {
+                                if (document.gstNumber.length !== 15) {
+                                    GSTPercentage.push(document.gstNumber)
+                                    continue
+                                }
+                                document[comPanNo] = document.gstNumber.slice(2, -3);
+                                document[id] = document.comPanNo
+                                const existingRecord = await Customer.findOne({
+                                    comPanNo: document.comPanNo, database: document.database, status: "Active"
+                                });
+                                const existingGst = await Customer.findOne({
+                                    gstNumber: document.gstNumber, database: document.database, status: "Active"
+                                });
+                                if (!existingRecord && !existingGst) {
+                                    const insertedDocument = await Customer.create(document);
+                                } else {
+                                    existingParts.push(document.gstNumber);
+                                }
                             } else {
-                                if (document.comPanNo) {
+                                if (document.aadharNo) {
+                                    document[id] = document.aadharNo
                                     const existingRecord = await Customer.findOne({
-                                        comPanNo: document.comPanNo, database: document.database, status: "Active"
+                                        aadharNo: document.aadharNo, database: document.database, status: "Active"
                                     });
                                     if (!existingRecord) {
                                         const insertedDocument = await Customer.create(document);
-                                        insertedDocuments.push(insertedDocument);
                                     } else {
-                                        existingParts.push(document.comPanNo);
+                                        existingParts.push(document.aadharNo);
                                     }
                                 } else {
-                                    if (document.aadharNo) {
-                                        const existingRecord = await Customer.findOne({
-                                            aadharNo: document.aadharNo, database: document.database, status: "Active"
-                                        });
-                                        if (!existingRecord) {
-                                            const insertedDocument = await Customer.create(document);
-                                            insertedDocuments.push(insertedDocument);
-                                        } else {
-                                            existingParts.push(document.aadharNo);
-                                        }
-                                    } else {
-                                        // const insertedDocument = await Customer.create(document);
-                                        panMobile.push(document.aadharNo);
-                                    }
+                                    panMobile.push(document.aadharNo);
                                 }
                             }
-                        } else {
-                            IdNotExisting.push(document.ownerName)
                         }
                     }
                 }
@@ -485,8 +489,10 @@ export const saveExcelFile = async (req, res) => {
             }
         }
         let message = 'Data Inserted Successfully';
-        if (existingParts.length > 0) {
-            message = `Some party already exist: ${existingParts.join(', ')}`;
+        if (GSTPercentage.length > 0) {
+            message = `this customer gstNo Invalid : ${GSTPercentage.join(', ')}`;
+        } else if (existingParts.length > 0) {
+            message = `Some party GST, PanNo or Aadhar already exist: ${existingParts.join(', ')}`;
         } else if (panMobile.length > 0) {
             message = `this pan or aadhar already exist: ${panMobile.join(', ')}`;
         } else if (existingIds.length > 0) {
