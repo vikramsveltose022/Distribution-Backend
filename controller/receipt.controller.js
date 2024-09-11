@@ -615,7 +615,7 @@ export const CashBookReport = async (req, res, next) => {
         if (startDate && endDate) {
             targetQuery.createdAt = { $gte: startDate, $lte: endDate };
         }
-        const receipts = await Receipt.find(targetQuery).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" });
+        const receipts = await Receipt.find(targetQuery).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" }).populate({ path: "transporterId", model: "transporter" });
         if (receipts.length === 0) {
             return res.status(404).json({ message: "Not Found", status: false });
         }
@@ -634,7 +634,7 @@ export const BankAccountReport = async (req, res, next) => {
         if (startDate && endDate) {
             targetQuery.createdAt = { $gte: startDate, $lte: endDate };
         }
-        const receipts = await Receipt.find(targetQuery).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" });
+        const receipts = await Receipt.find(targetQuery).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" }).populate({ path: "transporterId", model: "transporter" });
         if (receipts.length === 0) {
             return res.status(404).json({ message: "Not Found", status: false });
         }
