@@ -111,7 +111,7 @@ export const UpdateReceipt = async (req, res, next) => {
 }
 export const viewReceipt = async (req, res, next) => {
     try {
-        const receipts = await Receipt.find({ database: req.params.database, status: "Active" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" });
+        const receipts = await Receipt.find({ database: req.params.database, status: "Active" }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" }).populate({ path: "transporterId", model: "transporter" });
         return (receipts.length > 0) ? res.status(200).json({ Receipts: receipts, status: true }) : res.status(404).json({ message: "Not Found", status: false });
     } catch (err) {
         console.error(err);
@@ -120,7 +120,7 @@ export const viewReceipt = async (req, res, next) => {
 };
 export const ViewReceiptById = async (req, res, next) => {
     try {
-        let receipt = await Receipt.findById({ _id: req.params.id }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" });
+        let receipt = await Receipt.findById({ _id: req.params.id }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" }).populate({ path: "transporterId", model: "transporter" })
         // const customer = await Customer.findOne({ uniqueCode: receipt.code }).populate({path:"partyId",model:"customer"});
         // const receipts = { ...receipt.toObject(), partyId: customer };
         return receipt ? res.status(200).json({ Receipts: receipt, status: true }) : res.status(404).json({ error: "Not Found", status: false });
@@ -253,6 +253,7 @@ export const saveReceiptWithExcel = async (req, res) => {
         let voucherType = "voucherType";
         let lockStatus = "lockStatus";
         let partyId = "partyId";
+        let transporterId = "transporterId";
         let userId = "userId";
         let database = "database";
         let type = "type"
@@ -286,6 +287,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                 if (customer) {
                     document[userId] = undefined
                     document[expenseId] = undefined
+                    document[transporterId] = undefined
                     document[partyId] = customer._id.toString();
                     if (document.type === "receipt" && document.paymentMode !== "Cash") {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Bank", }).sort({ sortorder: -1 })
@@ -323,6 +325,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                 if (expense) {
                     document[userId] = undefined;
                     document[partyId] = undefined
+                    document[transporterId] = undefined
                     document[expenseId] = expense._id.toString()
                     if (document.type === "receipt" && document.paymentMode !== "Cash") {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
@@ -357,6 +360,7 @@ export const saveReceiptWithExcel = async (req, res) => {
                 if (customer) {
                     document[partyId] = undefined
                     document[expenseId] = undefined
+                    document[transporterId] = undefined
                     document[userId] = customer._id.toString();
                     if (document.type === "receipt" && document.paymentMode !== "Cash") {
                         const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
