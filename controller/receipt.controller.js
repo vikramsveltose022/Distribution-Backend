@@ -1,6 +1,6 @@
 import ExcelJS from "exceljs";
 import { Receipt } from "../model/receipt.model.js";
-import { ledgerExpensesForCredit, ledgerExpensesForDebit, ledgerPartyForCredit, ledgerPartyForDebit, ledgerUserForCredit, ledgerUserForDebit } from "../service/ledger.js";
+import { ledgerExpensesForCredit, ledgerExpensesForDebit, ledgerPartyForCredit, ledgerPartyForDebit, ledgerTransporterForCredit, ledgerTransporterForDebit, ledgerUserForCredit, ledgerUserForDebit } from "../service/ledger.js";
 import { Customer } from "../model/customer.model.js";
 import { DeleteOverDue, UpdateOverDue, overDue1 } from "../service/overDue.js";
 import { CreateOrder } from "../model/createOrder.model.js";
@@ -48,8 +48,10 @@ export const saveReceipt = async (req, res, next) => {
                     await ledgerPartyForCredit(receipt, particular);
                 } else if (item.userId) {
                     await ledgerUserForCredit(receipt, particular);
-                } else {
+                } else if (item.expenseId) {
                     await ledgerExpensesForCredit(receipt, particular);
+                } else {
+                    await ledgerTransporterForCredit(receipt, particular)
                 }
             }
             if (item.partyId) {
@@ -179,8 +181,10 @@ export const savePayment = async (req, res, next) => {
                     await ledgerPartyForDebit(receipt, particular);
                 } else if (item.userId) {
                     await ledgerUserForDebit(receipt, particular);
-                } else {
+                } else if (item.expenseId) {
                     await ledgerExpensesForDebit(receipt, particular)
+                } else {
+                    await ledgerTransporterForDebit(receipt, particular)
                 }
             }
             partyReceipt.push(receipt);

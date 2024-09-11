@@ -21,6 +21,9 @@ const LedgerSchema = new mongoose.Schema({
     expenseId: {
         type: String
     },
+    transporterId: {
+        type: String
+    },
     orderId: {
         type: String
     },

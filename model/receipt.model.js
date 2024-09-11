@@ -16,6 +16,9 @@ const ReceiptSchema = new mongoose.Schema({
     expenseId: {
         type: String,
     },
+    transporterId: {
+        type: String,
+    },
     type: {
         type: String
     },
