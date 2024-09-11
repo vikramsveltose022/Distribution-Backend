@@ -1,13 +1,11 @@
 import moment from "moment"
 import { StockUpdation } from "../model/stockUpdation.model.js";
 import { User } from "../model/user.model.js";
-import { Factory } from "../model/factory.model.js";
 import { Stock } from "../model/stock.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { Product } from "../model/product.model.js";
 import { Customer } from "../model/customer.model.js";
-import { Receipt } from "../model/receipt.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
 import { warehouseNo } from "../service/invoice.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
@@ -236,7 +234,6 @@ export const saveDamageItem1 = async (req, res, next) => {
         return res.status(500).json({ error: error, status: false });
     }
 };
-
 export const saveDamageItem = async (req, res, next) => {
     try {
         const warehouse = await Warehouse.findOne({ _id: req.body.warehouse });
@@ -531,8 +528,6 @@ export const ViewOverDueStock = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-
-
 export const ViewDeadParty = async (req, res, next) => {
     try {
         let days = 0
@@ -649,8 +644,6 @@ export const partyHierarchy = async function partyHierarchy(userId, database, pr
         throw error;
     }
 };
-
-
 export const ViewAllWarehouse = async () => {
     try {
         let array = []
@@ -778,7 +771,6 @@ export const deleteModel = async () => {
         console.error('Error deleting data:', error);
     }
 }
-
 // InWard And OutWard
 export const ClosingPurchase = async (orderItem, warehouse) => {
     try {

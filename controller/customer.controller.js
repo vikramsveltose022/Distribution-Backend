@@ -12,6 +12,7 @@ import { Role } from "../model/role.model.js";
 import { UpdateCheckLimit, checkLimit } from "../service/checkLimit.js";
 import { CustomerGroup } from "../model/customerGroup.model.js";
 import { Receipt } from "../model/receipt.model.js";
+import axios from "axios";
 dotenv.config();
 
 export const SaveCustomer = async (req, res, next) => {
@@ -399,6 +400,8 @@ export const saveExcelFile = async (req, res) => {
         let database = "database";
         let rolename = "rolename";
         let remainingLimit = "remainingLimit";
+        let City = "City";
+        let State = "State";
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -448,6 +451,11 @@ export const saveExcelFile = async (req, res) => {
                         if (existingId) {
                             existingIds.push(document.id)
                         } else {
+                            if (document.pincode) {
+                                const data = await GetCityByPincode(document.pincode)
+                                document[State] = data.StateName;
+                                document[City] = data.District;
+                            }
                             if (document.gstNumber) {
                                 if (document.gstNumber.length !== 15) {
                                     GSTPercentage.push(document.gstNumber)
@@ -512,6 +520,22 @@ export const saveExcelFile = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 }
+export const GetCityByPincode = async (pincode) => {
+    try {
+        const res = await axios.get("https://vikram-pratap-singh10.github.io/pincodeAPI/output.json")
+        if (res.data) {
+            for (let item of res.data) {
+                if (pincode == item.Pincode) {
+                    return item
+                }
+            }
+        }
+        return null
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
 export const updateExcelFile = async (req, res) => {
     try {
         let database = "database";
@@ -558,9 +582,17 @@ export const updateExcelFile = async (req, res) => {
                     if (!existCustomer) {
                         IdNotExisting.push(document.id)
                     } else {
-                        if (document.limit !== existCustomer.limit) {
-                            const diff = document.limit - existCustomer.limit
-                            document[remainingLimit] = (existCustomer.remainingLimit + diff);
+                        if (document.paymentTerm === existCustomer.paymentTerm && document.paymentTerm !== "cash") {
+                            if (existCustomer.limit !== document.limit) {
+                                const diff = document.limit - existCustomer.limit
+                                document[remainingLimit] = (existCustomer.remainingLimit || 0 + diff);
+                            }
+                        } else {
+                            if (document.paymentTerm !== "cash") {
+                                if (document.limit) {
+                                    document[remainingLimit] = document.limit;
+                                }
+                            }
                         }
                         document[rolename] = role._id.toString()
                         document[category] = await existCustomerGroup._id.toString()

@@ -344,3 +344,82 @@ export const ledgerExpensesForDebit = async function ledger(body, particular) {
         throw error;
     }
 };
+
+export const ledgerTransporterForCredit = async function ledger(body, particular) {
+    try {
+        const part = particular
+        const credit = body.grandTotal || body.amount;
+        const ledger = await Ledger.find({ transporterId: body.transporterId, ledgerType: "transporter" }).sort({ sortorder: -1 })
+        if (ledger.length > 0) {
+            const first = await ledger[ledger.length - 1]
+            const saveData = {
+                database: body.database,
+                transporterId: body.transporterId,
+                orderId: body._id.toString(),
+                reason: body.invoiceId || body.type,
+                particular: part,
+                voucherNo: first.voucherNo + 1,
+                voucherType: part,
+                credit: credit,
+                ledgerType: "transporter"
+            }
+            const led = await Ledger.create(saveData)
+            return led;
+        }
+        const saveData = {
+            database: body.database,
+            transporterId: body.transporterId,
+            orderId: body._id.toString(),
+            reason: body.invoiceId || body.type,
+            particular: part,
+            voucherType: part,
+            voucherNo: 1,
+            credit: credit,
+            ledgerType: "transporter"
+        }
+        const led = await Ledger.create(saveData)
+        return led;
+    } catch (error) {
+        console.error('Internal Server Error:', error);
+        throw error;
+    }
+};
+export const ledgerTransporterForDebit = async function ledger(body, particular) {
+    try {
+        const part = particular
+        const debit = body.grandTotal || body.amount;
+        const ledger = await Ledger.find({ transporterId: body.transporterId, ledgerType: "transporter" }).sort({ sortorder: -1 })
+        if (ledger.length > 0) {
+            const first = await ledger[ledger.length - 1]
+            const saveData = {
+                database: body.database,
+                orderId: body._id.toString(),
+                transporterId: body.transporterId,
+                reason: body.type || body.invoiceId,
+                particular: part,
+                voucherType: part,
+                voucherNo: first.voucherNo + 1,
+                debit: debit,
+                ledgerType: "transporter"
+            }
+            const led = await Ledger.create(saveData)
+            return led;
+        }
+        const saveData = {
+            database: body.database,
+            orderId: body._id.toString(),
+            transporterId: body.transporterId,
+            reason: body.type || body.invoiceId,
+            particular: part,
+            voucherType: part,
+            voucherNo: 1,
+            debit: debit,
+            ledgerType: "transporter"
+        }
+        const led = await Ledger.create(saveData)
+        return led;
+    } catch (error) {
+        console.error('Internal Server Error:', error);
+        throw error;
+    }
+};
