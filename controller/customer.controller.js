@@ -520,22 +520,6 @@ export const saveExcelFile = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 }
-export const GetCityByPincode = async (pincode) => {
-    try {
-        const res = await axios.get("https://vikram-pratap-singh10.github.io/pincodeAPI/output.json")
-        if (res.data) {
-            for (let item of res.data) {
-                if (pincode == item.Pincode) {
-                    return item
-                }
-            }
-        }
-        return null
-    }
-    catch (err) {
-        console.log(err)
-    }
-}
 export const updateExcelFile = async (req, res) => {
     try {
         let database = "database";
@@ -596,6 +580,11 @@ export const updateExcelFile = async (req, res) => {
                         }
                         document[rolename] = role._id.toString()
                         document[category] = await existCustomerGroup._id.toString()
+                        if (document.pincode) {
+                            const data = await GetCityByPincode(document.pincode)
+                            document[State] = data.StateName;
+                            document[City] = data.District;
+                        }
                         const filter = { id: document.id, database: req.params.database };
                         const options = { new: true, upsert: true };
                         const insertedDocument = await Customer.findOneAndUpdate(filter, document, options);
@@ -620,6 +609,22 @@ export const updateExcelFile = async (req, res) => {
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+}
+export const GetCityByPincode = async (pincode) => {
+    try {
+        const res = await axios.get("https://vikram-pratap-singh10.github.io/pincodeAPI/output.json")
+        if (res.data) {
+            for (let item of res.data) {
+                if (pincode == item.Pincode) {
+                    return item
+                }
+            }
+        }
+        return null
+    }
+    catch (err) {
+        console.log(err)
     }
 }
 
