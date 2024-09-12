@@ -545,10 +545,12 @@ export const HSNWiseSalesReport = async (req, res, next) => {
       } else {
         const newOrder = {
           // productId: orderItem.productId,
+          primaryUnit: orderItem.productId.primaryUnit,
+          secondaryUnit: orderItem.productId.secondaryUnit,
           HSN_Code: orderItem.productId.HSN_Code,
           Product_Desc: orderItem.productId.Product_Desc,
           unitType: orderItem.unitType,
-          qty: orderItem.qty * orderItem.Size,
+          qty: orderItem.qty,
           grandTotal: orderItem.grandTotal,
           gstPercentage: orderItem.gstPercentage,
           taxableAmount: orderItem.taxableAmount,
@@ -597,10 +599,12 @@ export const HSNWisePurchaseReport = async (req, res, next) => {
       } else {
         const newOrder = {
           // productId: orderItem.productId,
+          primaryUnit: orderItem.productId.primaryUnit,
+          secondaryUnit: orderItem.productId.secondaryUnit,
           HSN_Code: orderItem.productId.HSN_Code,
           Product_Desc: orderItem.productId.Product_Desc,
           unitType: orderItem.unitType,
-          qty: orderItem.qty * orderItem.Size,
+          qty: orderItem.qty,
           grandTotal: orderItem.grandTotal,
           gstPercentage: orderItem.gstPercentage,
           taxableAmount: orderItem.taxableAmount,
