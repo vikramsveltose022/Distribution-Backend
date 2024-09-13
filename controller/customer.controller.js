@@ -452,8 +452,8 @@ export const saveExcelFile = async (req, res) => {
                             existingIds.push(document.id)
                         } else {
                             if (document.pincode) {
+                                console.log(document.Pincode)
                                 const data = await GetCityByPincode(document.pincode)
-                                console.log(data.Pincode)
                                 document[State] = data.StateName;
                                 document[City] = data.District;
                             }
