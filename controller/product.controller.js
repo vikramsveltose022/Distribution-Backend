@@ -135,8 +135,6 @@ export const UpdateProduct = async (req, res, next) => {
       }
       const updatedProduct = req.body;
       const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
-
-      // }
       return res.status(200).json({ message: "Product Updated Successfully", status: true });
     }
   } catch (err) {
