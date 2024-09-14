@@ -78,7 +78,6 @@ export const createOrderWithInvoice = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
-            const orderNo = await generateOrderNo(user.database);
             for (const orderItem of orderItems) {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
@@ -97,7 +96,6 @@ export const createOrderWithInvoice = async (req, res, next) => {
             req.body.status = "completed"
             req.body.userId = party.created_by
             req.body.database = user.database
-            req.body.orderNo = orderNo
             req.body.orderItems = orderItems
             const savedOrder = CreateOrder.create(req.body)
             return res.status(200).json({ orderDetail: savedOrder, status: true });
