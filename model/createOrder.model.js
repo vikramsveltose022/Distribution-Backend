@@ -59,7 +59,6 @@ const orderItemsSchema = new mongoose.Schema({
     },
     date: {
         type: Date,
-        default: Date.now
     },
     igstTaxType: {
         type: Boolean
@@ -106,7 +105,6 @@ const createOrderSchema = new mongoose.Schema({
     },
     date: {
         type: Date,
-        default: Date.now,
     },
     DateofDelivery: {
         type: String
