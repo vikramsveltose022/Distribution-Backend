@@ -254,6 +254,7 @@ export const saveItemWithExcel = async (req, res) => {
   try {
     let groupDiscount = 0;
     let database = "database";
+    let qty = "qty";
     let warehouse = "warehouse"
     let SalesRate = "SalesRate"
     let Product_MRP = "Product_MRP";
@@ -304,6 +305,12 @@ export const saveItemWithExcel = async (req, res) => {
               if (!document.ProfitPercentage || document.ProfitPercentage === 0) {
                 document[SalesRate] = document.Purchase_Rate * 1.03;
                 document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate / 100) * (1 + groupDiscount / 100);
+              } else {
+                document[SalesRate] = (document.Purchase_Rate * (document.ProfitPercentage + 100) / 100);
+                document[Product_MRP] = (document.SalesRate) * (1 + document.GSTRate / 100) * (1 + groupDiscount / 100);
+              }
+              if (document.Opening_Stock) {
+                document[qty] = document.Opening_Stock
               }
               document[landedCost] = document.Purchase_Rate
               document[category] = document.category?.toUpperCase()

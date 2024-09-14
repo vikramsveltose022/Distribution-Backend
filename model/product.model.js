@@ -79,10 +79,10 @@ const ProductSchema = new mongoose.Schema({
         default: "Active"
     },
     salesDate: {
-        type: String
+        type: Date
     },
     purchaseDate: {
-        type: String
+        type: Date
     },
     purchaseStatus: {
         type: Boolean,
