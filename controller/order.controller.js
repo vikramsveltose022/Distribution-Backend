@@ -28,29 +28,16 @@ const __dirname = dirname(__filename);
 
 export const createOrder = async (req, res, next) => {
     try {
-        let ware = ""
-        const { partyId, userId, orderId } = req.body;
         const orderItems = req.body.orderItems;
-        const party = await Customer.findById({ _id: partyId })
+        const party = await Customer.findById({ _id: req.body.partyId })
         const user = await User.findOne({ _id: party.created_by });
         if (!user) {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
-            // const result = await generateInvoice(user.database);
-            // if (50000 >= req.body.grandTotal) {
-            //     req.body.challanNo = result
-            // } else {
-            //     req.body.invoiceId = result
-            // }
             const orderNo = await generateOrderNo(user.database);
-            const billAmount = orderItems.reduce((total, orderItem) => {
-                return total + (orderItem.price * orderItem.qty);
-            }, 0);
             for (const orderItem of orderItems) {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
-                    // orderItem.warehouse = product.warehouse;
-                    // ware = product.warehouse
                     product.salesDate = new Date()
                     const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
@@ -58,10 +45,6 @@ export const createOrder = async (req, res, next) => {
                         pro.currentStock -= (orderItem.qty);
                         product.qty -= orderItem.qty;
                         product.pendingQty += orderItem.qty;
-                        // if (pro.currentStock < 0) {
-                        //     return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
-                        // }
-                        // pro.pendingStock += (orderItem.qty)
                         await warehouse.save();
                         await product.save()
                     }
@@ -73,7 +56,6 @@ export const createOrder = async (req, res, next) => {
             req.body.database = user.database
             req.body.orderNo = orderNo
             req.body.orderItems = orderItems
-            // req.body.warehouseId = ware
             const savedOrder = CreateOrder.create(req.body)
             req.body.database = user.database;
             req.body.totalAmount = req.body.grandTotal;
@@ -81,6 +63,43 @@ export const createOrder = async (req, res, next) => {
             if (party.paymentTerm === "credit") {
                 await checkLimit(req.body)
             }
+            return res.status(200).json({ orderDetail: savedOrder, status: true });
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+export const createOrderWithInvoice = async (req, res, next) => {
+    try {
+        const orderItems = req.body.orderItems;
+        const party = await Customer.findById({ _id: req.body.partyId })
+        const user = await User.findOne({ _id: party.created_by });
+        if (!user) {
+            return res.status(401).json({ message: "No user found", status: false });
+        } else {
+            const orderNo = await generateOrderNo(user.database);
+            for (const orderItem of orderItems) {
+                const product = await Product.findById({ _id: orderItem.productId });
+                if (product) {
+                    const warehouse = await Warehouse.findById(product.warehouse)
+                    if (warehouse) {
+                        const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
+                        pro.currentStock -= (orderItem.qty);
+                        product.qty -= orderItem.qty;
+                        await warehouse.save();
+                        await product.save()
+                    }
+                } else {
+                    console.error(`Product with ID ${orderItem.productId} not found`);
+                }
+            }
+            req.body.status = "completed"
+            req.body.userId = party.created_by
+            req.body.database = user.database
+            req.body.orderNo = orderNo
+            req.body.orderItems = orderItems
+            const savedOrder = CreateOrder.create(req.body)
             return res.status(200).json({ orderDetail: savedOrder, status: true });
         }
     } catch (err) {
