@@ -7,9 +7,10 @@ import { User } from "../model/user.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 import { generateInvoice } from "../service/invoice.js";
-import { addProductInWarehouse } from "./product.controller.js";
+import { addProductInWarehouse, addProductInWarehouse2 } from "./product.controller.js";
 import { Receipt } from "../model/receipt.model.js";
 import { CustomerGroup } from "../model/customerGroup.model.js";
+import { ledgerPartyForCredit } from "../service/ledger.js";
 
 export const purchaseOrder = async (req, res, next) => {
     try {
@@ -18,10 +19,10 @@ export const purchaseOrder = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
-            const result = await generateInvoice(user.database);
-            if (!result) {
-                return res.status(404).json({ message: "InvoiceNo. Not Set", status: false })
-            }
+            // const result = await generateInvoice(user.database);
+            // if (!result) {
+            //     return res.status(404).json({ message: "InvoiceNo. Not Set", status: false })
+            // }
             const billAmount = orderItems.reduce((total, orderItem) => {
                 return total + (orderItem.price * orderItem.qty);
             }, 0);
@@ -43,8 +44,43 @@ export const purchaseOrder = async (req, res, next) => {
             }
             req.body.userId = user._id;
             req.body.database = user.database;
-            req.body.invoiceId = result
+            // req.body.invoiceId = result
             const order = await PurchaseOrder.create(req.body)
+            return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: err, status: false })
+    }
+};
+export const purchaseInvoiceOrder = async (req, res, next) => {
+    try {
+        const orderItems = req.body.orderItems;
+        const user = await User.findOne({ _id: req.body.userId });
+        if (!user) {
+            return res.status(401).json({ message: "No user found", status: false });
+        } else {
+            for (const orderItem of orderItems) {
+                const product = await Product.findOne({ _id: orderItem.productId });
+                if (product) {
+                    product.purchaseDate = new Date()
+                    product.partyId = req.body.partyId;
+                    product.purchaseStatus = true
+                    product.qty += orderItem.qty;
+                    await product.save();
+                    await addProductInWarehouse2(product, product.warehouse, orderItem)
+                } else {
+                    return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
+                }
+            }
+            req.body.userId = user._id;
+            req.body.database = user.database;
+            const order = await PurchaseOrder.create(req.body)
+            if (order) {
+                let particular = "PurchaseInvoice";
+                await ledgerPartyForCredit(order, particular)
+            }
             return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
         }
     }

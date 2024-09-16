@@ -20,6 +20,7 @@ import { Ledger } from "../model/ledger.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
 import { Receipt } from "../model/receipt.model.js";
 import { ClosingSales } from "./createInvoice.controller.js";
+import { ledgerPartyForDebit } from "../service/ledger.js";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -96,8 +97,11 @@ export const createOrderWithInvoice = async (req, res, next) => {
             req.body.status = "completed"
             req.body.userId = party.created_by
             req.body.database = user.database
-            req.body.orderItems = orderItems
             const savedOrder = CreateOrder.create(req.body)
+            if(savedOrder){
+                const particular = "SalesInvoice";
+                await ledgerPartyForDebit(savedOrder, particular)
+            }
             return res.status(200).json({ orderDetail: savedOrder, status: true });
         }
     } catch (err) {
