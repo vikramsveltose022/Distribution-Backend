@@ -266,7 +266,11 @@ const PurchaseOrderSchema = new mongoose.Schema({
     NoOfPackage: {
         type: Number,
         default: 0
-    }
+    },
+    BuiltyNumber: {
+        type: Number,
+        default: 0
+    },
 }, { timestamps: true });
 
 export const PurchaseOrder = mongoose.model("purchaseOrder", PurchaseOrderSchema)
