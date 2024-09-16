@@ -102,6 +102,24 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
         return res.status(500).json({ error: err, status: false })
     }
 };
+export const UpdatePurchaseInvoiceOrder = async (req, res, next) => {
+    try {
+        const purchase = await PurchaseOrder.findById(req.params.orderId);
+        if (!purchase) {
+            return res.status(401).json({ message: "PurchaseOrder Not Found", status: false });
+        } else {
+            if (Object.keys(req.body).length === 0) {
+                return res.status(400).json({ message: "Purchase Order Not Updated", status: false });
+            }
+            const order = await PurchaseOrder.findByIdAndUpdate(req.params.orderId, req.body, { new: true })
+            return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+};
 export const PurchaseOrderDispatch = async (req, res, next) => {
     try {
         const Checked = []
