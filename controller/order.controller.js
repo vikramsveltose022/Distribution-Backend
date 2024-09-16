@@ -110,10 +110,7 @@ export const createOrderHistoryByUserId = async (req, res, next) => {
         const userId = req.params.id;
         // const userHierarchy = await findUserDetails(userId);
         // const adminDetail = (userHierarchy[userHierarchy.length - 1])
-        const orders = await CreateOrder.find({ userId: userId }).populate({
-            path: 'orderItems.productId',
-            model: 'product'
-        }).populate({ path: "partyId", model: "customer" }).exec();
+        const orders = await CreateOrder.find({ userId: userId }).populate({ path: 'orderItems.productId', model: 'product' }).populate({ path: "partyId", model: "customer" }).exec();
         if (!orders || orders.length === 0) {
             return res.status(404).json({ message: "No orders found for the user", status: false });
         }
@@ -121,7 +118,6 @@ export const createOrderHistoryByUserId = async (req, res, next) => {
             const formattedOrderItems = order.orderItems.map(item => ({
                 product: item.productId,
                 qty: item.qty,
-                Size: item.Size,
                 unitType: item.unitType,
                 price: item.price,
                 status: item.status
