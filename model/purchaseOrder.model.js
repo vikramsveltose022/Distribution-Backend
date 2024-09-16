@@ -114,7 +114,7 @@ const PurchaseOrderSchema = new mongoose.Schema({
     date: {
         type: Date,
     },
-    DateofDelivery: {
+    DispatchDate: {
         type: String
     },
     fullName: {
