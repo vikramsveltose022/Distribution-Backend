@@ -56,6 +56,7 @@ export const purchaseOrder = async (req, res, next) => {
 };
 export const purchaseInvoiceOrder = async (req, res, next) => {
     try {
+        let groupDiscount = 0;
         const orderItems = req.body.orderItems;
         const user = await User.findOne({ _id: req.body.userId });
         if (!user) {
@@ -64,6 +65,18 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
             for (const orderItem of orderItems) {
                 const product = await Product.findOne({ _id: orderItem.productId });
                 if (product) {
+                    const group = await CustomerGroup.find({ database: product.database, status: "Active" })
+                    if (group.length > 0) {
+                        const maxDiscount = group.reduce((max, group) => {
+                            return group.discount > max.discount ? group : max;
+                        });
+                        groupDiscount = maxDiscount.discount;
+                    }
+                    product.Purchase_Rate = orderItem.landedCost;
+                    if (!product.ProfitPercentage || product.ProfitPercentage === 0) {
+                        product.SalesRate = product.Purchase_Rate * 1.03;
+                        product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
+                    }
                     product.purchaseDate = new Date()
                     product.partyId = req.body.partyId;
                     product.purchaseStatus = true
