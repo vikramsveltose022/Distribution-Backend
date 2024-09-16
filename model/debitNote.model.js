@@ -35,6 +35,9 @@ const DebitNoteSchema = new mongoose.Schema({
     reverseCharge: {
         type: String,
         default: "N"
+    },
+    NoteNumber: {
+        type: String
     }
 }, { timestamps: true });
 
