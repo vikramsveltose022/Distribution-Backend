@@ -78,6 +78,12 @@ const TransporterSchema = new mongoose.Schema({
       type: String
     }
   }],
+  OpeningBalance: {
+    type: Number
+  },
+  Type: {
+    type: String
+  },
   status: {
     type: String,
     default: "Active"

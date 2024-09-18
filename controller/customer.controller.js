@@ -37,6 +37,9 @@ export const SaveCustomer = async (req, res, next) => {
             })
             req.body.shopPhoto = images;
         }
+        if (!req.body.OpeningBalance) {
+            return res.status(400).json({ message: "Opening Balance Required", status: false })
+        }
         if (req.body.assignTransporter) {
             req.body.assignTransporter = JSON.parse(req.body.assignTransporter)
         }
@@ -452,7 +455,6 @@ export const saveExcelFile = async (req, res) => {
                             existingIds.push(document.id)
                         } else {
                             if (document.pincode) {
-                                console.log(document.pincode)
                                 const data = await GetCityByPincode(document.pincode)
                                 document[State] = data.StateName;
                                 document[City] = data.District;
