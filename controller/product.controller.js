@@ -98,7 +98,6 @@ export const DeleteProduct = async (req, res, next) => {
 };
 export const UpdateProduct = async (req, res, next) => {
   try {
-    console.log(req.body)
     let groupDiscount = 0;
     if (req.files) {
       let images = [];
@@ -119,22 +118,21 @@ export const UpdateProduct = async (req, res, next) => {
         });
         groupDiscount = maxDiscount?.discount ? maxDiscount?.discount : 0;
       }
-      if (req.body.Purchase_Rate > req.body.landedCost) {
-        req.body.landedCost = req.body.Purchase_Rate;
+      if (parseInt(req.body.Purchase_Rate) > existingProduct.landedCost) {
+        req.body.landedCost = parseInt(req.body.Purchase_Rate);
+        req.body.Purchase_Rate = parseInt(req.body.Purchase_Rate)
       } else {
-        req.body.Purchase_Rate = req.body.landedCost;
+        req.body.Purchase_Rate = existingProduct.landedCost;
       }
-      if (!req.body.ProfitPercentage || req.body.ProfitPercentage === 0) {
+      if (!req.body.ProfitPercentage || parseInt(req.body.ProfitPercentage) === 0) {
         req.body.SalesRate = req.body.Purchase_Rate * 1.03;
         req.body.ProfitPercentage = 3;
-        req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.GSTRate / 100) * (1 + groupDiscount / 100);
+        req.body.Product_MRP = (req.body.SalesRate) * (1 + parseInt(req.body.GSTRate) / 100) * (1 + groupDiscount / 100);
       } else {
-        req.body.SalesRate = req.body.Purchase_Rate * (1 + req.body.ProfitPercentage / 100);
-        req.body.Product_MRP = (req.body.SalesRate) * (1 + (req.body.GSTRate / 100)) * (1 + (groupDiscount / 100));
-        console.log(req.body)
+        req.body.SalesRate = req.body.Purchase_Rate * (1 + parseInt(req.body.ProfitPercentage) / 100);
+        req.body.Product_MRP = (req.body.SalesRate) * (1 + (parseInt(req.body.GSTRate) / 100)) * (1 + (groupDiscount / 100));
       }
-      if (existingProduct.Opening_Stock !== req.body.Opening_Stock) {
-        console.log("calling")
+      if (existingProduct.Opening_Stock !== parseInt(req.body.Opening_Stock)) {
         const qty = req.body.Opening_Stock - existingProduct.Opening_Stock
         req.body.qty = existingProduct.qty + qty
         await addProductInWarehouse(req.body, req.body.warehouse, existingProduct)
@@ -481,16 +479,16 @@ export const addProductInWarehouse = async (warehouse, warehouseId, productId) =
     }
     const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === productId._id.toString());
     if (sourceProductItem) {
-      sourceProductItem.gstPercentage = warehouse.GSTRate
-      sourceProductItem.currentStock = warehouse.qty
-      sourceProductItem.price = warehouse.Purchase_Rate;
-      sourceProductItem.totalPrice = (warehouse.qty * warehouse.Purchase_Rate);
-      sourceProductItem.transferQty = warehouse.qty;
-      sourceProductItem.oQty = warehouse.Opening_Stock
-      sourceProductItem.oRate = warehouse.Purchase_Rate
-      sourceProductItem.oBAmount = (((warehouse.Opening_Stock * warehouse.Purchase_Rate) * 100) / (warehouse.GSTRate + 100))
-      sourceProductItem.oTaxRate = (warehouse.GSTRate)
-      sourceProductItem.oTotal = (warehouse.Opening_Stock * warehouse.Purchase_Rate)
+      sourceProductItem.gstPercentage = parseInt(warehouse.GSTRate)
+      sourceProductItem.currentStock = parseInt(warehouse.qty)
+      sourceProductItem.price = parseInt(warehouse.Purchase_Rate);
+      sourceProductItem.totalPrice = (parseInt(warehouse.qty) * parseInt(warehouse.Purchase_Rate));
+      sourceProductItem.transferQty = parseInt(warehouse.qty);
+      sourceProductItem.oQty = parseInt(warehouse.Opening_Stock)
+      sourceProductItem.oRate = parseInt(warehouse.Purchase_Rate)
+      sourceProductItem.oBAmount = (((parseInt(warehouse.Opening_Stock) * parseInt(warehouse.Purchase_Rate)) * 100) / (parseInt(warehouse.GSTRate) + 100))
+      sourceProductItem.oTaxRate = parseInt(warehouse.GSTRate)
+      sourceProductItem.oTotal = (parseInt(warehouse.Opening_Stock) * parseInt(warehouse.Purchase_Rate))
       user.markModified('productItems');
       await user.save();
     }
