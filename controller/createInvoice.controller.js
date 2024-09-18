@@ -230,10 +230,18 @@ export const SavePurchaseInvoice = async (req, res, next) => {
                         });
                         groupDiscount = maxDiscount.discount;
                     }
-                    product.Purchase_Rate = orderItem.landedCost;
+                    if (product.Purchase_Rate > orderItem.landedCost) {
+                        product.Purchase_Rate = product.Purchase_Rate;
+                    } else {
+                        product.Purchase_Rate = orderItem.landedCost;
+                    }
+                    // product.Purchase_Rate = orderItem.landedCost;
                     product.landedCost = orderItem.landedCost;
                     if (!product.ProfitPercentage || product.ProfitPercentage === 0) {
                         product.SalesRate = product.Purchase_Rate * 1.03;
+                        product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
+                    } else {
+                        product.SalesRate = (product.Purchase_Rate * (100 + product.ProfitPercentage) / 100);
                         product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
                     }
                     const current = new Date(new Date())
