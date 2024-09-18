@@ -33,15 +33,6 @@ export const SaveUser = async (req, res, next) => {
     if (req.file) {
       req.body.profileImage = req.file.filename;
     }
-    if (req.body.Pan_No) {
-      req.body.code = req.body.Pan_No
-    } else {
-      if (req.body.Aadhar_No) {
-        req.body.code = req.body.Aadhar_No
-      } else {
-        return res.status(400).json({ message: "It is necessary to insert aadhar no. or pan no.", status: false })
-      }
-    }
     if (req.body.setRule) {
       req.body.setRule = await JSON.parse(req.body.setRule)
     }

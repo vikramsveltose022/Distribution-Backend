@@ -143,6 +143,12 @@ const CustomerSchema = new mongoose.Schema({
   shopPhoto: {
     type: []
   },
+  OpeningBalance: {
+    type: Number
+  },
+  Type: {
+    type: String
+  },
   status: {
     type: String,
     default: "Active"

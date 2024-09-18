@@ -16,6 +16,9 @@ export const SaveTransporter = async (req, res) => {
         if (req.file) {
             req.body.image = req.file.filename;
         }
+        if (!req.body.OpeningBalance) {
+            return res.status(400).json({ message: "Opening Balance Required", status: false })
+        }
         // req.body.City = JSON.parse(req.body.City)
         if (req.body.serviceArea) {
             req.body.serviceArea = JSON.parse(req.body.serviceArea)

@@ -203,6 +203,12 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "unpaid"
   },
+  OpeningBalance: {
+    type: Number
+  },
+  Type: {
+    type: String
+  },
   externalImageId: {
     type: String
   },
