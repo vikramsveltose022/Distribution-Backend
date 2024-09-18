@@ -98,6 +98,7 @@ export const DeleteProduct = async (req, res, next) => {
 };
 export const UpdateProduct = async (req, res, next) => {
   try {
+    console.log(req.body)
     let groupDiscount = 0;
     if (req.files) {
       let images = [];
@@ -125,15 +126,15 @@ export const UpdateProduct = async (req, res, next) => {
       }
       if (!req.body.ProfitPercentage || req.body.ProfitPercentage === 0) {
         req.body.SalesRate = req.body.Purchase_Rate * 1.03;
-        // req.body.landedCost = req.body.Purchase_Rate;
         req.body.ProfitPercentage = 3;
         req.body.Product_MRP = (req.body.SalesRate) * (1 + req.body.GSTRate / 100) * (1 + groupDiscount / 100);
       } else {
         req.body.SalesRate = req.body.Purchase_Rate * (1 + req.body.ProfitPercentage / 100);
-        // req.body.landedCost = req.body.Purchase_Rate;
         req.body.Product_MRP = (req.body.SalesRate) * (1 + (req.body.GSTRate / 100)) * (1 + (groupDiscount / 100));
+        console.log(req.body)
       }
       if (existingProduct.Opening_Stock !== req.body.Opening_Stock) {
+        console.log("calling")
         const qty = req.body.Opening_Stock - existingProduct.Opening_Stock
         req.body.qty = existingProduct.qty + qty
         await addProductInWarehouse(req.body, req.body.warehouse, existingProduct)
