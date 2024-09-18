@@ -118,6 +118,11 @@ export const UpdateProduct = async (req, res, next) => {
         });
         groupDiscount = maxDiscount?.discount ? maxDiscount?.discount : 0;
       }
+      if (product.Purchase_Rate > product.landedCost) {
+        product.landedCost = product.Purchase_Rate;
+      } else {
+        product.Purchase_Rate = product.landedCost;
+      }
       if (!req.body.ProfitPercentage || req.body.ProfitPercentage === 0) {
         req.body.SalesRate = req.body.Purchase_Rate * 1.03;
         // req.body.landedCost = req.body.Purchase_Rate;
