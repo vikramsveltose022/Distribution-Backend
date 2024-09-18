@@ -73,6 +73,7 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                         groupDiscount = maxDiscount.discount;
                     }
                     product.Purchase_Rate = orderItem.landedCost;
+                    product.landedCost = orderItem.landedCost;
                     if (!product.ProfitPercentage || product.ProfitPercentage === 0) {
                         product.SalesRate = product.Purchase_Rate * 1.03;
                         product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
@@ -359,7 +360,7 @@ export const deletedPurchase = async (req, res, next) => {
                 const warehouse = { productId: orderItem.productId, currentStock: (orderItem.qty), transferQty: (orderItem.qty), price: orderItem.price, totalPrice: orderItem.totalPrice, gstPercentage: orderItem.gstPercentage, igstTaxType: orderItem.igstTaxType, primaryUnit: orderItem.primaryUnit, secondaryUnit: orderItem.secondaryUnit, secondarySize: orderItem.secondarySize, landedCost: orderItem.landedCost }
                 await product.save();
                 await deleteAddProductInWarehouse(warehouse, product.warehouse)
-                await DeleteClosingPurchase(orderItem, product.warehouse)
+                // await DeleteClosingPurchase(orderItem, product.warehouse)
             } else {
                 console.log("Product Id Not Found")
                 // return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
