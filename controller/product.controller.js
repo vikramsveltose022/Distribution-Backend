@@ -524,6 +524,10 @@ export const addProductInWarehouse2 = async (warehouse, warehouseId, orderItem) 
 };
 export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, date) => {
   try {
+    const date = new Date(date);
+    const startOfDay = new Date(date);
+    const endOfDay = new Date(date);
+    endOfDay.setUTCHours(23, 59, 59, 999);
     const user = await Warehouse.findById({ _id: warehouseId })
     if (!user) {
       return console.log("warehouse not found")
@@ -538,7 +542,7 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
       user.markModified('productItems');
       await user.save();
     }
-    const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), createdAt: date })
+    const stock = await Stock.findOne({ warehouseId: req.params.id.toString(), createdAt: { $gte: startOfDay, $lte: endOfDay } });
     if (!stock) {
       return console.log("warehouse not found")
     }
