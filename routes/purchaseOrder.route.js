@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { CreditorCalculate, ProductWisePurchaseReport, PurchaseOrderDispatch, UpdatePurchaseInvoiceOrder, deletePurchaseOrder, deletedPurchase, purchaseInvoiceOrder, purchaseOrder, purchaseOrderHistory, purchaseOrderHistoryByOrderId, updatePurchaseOrder, updatePurchaseOrderStatus } from "../controller/purchageOrder.controller.js";
+import { CreditorCalculate, ProductWisePurchaseReport, Purch, PurchaseOrderDispatch, UpdatePurchaseInvoiceOrder, deletePurchaseOrder, deletedPurchase, purchaseInvoiceOrder, purchaseOrder, purchaseOrderHistory, purchaseOrderHistoryByOrderId, updatePurchaseOrder, updatePurchaseOrderStatus } from "../controller/purchageOrder.controller.js";
 
 const router = express.Router();
 const upload = multer({ dest: "public/Images/" })
@@ -18,4 +18,5 @@ router.delete("/delete-purchase-order/:id", deletePurchaseOrder);
 router.delete("/deleted-purchase-order/:id", deletedPurchase)
 
 router.get("/creditor-calculate/:database", CreditorCalculate)
+router.post("/purch/:id", Purch)
 export default router;
