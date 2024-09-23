@@ -9,8 +9,7 @@ const LedgerSchema = new mongoose.Schema({
         type: String
     },
     date: {
-        type: Date,
-        default: Date.now
+        type: Date
     },
     userId: {
         type: String

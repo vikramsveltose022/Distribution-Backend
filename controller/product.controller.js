@@ -4,6 +4,7 @@ import { Warehouse } from "../model/warehouse.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
 import { CustomerGroup } from "../model/customerGroup.model.js";
+import { Stock } from "../model/stock.js";
 
 export const SaveProduct = async (req, res) => {
   try {
@@ -516,6 +517,38 @@ export const addProductInWarehouse2 = async (warehouse, warehouseId, orderItem) 
       sourceProductItem.transferQty += orderItem.qty;
       user.markModified('productItems');
       await user.save();
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, date) => {
+  try {
+    const user = await Warehouse.findById({ _id: warehouseId })
+    if (!user) {
+      return console.log("warehouse not found")
+    }
+    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
+    if (sourceProductItem) {
+      sourceProductItem.gstPercentage = warehouse.GSTRate
+      sourceProductItem.currentStock += orderItem.qty
+      sourceProductItem.price = orderItem.price;
+      sourceProductItem.totalPrice += (orderItem.qty * orderItem.price);
+      sourceProductItem.transferQty += orderItem.qty;
+      user.markModified('productItems');
+      await user.save();
+    }
+    const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), createdAt: date })
+    if (!stock) {
+      return console.log("warehouse not found")
+    }
+    const existingStock = stock.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+    if (existingStock) {
+      existingStock.pQty += (orderItem.qty);
+      existingStock.pRate = (orderItem.price);
+      existingStock.pBAmount += (orderItem.totalPrice)
+      existingStock.pTaxRate = warehouse.GSTRate;
+      existingStock.pTotal += (orderItem.totalPrice)
     }
   } catch (error) {
     console.error(error);

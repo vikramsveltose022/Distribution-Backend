@@ -7,7 +7,7 @@ import { User } from "../model/user.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 import { generateInvoice } from "../service/invoice.js";
-import { addProductInWarehouse, addProductInWarehouse2 } from "./product.controller.js";
+import { addProductInWarehouse, addProductInWarehouse2, addProductInWarehouse3 } from "./product.controller.js";
 import { Receipt } from "../model/receipt.model.js";
 import { CustomerGroup } from "../model/customerGroup.model.js";
 import { ledgerPartyForCredit } from "../service/ledger.js";
@@ -19,45 +19,26 @@ export const purchaseOrder = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
-            const date1 = new Date();
-            const date2 = new Date(req.body.date);
-            if (date1.toDateString() === date2.toDateString()) {
-                console.log("The dates are the same.");
-            } else if (date1 > date2) {
-                console.log("Previous Date Ordered.");
-            } else {
-                console.log("does not ordered next date")
-                return res.status(400).json({ message: "order not submit becuase next date not order!" })
+            for (const orderItem of orderItems) {
+                const product = await Product.findOne({ _id: orderItem.productId });
+                if (product) {
+                    // product.purchaseDate = new Date()
+                    // product.partyId = req.body.partyId;
+                    // product.purchaseStatus = true
+                    // product.basicPrice = await orderItem.basicPrice;
+                    // product.landedCost = await orderItem.landedCost;
+                    // await product.save();
+                    // console.log(await product.save())
+                    // const warehouse = { productId: orderItem.productId, unitType: orderItem.unitType, currentStock: orderItem.qty, transferQty: orderItem.qty, price: orderItem.price, totalPrice: orderItem.totalPrice, Size: orderItem.Size }
+                    // await addProductInWarehouse(warehouse, product.warehouse)
+                } else {
+                    return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
+                }
             }
-            // // const result = await generateInvoice(user.database);
-            // // if (!result) {
-            // //     return res.status(404).json({ message: "InvoiceNo. Not Set", status: false })
-            // // }
-            // const billAmount = orderItems.reduce((total, orderItem) => {
-            //     return total + (orderItem.price * orderItem.qty);
-            // }, 0);
-            // for (const orderItem of orderItems) {
-            //     const product = await Product.findOne({ _id: orderItem.productId });
-            //     if (product) {
-            //         // product.purchaseDate = new Date()
-            //         // product.partyId = req.body.partyId;
-            //         // product.purchaseStatus = true
-            //         // product.basicPrice = await orderItem.basicPrice;
-            //         // product.landedCost = await orderItem.landedCost;
-            //         // await product.save();
-            //         // console.log(await product.save())
-            //         // const warehouse = { productId: orderItem.productId, unitType: orderItem.unitType, currentStock: orderItem.qty, transferQty: orderItem.qty, price: orderItem.price, totalPrice: orderItem.totalPrice, Size: orderItem.Size }
-            //         // await addProductInWarehouse(warehouse, product.warehouse)
-            //     } else {
-            //         return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
-            //     }
-            // }
-            // req.body.userId = user._id;
-            // req.body.database = user.database;
-            // // req.body.invoiceId = result
-            // const order = await PurchaseOrder.create(req.body)
-            // return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
-            return res.status({ message: "ordered submit successfull!", status: false })
+            req.body.userId = user._id;
+            req.body.database = user.database;
+            const order = await PurchaseOrder.create(req.body)
+            return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
         }
     }
     catch (err) {
@@ -73,53 +54,102 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
-            for (const orderItem of orderItems) {
-                const product = await Product.findOne({ _id: orderItem.productId });
-                if (product) {
-                    const group = await CustomerGroup.find({ database: product.database, status: "Active" })
-                    if (group.length > 0) {
-                        const maxDiscount = group.reduce((max, group) => {
-                            return group.discount > max.discount ? group : max;
-                        });
-                        groupDiscount = maxDiscount.discount;
-                    }
-                    if (product.Purchase_Rate > orderItem.landedCost) {
-                        product.Purchase_Rate = product.Purchase_Rate;
+            const date1 = new Date();
+            const date2 = new Date(req.body.date);
+            if (date1.toDateString() === date2.toDateString()) {
+                for (const orderItem of orderItems) {
+                    const product = await Product.findOne({ _id: orderItem.productId });
+                    if (product) {
+                        const group = await CustomerGroup.find({ database: product.database, status: "Active" })
+                        if (group.length > 0) {
+                            const maxDiscount = group.reduce((max, group) => {
+                                return group.discount > max.discount ? group : max;
+                            });
+                            groupDiscount = maxDiscount.discount;
+                        }
+                        if (product.Purchase_Rate > orderItem.landedCost) {
+                            product.Purchase_Rate = product.Purchase_Rate;
+                        } else {
+                            product.Purchase_Rate = orderItem.landedCost;
+                        }
+                        // product.Purchase_Rate = orderItem.landedCost;
+                        product.landedCost = orderItem.landedCost;
+                        if (!product.ProfitPercentage || product.ProfitPercentage === 0) {
+                            product.SalesRate = product.Purchase_Rate * 1.03;
+                            product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
+                        } else {
+                            product.SalesRate = (product.Purchase_Rate * (100 + product.ProfitPercentage) / 100);
+                            product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
+                        }
+                        product.purchaseDate = new Date()
+                        product.partyId = req.body.partyId;
+                        product.purchaseStatus = true
+                        product.qty += orderItem.qty;
+                        await product.save();
+                        await addProductInWarehouse2(product, product.warehouse, orderItem)
                     } else {
-                        product.Purchase_Rate = orderItem.landedCost;
+                        return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
                     }
-                    // product.Purchase_Rate = orderItem.landedCost;
-                    product.landedCost = orderItem.landedCost;
-                    if (!product.ProfitPercentage || product.ProfitPercentage === 0) {
-                        product.SalesRate = product.Purchase_Rate * 1.03;
-                        product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
-                    } else {
-                        product.SalesRate = (product.Purchase_Rate * (100 + product.ProfitPercentage) / 100);
-                        product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
-                    }
-                    product.purchaseDate = new Date()
-                    product.partyId = req.body.partyId;
-                    product.purchaseStatus = true
-                    product.qty += orderItem.qty;
-                    await product.save();
-                    await addProductInWarehouse2(product, product.warehouse, orderItem)
-                } else {
-                    return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
                 }
+                req.body.userId = user._id;
+                req.body.database = user.database;
+                const order = await PurchaseOrder.create(req.body)
+                if (order) {
+                    let particular = "PurchaseInvoice";
+                    await ledgerPartyForCredit(order, particular)
+                }
+                return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
+            } else if (date1 > date2) {
+                for (const orderItem of orderItems) {
+                    const product = await Product.findOne({ _id: orderItem.productId });
+                    if (product) {
+                        const group = await CustomerGroup.find({ database: product.database, status: "Active" })
+                        if (group.length > 0) {
+                            const maxDiscount = group.reduce((max, group) => {
+                                return group.discount > max.discount ? group : max;
+                            });
+                            groupDiscount = maxDiscount.discount;
+                        }
+                        if (product.Purchase_Rate > orderItem.landedCost) {
+                            product.Purchase_Rate = product.Purchase_Rate;
+                        } else {
+                            product.Purchase_Rate = orderItem.landedCost;
+                        }
+                        // product.Purchase_Rate = orderItem.landedCost;
+                        product.landedCost = orderItem.landedCost;
+                        if (!product.ProfitPercentage || product.ProfitPercentage === 0) {
+                            product.SalesRate = product.Purchase_Rate * 1.03;
+                            product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
+                        } else {
+                            product.SalesRate = (product.Purchase_Rate * (100 + product.ProfitPercentage) / 100);
+                            product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
+                        }
+                        product.purchaseDate = new Date()
+                        product.partyId = req.body.partyId;
+                        product.purchaseStatus = true
+                        product.qty += orderItem.qty;
+                        await product.save();
+                        await addProductInWarehouse3(product, product.warehouse, orderItem, req.body.date)
+                    } else {
+                        return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
+                    }
+                }
+                req.body.userId = user._id;
+                req.body.database = user.database;
+                const order = await PurchaseOrder.create(req.body)
+                if (order) {
+                    let particular = "PurchaseInvoice";
+                    await ledgerPartyForCredit(order, particular)
+                }
+                return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
+            } else {
+                return res.status(400).json({ message: "can not purchaseOrder of next date" })
             }
-            req.body.userId = user._id;
-            req.body.database = user.database;
-            const order = await PurchaseOrder.create(req.body)
-            if (order) {
-                let particular = "PurchaseInvoice";
-                await ledgerPartyForCredit(order, particular)
-            }
-            return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
         }
     }
     catch (err) {
         console.log(err);
-        return res.status(500).json({ error: err, status: false })
+        return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 };
 export const UpdatePurchaseInvoiceOrder = async (req, res, next) => {
