@@ -19,34 +19,45 @@ export const purchaseOrder = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
-            // const result = await generateInvoice(user.database);
-            // if (!result) {
-            //     return res.status(404).json({ message: "InvoiceNo. Not Set", status: false })
-            // }
-            const billAmount = orderItems.reduce((total, orderItem) => {
-                return total + (orderItem.price * orderItem.qty);
-            }, 0);
-            for (const orderItem of orderItems) {
-                const product = await Product.findOne({ _id: orderItem.productId });
-                if (product) {
-                    // product.purchaseDate = new Date()
-                    // product.partyId = req.body.partyId;
-                    // product.purchaseStatus = true
-                    // product.basicPrice = await orderItem.basicPrice;
-                    // product.landedCost = await orderItem.landedCost;
-                    // await product.save();
-                    // console.log(await product.save())
-                    // const warehouse = { productId: orderItem.productId, unitType: orderItem.unitType, currentStock: orderItem.qty, transferQty: orderItem.qty, price: orderItem.price, totalPrice: orderItem.totalPrice, Size: orderItem.Size }
-                    // await addProductInWarehouse(warehouse, product.warehouse)
-                } else {
-                    return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
-                }
+            const date1 = new Date();
+            const date2 = new Date(req.body.date);
+            if (date1.toDateString() === date2.toDateString()) {
+                console.log("The dates are the same.");
+            } else if (date1 > date2) {
+                console.log("Previous Date Ordered.");
+            } else {
+                console.log("does not ordered next date")
+                return res.status(400).json({ message: "order not submit becuase next date not order!" })
             }
-            req.body.userId = user._id;
-            req.body.database = user.database;
-            // req.body.invoiceId = result
-            const order = await PurchaseOrder.create(req.body)
-            return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
+            // // const result = await generateInvoice(user.database);
+            // // if (!result) {
+            // //     return res.status(404).json({ message: "InvoiceNo. Not Set", status: false })
+            // // }
+            // const billAmount = orderItems.reduce((total, orderItem) => {
+            //     return total + (orderItem.price * orderItem.qty);
+            // }, 0);
+            // for (const orderItem of orderItems) {
+            //     const product = await Product.findOne({ _id: orderItem.productId });
+            //     if (product) {
+            //         // product.purchaseDate = new Date()
+            //         // product.partyId = req.body.partyId;
+            //         // product.purchaseStatus = true
+            //         // product.basicPrice = await orderItem.basicPrice;
+            //         // product.landedCost = await orderItem.landedCost;
+            //         // await product.save();
+            //         // console.log(await product.save())
+            //         // const warehouse = { productId: orderItem.productId, unitType: orderItem.unitType, currentStock: orderItem.qty, transferQty: orderItem.qty, price: orderItem.price, totalPrice: orderItem.totalPrice, Size: orderItem.Size }
+            //         // await addProductInWarehouse(warehouse, product.warehouse)
+            //     } else {
+            //         return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
+            //     }
+            // }
+            // req.body.userId = user._id;
+            // req.body.database = user.database;
+            // // req.body.invoiceId = result
+            // const order = await PurchaseOrder.create(req.body)
+            // return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
+            return res.status({ message: "ordered submit successfull!", status: false })
         }
     }
     catch (err) {
