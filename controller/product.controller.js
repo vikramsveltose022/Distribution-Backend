@@ -524,9 +524,9 @@ export const addProductInWarehouse2 = async (warehouse, warehouseId, orderItem) 
 };
 export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, date) => {
   try {
-    const date = new Date(date);
-    const startOfDay = new Date(date);
-    const endOfDay = new Date(date);
+    const dates = new Date(date);
+    const startOfDay = new Date(dates);
+    const endOfDay = new Date(dates);
     endOfDay.setUTCHours(23, 59, 59, 999);
     const user = await Warehouse.findById({ _id: warehouseId })
     if (!user) {
