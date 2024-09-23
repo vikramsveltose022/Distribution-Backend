@@ -35,36 +35,47 @@ export const createOrder = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
-            const orderNo = await generateOrderNo(user.database);
-            for (const orderItem of orderItems) {
-                const product = await Product.findById({ _id: orderItem.productId });
-                if (product) {
-                    product.salesDate = new Date()
-                    const warehouse = await Warehouse.findById(product.warehouse)
-                    if (warehouse) {
-                        const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                        pro.currentStock -= (orderItem.qty);
-                        product.qty -= orderItem.qty;
-                        product.pendingQty += orderItem.qty;
-                        await warehouse.save();
-                        await product.save()
-                    }
-                } else {
-                    console.error(`Product with ID ${orderItem.productId} not found`);
-                }
+            const date1 = new Date();
+            const date2 = new Date(req.body.date);
+            if (date1.toDateString() === date2.toDateString()) {
+                console.log("The dates are the same.");
+            } else if (date1 > date2) {
+                console.log("Previous Date Ordered.");
+            } else {
+                console.log("does not ordered next date")
+                return res.status(400).json({ message: "order not submit becuase next date not order!" })
             }
-            req.body.userId = party.created_by
-            req.body.database = user.database
-            req.body.orderNo = orderNo
-            req.body.orderItems = orderItems
-            const savedOrder = CreateOrder.create(req.body)
-            req.body.database = user.database;
-            req.body.totalAmount = req.body.grandTotal;
-            req.body.orderId = savedOrder._id;
-            if (party.paymentTerm === "credit") {
-                await checkLimit(req.body)
-            }
-            return res.status(200).json({ orderDetail: savedOrder, status: true });
+            // const orderNo = await generateOrderNo(user.database);
+            // for (const orderItem of orderItems) {
+            //     const product = await Product.findById({ _id: orderItem.productId });
+            //     if (product) {
+            //         product.salesDate = new Date()
+            //         const warehouse = await Warehouse.findById(product.warehouse)
+            //         if (warehouse) {
+            //             const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
+            //             pro.currentStock -= (orderItem.qty);
+            //             product.qty -= orderItem.qty;
+            //             product.pendingQty += orderItem.qty;
+            //             await warehouse.save();
+            //             await product.save()
+            //         }
+            //     } else {
+            //         console.error(`Product with ID ${orderItem.productId} not found`);
+            //     }
+            // }
+            // req.body.userId = party.created_by
+            // req.body.database = user.database
+            // req.body.orderNo = orderNo
+            // req.body.orderItems = orderItems
+            // const savedOrder = CreateOrder.create(req.body)
+            // req.body.database = user.database;
+            // req.body.totalAmount = req.body.grandTotal;
+            // req.body.orderId = savedOrder._id;
+            // if (party.paymentTerm === "credit") {
+            //     await checkLimit(req.body)
+            // }
+            // return res.status(200).json({ orderDetail: savedOrder, status: true });
+            return res.status(200).json({ message: "Order Submit Successfull!", status: true });
         }
     } catch (err) {
         console.log(err);
@@ -98,7 +109,7 @@ export const createOrderWithInvoice = async (req, res, next) => {
             req.body.userId = party.created_by
             req.body.database = user.database
             const savedOrder = CreateOrder.create(req.body)
-            if(savedOrder){
+            if (savedOrder) {
                 const particular = "SalesInvoice";
                 await ledgerPartyForDebit(savedOrder, particular)
             }
