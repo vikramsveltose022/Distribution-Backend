@@ -553,6 +553,8 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
       existingStock.pBAmount += (orderItem.totalPrice)
       existingStock.pTaxRate = warehouse.GSTRate;
       existingStock.pTotal += (orderItem.totalPrice)
+      stock.markModified('productItems');
+      await stock.save();
     }
   } catch (error) {
     console.error(error);
