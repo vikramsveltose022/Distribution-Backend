@@ -5,7 +5,7 @@ export const viewLedgerByParty = async (req, res, next) => {
     try {
         const ledger = await Ledger.find({
             $or: [{ userId: req.params.id }, { partyId: req.params.id }, { expenseId: req.params.id }, { transporterId: req.params.id }]
-        }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" }).populate({ path: "transporterId", model: "transporter" })
+        }).sort({ date: 1, sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" }).populate({ path: "transporterId", model: "transporter" })
         if (ledger.length === 0) {
             return res.status(404).json({ message: "Not Found", status: false });
         }

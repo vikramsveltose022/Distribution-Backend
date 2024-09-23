@@ -69,7 +69,8 @@ export const ledgerPartyForCredit = async function ledger(body, particular) {
                 voucherNo: first.voucherNo + 1,
                 voucherType: part,
                 credit: credit,
-                ledgerType: "party"
+                ledgerType: "party",
+                date: body.date
             }
             const led = await Ledger.create(saveData)
             return led;
@@ -83,7 +84,8 @@ export const ledgerPartyForCredit = async function ledger(body, particular) {
             voucherType: part,
             voucherNo: 1,
             credit: credit,
-            ledgerType: "party"
+            ledgerType: "party",
+            date: body.date
         }
         const led = await Ledger.create(saveData)
         return led;
