@@ -130,7 +130,7 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                         product.purchaseStatus = true
                         product.qty += orderItem.qty;
                         await product.save();
-                        await addProductInWarehouse3(product, product.warehouse, orderItem, req.body.date)
+                        await addProductInWarehouse2(product, product.warehouse, orderItem, req.body.date)
                     } else {
                         return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
                     }
@@ -584,33 +584,33 @@ export const Purch = async (req, res, next) => {
 
         console.log(`Querying stock for warehouseId: ${req.params.id} with date range: ${startOfDay} to ${endOfDay}`);
 
-        const stock = await Stock.findOne({
+        const stock = await Stock.find({
             warehouseId: req.params.id.toString(),
-            createdAt: { $gte: startOfDay, $lte: endOfDay }
+            createdAt: { $gte: startOfDay }
         });
 
-        if (!stock) {
+        if (stock.length === 0) {
             console.log("Warehouse not found");
             return res.status(404).json({ message: "Warehouse not found", status: false });
         }
 
         console.log("Stock found:", stock);
 
-        const existingStock = stock.productItems.find((item) => item.productId.toString() === req.body.productId.toString());
+        // const existingStock = stock.productItems.find((item) => item.productId.toString() === req.body.productId.toString());
 
-        if (existingStock) {
-            existingStock.pQty += req.body.orderItem.qty;
-            existingStock.pRate = req.body.orderItem.price;
-            existingStock.pBAmount += req.body.orderItem.totalPrice;
-            existingStock.pTaxRate = stock.GSTRate;
-            existingStock.pTotal += req.body.orderItem.totalPrice;
-        } else {
-            console.log("Product not found in stock");
-            return res.status(404).json({ message: "Product not found in stock", status: false });
-        }
+        // if (existingStock) {
+        //     existingStock.pQty += req.body.orderItem.qty;
+        //     existingStock.pRate = req.body.orderItem.price;
+        //     existingStock.pBAmount += req.body.orderItem.totalPrice;
+        //     existingStock.pTaxRate = stock.GSTRate;
+        //     existingStock.pTotal += req.body.orderItem.totalPrice;
+        // } else {
+        //     console.log("Product not found in stock");
+        //     return res.status(404).json({ message: "Product not found in stock", status: false });
+        // }
 
-        await stock.save();
-        return res.status(200).json({ message: "Stock updated successfully", status: true });
+        // await stock.save();
+        return res.status(200).json({ message: "Stock updated successfully", stock, status: true });
 
     } catch (err) {
         console.error(err);
