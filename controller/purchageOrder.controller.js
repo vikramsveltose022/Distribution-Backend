@@ -144,7 +144,7 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                 }
                 return order ? res.status(200).json({ orderDetail: order, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
             } else {
-                return res.status(400).json({ message: "can not purchaseOrder of next date" })
+                return res.status(400).json({ message: "can not purchaseOrder of next date", status: false })
             }
         }
     }
@@ -599,7 +599,7 @@ export const Purch = async (req, res, next) => {
         const existingStock = stock.productItems.find((item) => item.productId.toString() === req.body.productId.toString());
 
         if (existingStock) {
-            existingStock.pQty += req.body.orderItem.qty; 
+            existingStock.pQty += req.body.orderItem.qty;
             existingStock.pRate = req.body.orderItem.price;
             existingStock.pBAmount += req.body.orderItem.totalPrice;
             existingStock.pTaxRate = stock.GSTRate;
