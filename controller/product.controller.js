@@ -522,47 +522,6 @@ export const addProductInWarehouse2 = async (warehouse, warehouseId, orderItem) 
     console.error(error);
   }
 };
-// export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, date) => {
-//   try {
-//     const dates = new Date(date);
-//     const startOfDay = new Date(dates);
-//     const endOfDay = new Date(dates);
-//     endOfDay.setUTCHours(23, 59, 59, 999);
-//     const user = await Warehouse.findById({ _id: warehouseId })
-//     if (!user) {
-//       return console.log("warehouse not found")
-//     }
-//     const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
-//     if (sourceProductItem) {
-//       sourceProductItem.gstPercentage = warehouse.GSTRate
-//       sourceProductItem.currentStock += orderItem.qty
-//       sourceProductItem.price = orderItem.price;
-//       sourceProductItem.totalPrice += (orderItem.qty * orderItem.price);
-//       sourceProductItem.transferQty += orderItem.qty;
-//       user.markModified('productItems');
-//       await user.save();
-//     }
-//     const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), createdAt: { $gte: startOfDay, $lte: endOfDay } });
-//     if (!stock) {
-//       return console.log("warehouse not found")
-//     }
-//     const existingStock = stock.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
-//     if (existingStock) {
-//       existingStock.pQty += (orderItem.qty);
-//       existingStock.pRate = (orderItem.price);
-//       existingStock.pBAmount += (orderItem.totalPrice)
-//       existingStock.pTaxRate = warehouse.GSTRate;
-//       existingStock.pTotal += (orderItem.totalPrice)
-//       stock.markModified('productItems');
-//       await stock.save();
-//     }
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };
-
-// HSN SALES SUMMARY REPORT
-
 export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, date) => {
   try {
     const dates = new Date(date);
@@ -583,25 +542,19 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
       user.markModified('productItems');
       await user.save();
     }
-    const stock = await Stock.find({ warehouseId: warehouseId.toString() });
-    if (stock.length === 0) {
+    const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), createdAt: { $gte: startOfDay, $lte: endOfDay } });
+    if (!stock) {
       return console.log("warehouse not found")
     }
-    for (let item of stock) {
-      const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
-      if (existingStock) {
-        existingStock.pQty += (orderItem.qty);
-        existingStock.pRate = (orderItem.price);
-        existingStock.pBAmount += (orderItem.totalPrice)
-        existingStock.pTaxRate = warehouse.GSTRate;
-        existingStock.pTotal += (orderItem.totalPrice)
-        existingStock.gstPercentage = warehouse.GSTRate
-        existingStock.currentStock += orderItem.qty
-        existingStock.price = orderItem.price;
-        existingStock.totalPrice += (orderItem.qty * orderItem.price);
-        item.markModified('productItems');
-        await item.save();
-      }
+    const existingStock = stock.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+    if (existingStock) {
+      existingStock.pQty += (orderItem.qty);
+      existingStock.pRate = (orderItem.price);
+      existingStock.pBAmount += (orderItem.totalPrice)
+      existingStock.pTaxRate = warehouse.GSTRate;
+      existingStock.pTotal += (orderItem.totalPrice)
+      stock.markModified('productItems');
+      await stock.save();
     }
   } catch (error) {
     console.error(error);
@@ -610,7 +563,54 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
 
 
 
+// export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, date) => {
+//   try {
+//     const dates = new Date(date);
+//     const startOfDay = new Date(dates);
+//     const endOfDay = new Date(dates);
+//     endOfDay.setUTCHours(23, 59, 59, 999);
+//     const user = await Warehouse.findById({ _id: warehouseId })
+//     if (!user) {
+//       return console.log("warehouse not found")
+//     }
+//     const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
+//     if (sourceProductItem) {
+//       sourceProductItem.gstPercentage = warehouse.GSTRate
+//       sourceProductItem.currentStock += orderItem.qty
+//       sourceProductItem.price = orderItem.price;
+//       sourceProductItem.totalPrice += (orderItem.qty * orderItem.price);
+//       sourceProductItem.transferQty += orderItem.qty;
+//       user.markModified('productItems');
+//       await user.save();
+//     }
+//     const stock = await Stock.find({ warehouseId: warehouseId.toString(), createdAt: { $gte: startOfDay } });
+//     if (stock.length === 0) {
+//       return console.log("warehouse not found")
+//     }
+//     for (let item of stock) {
+//       const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+//       if (existingStock) {
+//         existingStock.pQty += (orderItem.qty);
+//         existingStock.pRate = (orderItem.price);
+//         existingStock.pBAmount += (orderItem.totalPrice)
+//         existingStock.pTaxRate = warehouse.GSTRate;
+//         existingStock.pTotal += (orderItem.totalPrice)
+//         existingStock.gstPercentage = warehouse.GSTRate
+//         existingStock.currentStock += orderItem.qty
+//         existingStock.price = orderItem.price;
+//         existingStock.totalPrice += (orderItem.qty * orderItem.price);
+//         item.markModified('productItems');
+//         await item.save();
+//       }
+//     }
+//   } catch (error) {
+//     console.error(error);
+//   }
+// };
 
+
+
+// HSN SALES SUMMARY REPORT
 export const HSNWiseSalesReport = async (req, res, next) => {
   try {
     const startDate = req.body.startDate ? new Date(req.body.startDate) : null;

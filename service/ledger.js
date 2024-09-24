@@ -29,7 +29,8 @@ export const ledgerSalesForDebit = async function ledger(body, particular) {
                 voucherType: part,
                 voucherNo: first.voucherNo + 1,
                 debit: debit,
-                ledgerType: "user"
+                ledgerType: "user",
+                date: body.date
             }
             const led = await Ledger.create(saveData)
             return led;
@@ -44,7 +45,8 @@ export const ledgerSalesForDebit = async function ledger(body, particular) {
             voucherType: part,
             voucherNo: 1,
             debit: debit,
-            ledgerType: "user"
+            ledgerType: "user",
+            date: body.date
         }
         const led = await Ledger.create(saveData)
         return led;
@@ -110,7 +112,8 @@ export const ledgerPartyForDebit = async function ledger(body, particular) {
                 voucherType: part,
                 voucherNo: first.voucherNo + 1,
                 debit: debit,
-                ledgerType: "party"
+                ledgerType: "party",
+                date: body.date
             }
             const led = await Ledger.create(saveData)
             return led;
@@ -124,7 +127,8 @@ export const ledgerPartyForDebit = async function ledger(body, particular) {
             voucherType: part,
             voucherNo: 1,
             debit: debit,
-            ledgerType: "party"
+            ledgerType: "party",
+            date: body.date
         }
         const led = await Ledger.create(saveData)
         return led;
@@ -166,7 +170,8 @@ export const ledgerSalesForCredit = async function ledger(body, particular) {
                 voucherType: part,
                 voucherNo: first.voucherNo + 1,
                 credit: credit,
-                ledgerType: "user"
+                ledgerType: "user",
+                date: body.date
             }
             const led = await Ledger.create(saveData)
             return led;
@@ -180,7 +185,8 @@ export const ledgerSalesForCredit = async function ledger(body, particular) {
             voucherType: part,
             voucherNo: 1,
             credit: credit,
-            ledgerType: "user"
+            ledgerType: "user",
+            date: body.date
         }
         const led = await Ledger.create(saveData)
         return led;
@@ -206,7 +212,8 @@ export const ledgerUserForCredit = async function ledger(body, particular) {
                 voucherNo: first.voucherNo + 1,
                 voucherType: part,
                 credit: credit,
-                ledgerType: "user"
+                ledgerType: "user",
+                date: body.date
             }
             const led = await Ledger.create(saveData)
             return led;
@@ -220,7 +227,8 @@ export const ledgerUserForCredit = async function ledger(body, particular) {
             voucherType: part,
             voucherNo: 1,
             credit: credit,
-            ledgerType: "user"
+            ledgerType: "user",
+            date: body.date
         }
         const led = await Ledger.create(saveData)
         return led;
@@ -245,7 +253,8 @@ export const ledgerUserForDebit = async function ledger(body, particular) {
                 voucherType: part,
                 voucherNo: first.voucherNo + 1,
                 debit: debit,
-                ledgerType: "user"
+                ledgerType: "user",
+                date: body.date
             }
             const led = await Ledger.create(saveData)
             return led;
@@ -259,7 +268,8 @@ export const ledgerUserForDebit = async function ledger(body, particular) {
             voucherType: part,
             voucherNo: 1,
             debit: debit,
-            ledgerType: "user"
+            ledgerType: "user",
+            date: body.date
         }
         const led = await Ledger.create(saveData)
         return led;
@@ -284,7 +294,8 @@ export const ledgerExpensesForCredit = async function ledger(body, particular) {
                 voucherNo: first.voucherNo + 1,
                 voucherType: part,
                 credit: credit,
-                ledgerType: "expenses"
+                ledgerType: "expenses",
+                date: body.date
             }
             const led = await Ledger.create(saveData)
             return led;
@@ -298,7 +309,8 @@ export const ledgerExpensesForCredit = async function ledger(body, particular) {
             voucherType: part,
             voucherNo: 1,
             credit: credit,
-            ledgerType: "expenses"
+            ledgerType: "expenses",
+            date: body.date
         }
         const led = await Ledger.create(saveData)
         return led;
@@ -323,7 +335,8 @@ export const ledgerExpensesForDebit = async function ledger(body, particular) {
                 voucherType: part,
                 voucherNo: first.voucherNo + 1,
                 debit: debit,
-                ledgerType: "expenses"
+                ledgerType: "expenses",
+                date: body.date
             }
             const led = await Ledger.create(saveData)
             return led;
@@ -337,7 +350,8 @@ export const ledgerExpensesForDebit = async function ledger(body, particular) {
             voucherType: part,
             voucherNo: 1,
             debit: debit,
-            ledgerType: "expenses"
+            ledgerType: "expenses",
+            date: body.date
         }
         const led = await Ledger.create(saveData)
         return led;
@@ -363,7 +377,8 @@ export const ledgerTransporterForCredit = async function ledger(body, particular
                 voucherNo: first.voucherNo + 1,
                 voucherType: part,
                 credit: credit,
-                ledgerType: "transporter"
+                ledgerType: "transporter",
+                date: body.date
             }
             const led = await Ledger.create(saveData)
             return led;
@@ -377,7 +392,8 @@ export const ledgerTransporterForCredit = async function ledger(body, particular
             voucherType: part,
             voucherNo: 1,
             credit: credit,
-            ledgerType: "transporter"
+            ledgerType: "transporter",
+            date: body.date
         }
         const led = await Ledger.create(saveData)
         return led;
@@ -402,7 +418,8 @@ export const ledgerTransporterForDebit = async function ledger(body, particular)
                 voucherType: part,
                 voucherNo: first.voucherNo + 1,
                 debit: debit,
-                ledgerType: "transporter"
+                ledgerType: "transporter",
+                date: body.date
             }
             const led = await Ledger.create(saveData)
             return led;
@@ -416,7 +433,8 @@ export const ledgerTransporterForDebit = async function ledger(body, particular)
             voucherType: part,
             voucherNo: 1,
             debit: debit,
-            ledgerType: "transporter"
+            ledgerType: "transporter",
+            date: body.date
         }
         const led = await Ledger.create(saveData)
         return led;
