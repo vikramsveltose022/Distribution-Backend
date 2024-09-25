@@ -130,7 +130,7 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                         product.purchaseStatus = true
                         product.qty += orderItem.qty;
                         await product.save();
-                        await addProductInWarehouse2(product, product.warehouse, orderItem, req.body.date)
+                        await addProductInWarehouse3(product, product.warehouse, orderItem, req.body.date)
                     } else {
                         return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
                     }
@@ -575,29 +575,17 @@ export const CreditorCalculate = async (req, res, next) => {
 export const Purch = async (req, res, next) => {
     try {
         const date = new Date(req.body.date);
-        if (isNaN(date)) {
-            return res.status(400).json({ message: "Invalid date format", status: false });
-        }
+        if (isNaN(date)) return res.status(400).json({ message: "Invalid date format", status: false });
         const startOfDay = new Date(date);
         const endOfDay = new Date(date);
-        endOfDay.setUTCHours(23, 59, 59, 999); // Set to end of the day in UTC
-
-        console.log(`Querying stock for warehouseId: ${req.params.id} with date range: ${startOfDay} to ${endOfDay}`);
-
+        endOfDay.setUTCHours(23, 59, 59, 999);
         const stock = await Stock.find({
-            warehouseId: req.params.id.toString(),
+            warehouseId: req.params.id.toString(), "productItems.productId": req.body.productId,
             createdAt: { $gte: startOfDay }
         });
-
-        if (stock.length === 0) {
-            console.log("Warehouse not found");
-            return res.status(404).json({ message: "Warehouse not found", status: false });
-        }
-
-        console.log("Stock found:", stock);
-
+        if (stock.length === 0) return res.status(404).json({ message: "Warehouse not found", status: false });
+        // console.log("Stock found:", stock);
         // const existingStock = stock.productItems.find((item) => item.productId.toString() === req.body.productId.toString());
-
         // if (existingStock) {
         //     existingStock.pQty += req.body.orderItem.qty;
         //     existingStock.pRate = req.body.orderItem.price;
@@ -608,10 +596,8 @@ export const Purch = async (req, res, next) => {
         //     console.log("Product not found in stock");
         //     return res.status(404).json({ message: "Product not found in stock", status: false });
         // }
-
         // await stock.save();
         return res.status(200).json({ message: "Stock updated successfully", stock, status: true });
-
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });

@@ -560,9 +560,6 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
     console.error(error);
   }
 };
-
-
-
 // export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, date) => {
 //   try {
 //     const dates = new Date(date);
@@ -611,6 +608,7 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
 
 
 // HSN SALES SUMMARY REPORT
+
 export const HSNWiseSalesReport = async (req, res, next) => {
   try {
     const startDate = req.body.startDate ? new Date(req.body.startDate) : null;
