@@ -40,6 +40,9 @@ const stockSchema = new mongoose.Schema({
     openingStatus: {
         type: String
     },
+    date: {
+        type: Date
+    },
     productItems: [{
         productId: {
             type: String
