@@ -581,7 +581,30 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
     }
     const stock = await Stock.find({ warehouseId: warehouseId.toString(), createdAt: { $gte: startOfDay } });
     if (stock.length === 0) {
-      return console.log("warehouse not found")
+      let productItems = {
+        productId: warehouse._id.toString(),
+        gstPercentage: warehouse.GSTRate,
+        currentStock: warehouse.qty,
+        price: warehouse.Purchase_Rate,
+        totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
+        oQty: warehouse.Opening_Stock,
+        oRate: warehouse.Purchase_Rate,
+        oTaxRate: warehouse.GSTRate,
+        oTotal: (warehouse.qty * warehouse.Purchase_Rate),
+        pQty: orderItem.qty,
+        pRate: orderItem.price,
+        pBAmount: orderItem.totalPrice,
+        pTaxRate: warehouse.GSTRate,
+        pTotal: orderItem.totalPrice
+      }
+      let warehouse = {
+        database: warehouse.database,
+        warehouseId: warehouseId,
+        closingStatus: "closing",
+        productItems: productItems
+      }
+      await Stock.create(warehouse)
+      // return console.log("warehouse not found")
     }
     for (let item of stock) {
       const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
@@ -608,12 +631,10 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
         }
       }
     }
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
   }
 };
-
-
 
 // HSN SALES SUMMARY REPORT
 
