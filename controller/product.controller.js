@@ -522,7 +522,7 @@ export const addProductInWarehouse2 = async (warehouse, warehouseId, orderItem) 
     console.error(error);
   }
 };
-export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, date) => {
+export const addProductInWarehouse4 = async (warehouse, warehouseId, orderItem, date) => {
   try {
     const dates = new Date(date);
     const startOfDay = new Date(dates);
@@ -559,7 +559,7 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
     console.error(error);
   }
 };
-export const addProductInWarehouse4 = async (warehouse, warehouseId, orderItem, date) => {
+export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, date) => {
   try {
     const dates = new Date(date);
     const startOfDay = new Date(dates);
@@ -606,7 +606,6 @@ export const addProductInWarehouse4 = async (warehouse, warehouseId, orderItem, 
           item.markModified('productItems');
           await item.save();
         }
-
       }
     }
   } catch (error) {
