@@ -597,13 +597,13 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
         pTaxRate: warehouse.GSTRate,
         pTotal: orderItem.totalPrice
       }
-      let warehouse = {
+      let warehouses = {
         database: warehouse.database,
         warehouseId: warehouseId,
         closingStatus: "closing",
         productItems: productItems
       }
-      await Stock.create(warehouse)
+      await Stock.create(warehouses)
     } else {
       const stock = await Stock.find({ warehouseId: warehouseId.toString(), createdAt: { $gte: startOfDay } });
       if (stock.length === 0) {
