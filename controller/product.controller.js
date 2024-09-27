@@ -603,7 +603,9 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
         closingStatus: "closing",
         productItems: productItems
       }
-      await Stock.create(warehouse)
+      const stockww = await Stock.create(warehouse)
+      console.log(stockww)
+      console.log("completed....")
       // return console.log("warehouse not found")
     }
     for (let item of stock) {
