@@ -580,59 +580,31 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
       await user.save();
     }
     const stock = await Stock.find({ warehouseId: warehouseId.toString(), createdAt: { $gte: startOfDay } });
-    console.log(stock)
     if (stock.length === 0) {
-      let productItems = {
-        productId: warehouse._id.toString(),
-        gstPercentage: warehouse.GSTRate,
-        currentStock: warehouse.qty,
-        price: warehouse.Purchase_Rate,
-        totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
-        oQty: warehouse.Opening_Stock,
-        oRate: warehouse.Purchase_Rate,
-        oTaxRate: warehouse.GSTRate,
-        oTotal: (warehouse.qty * warehouse.Purchase_Rate),
-        pQty: orderItem.qty,
-        pRate: orderItem.price,
-        pBAmount: orderItem.totalPrice,
-        pTaxRate: warehouse.GSTRate,
-        pTotal: orderItem.totalPrice
-      }
-      let warehouse = {
-        database: warehouse.database,
-        warehouseId: warehouseId,
-        closingStatus: "closing",
-        productItems: productItems
-      }
-      const stockww = await Stock.create(warehouse)
-      console.log(stockww)
-      console.log("completed....")
-      // return console.log("warehouse not found")
-    } else {
-      console.log("calling....")
-      for (let item of stock) {
-        const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
-        if (existingStock) {
-          if (item.createdAt.toDateString() === dates.toDateString()) {
-            existingStock.pQty += (orderItem.qty);
-            existingStock.pRate = (orderItem.price);
-            existingStock.pBAmount += (orderItem.totalPrice)
-            existingStock.pTaxRate = warehouse.GSTRate;
-            existingStock.pTotal += (orderItem.totalPrice)
-            existingStock.gstPercentage = warehouse.GSTRate
-            existingStock.currentStock += orderItem.qty
-            existingStock.price = orderItem.price;
-            existingStock.totalPrice += (orderItem.qty * orderItem.price);
-            item.markModified('productItems');
-            await item.save();
-          } else {
-            existingStock.gstPercentage = warehouse.GSTRate
-            existingStock.currentStock += orderItem.qty
-            existingStock.price = orderItem.price;
-            existingStock.totalPrice += (orderItem.qty * orderItem.price);
-            item.markModified('productItems');
-            await item.save();
-          }
+      return console.log("warehouse not found")
+    }
+    for (let item of stock) {
+      const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+      if (existingStock) {
+        if (item.createdAt.toDateString() === dates.toDateString()) {
+          existingStock.pQty += (orderItem.qty);
+          existingStock.pRate = (orderItem.price);
+          existingStock.pBAmount += (orderItem.totalPrice)
+          existingStock.pTaxRate = warehouse.GSTRate;
+          existingStock.pTotal += (orderItem.totalPrice)
+          existingStock.gstPercentage = warehouse.GSTRate
+          existingStock.currentStock += orderItem.qty
+          existingStock.price = orderItem.price;
+          existingStock.totalPrice += (orderItem.qty * orderItem.price);
+          item.markModified('productItems');
+          await item.save();
+        } else {
+          existingStock.gstPercentage = warehouse.GSTRate
+          existingStock.currentStock += orderItem.qty
+          existingStock.price = orderItem.price;
+          existingStock.totalPrice += (orderItem.qty * orderItem.price);
+          item.markModified('productItems');
+          await item.save();
         }
       }
     }
