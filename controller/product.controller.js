@@ -602,7 +602,7 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
         warehouseId: warehouseId,
         closingStatus: "closing",
         productItems: productItems,
-        date: orderItem.date
+        date: date
       }
       await Stock.create(warehouses)
       const stock = await Stock.find({ warehouseId: warehouseId.toString(), createdAt: { $gte: startOfDay } });
