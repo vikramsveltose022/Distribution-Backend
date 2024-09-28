@@ -601,7 +601,8 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
         database: warehouse.database,
         warehouseId: warehouseId,
         closingStatus: "closing",
-        productItems: productItems
+        productItems: productItems,
+        date: new Date()
       }
       await Stock.create(warehouses)
     } else {
