@@ -413,7 +413,7 @@ export const ViewAllWarehouse1 = async () => {
 };
 export const viewStockClosingWarehouse = async (req, res, next) => {
     try {
-        const warehouse = await Stock.find({ database: req.params.database }).sort({ sortorder: -1 }).populate({ path: "productItems.productId", model: "product" }).populate({ path: "warehouseId", model: "warehouse" })
+        const warehouse = await Stock.find({ database: req.params.database }).sort({ date: 1, sortorder: -1 }).populate({ path: "productItems.productId", model: "product" }).populate({ path: "warehouseId", model: "warehouse" })
         return (warehouse.length > 0) ? res.status(200).json({ Warehouse: warehouse, status: true }) : res.status(404).json({ message: "Not Found", status: false })
     }
     catch (err) {
