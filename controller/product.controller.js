@@ -602,9 +602,24 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
         warehouseId: warehouseId,
         closingStatus: "closing",
         productItems: productItems,
-        date: new Date()
+        date: new Date(orderItem.date)
       }
       await Stock.create(warehouses)
+      const stock = await Stock.find({ warehouseId: warehouseId.toString(), createdAt: { $gte: startOfDay } });
+      if (stock.length === 0) {
+        console.log("warehouse not found")
+      }
+      for (let item of stock) {
+        const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+        if (existingStock) {
+          existingStock.gstPercentage = warehouse.GSTRate
+          existingStock.currentStock += orderItem.qty
+          existingStock.price = orderItem.price;
+          existingStock.totalPrice += (orderItem.qty * orderItem.price);
+          item.markModified('productItems');
+          await item.save();
+        }
+      }
     } else {
       const stock = await Stock.find({ warehouseId: warehouseId.toString(), createdAt: { $gte: startOfDay } });
       if (stock.length === 0) {
