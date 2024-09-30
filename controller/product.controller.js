@@ -581,6 +581,7 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
     }
     const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: startOfDay });
     if (!stock) {
+      console.log("called--1")
       let productItems = {
         productId: warehouse._id.toString(),
         gstPercentage: warehouse.GSTRate,
@@ -608,20 +609,23 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
       const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
       if (stock.length === 0) {
         console.log("warehouse not found")
-      }
-      for (let item of stock) {
-        const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
-        if (existingStock) {
-          existingStock.gstPercentage = warehouse.GSTRate
-          existingStock.currentStock += orderItem.qty
-          existingStock.price = orderItem.price;
-          existingStock.totalPrice += (orderItem.qty * orderItem.price);
-          item.markModified('productItems');
-          await item.save();
+      } else {
+        console.log("called--2", stock)
+        for (let item of stock) {
+          const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+          if (existingStock) {
+            existingStock.gstPercentage = warehouse.GSTRate
+            existingStock.currentStock += orderItem.qty
+            existingStock.price = orderItem.price;
+            existingStock.totalPrice += (orderItem.qty * orderItem.price);
+            item.markModified('productItems');
+            await item.save();
+          }
         }
       }
       await Stock.create(warehouses)
     } else {
+      console.log("called---3")
       const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
       if (stock.length === 0) {
         return console.log("warehouse not found")
@@ -702,7 +706,6 @@ export const addProductInWarehouse5 = async (warehouse, warehouseId, orderItem, 
         productItems: productItems,
         date: date
       }
-      await Stock.create(warehouses)
       const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
       if (stock.length === 0) {
         console.log("warehouse not found")
@@ -718,6 +721,7 @@ export const addProductInWarehouse5 = async (warehouse, warehouseId, orderItem, 
           await item.save();
         }
       }
+      await Stock.create(warehouses)
     } else {
       const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
       if (stock.length === 0) {
