@@ -605,7 +605,6 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
         productItems: productItems,
         date: date
       }
-      await Stock.create(warehouses)
       const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
       if (stock.length === 0) {
         console.log("warehouse not found")
@@ -621,6 +620,7 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
           await item.save();
         }
       }
+      await Stock.create(warehouses)
     } else {
       const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
       if (stock.length === 0) {

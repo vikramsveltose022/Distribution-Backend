@@ -268,8 +268,7 @@ const PurchaseOrderSchema = new mongoose.Schema({
         default: 0
     },
     BuiltyNumber: {
-        type: Number,
-        default: 0
+        type: String
     },
 }, { timestamps: true });
 
