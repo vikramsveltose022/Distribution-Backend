@@ -620,6 +620,7 @@ const ClosingStock = async (productItems) => {
                 sRate: item.sRate,
                 sTaxRate: item.sTaxRate,
                 sTotal: item.sTotal,
+                date: new Date()
             };
             stock.push(warehouseStock);
         }
