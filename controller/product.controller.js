@@ -581,7 +581,6 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
     }
     const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: startOfDay });
     if (!stock) {
-      console.log("called--1")
       let productItems = {
         productId: warehouse._id.toString(),
         gstPercentage: warehouse.GSTRate,
@@ -610,7 +609,6 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
       if (stock.length === 0) {
         console.log("warehouse not found")
       } else {
-        console.log("called--2", stock)
         for (let item of stock) {
           const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
           if (existingStock) {
