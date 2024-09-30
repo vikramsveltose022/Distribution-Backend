@@ -595,7 +595,8 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
         pRate: orderItem.price,
         pBAmount: orderItem.totalPrice,
         pTaxRate: warehouse.GSTRate,
-        pTotal: orderItem.totalPrice
+        pTotal: orderItem.totalPrice,
+        date: date
       }
       let warehouses = {
         database: warehouse.database,
@@ -628,7 +629,7 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
       for (let item of stock) {
         const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
         if (existingStock) {
-          if (item.createdAt.toDateString() === dates.toDateString()) {
+          if (item.date.toDateString() === dates.toDateString()) {
             existingStock.pQty += (orderItem.qty);
             existingStock.pRate = (orderItem.price);
             existingStock.pBAmount += (orderItem.totalPrice)
@@ -691,7 +692,8 @@ export const addProductInWarehouse5 = async (warehouse, warehouseId, orderItem, 
         sRate: orderItem.price,
         sBAmount: orderItem.totalPrice,
         sTaxRate: warehouse.GSTRate,
-        sTotal: orderItem.totalPrice
+        sTotal: orderItem.totalPrice,
+        date: date
       }
       let warehouses = {
         database: warehouse.database,
@@ -724,7 +726,7 @@ export const addProductInWarehouse5 = async (warehouse, warehouseId, orderItem, 
       for (let item of stock) {
         const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
         if (existingStock) {
-          if (item.createdAt.toDateString() === dates.toDateString()) {
+          if (item.date.toDateString() === dates.toDateString()) {
             existingStock.sQty += (orderItem.qty);
             existingStock.sRate = (orderItem.price);
             existingStock.sBAmount += (orderItem.totalPrice)

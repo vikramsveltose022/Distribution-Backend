@@ -437,9 +437,9 @@ export const deleteAddProductInWarehouse = async (warehouse, warehouseId) => {
             sourceProductItem.currentStock -= warehouse.transferQty;
             sourceProductItem.totalPrice -= warehouse.totalPrice;
             sourceProductItem.transferQty -= warehouse.transferQty;
-            if (sourceProductItem.currentStock <= 0) {
-                user.productItems = user.productItems.filter((pItem) => pItem.productId.toString() !== warehouse.productId._id.toString());
-            }
+            // if (sourceProductItem.currentStock <= 0) {
+            //     user.productItems = user.productItems.filter((pItem) => pItem.productId.toString() !== warehouse.productId._id.toString());
+            // }
             // console.log("warehouse : " + sourceProductItem)
             user.markModified('productItems');
             await user.save();

@@ -161,6 +161,9 @@ const stockSchema = new mongoose.Schema({
         },
         secondarySize: {
             type: Number
+        },
+        date: {
+            type: Date
         }
     }],
     damageItem: []
