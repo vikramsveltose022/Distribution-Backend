@@ -137,6 +137,7 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                 }
                 req.body.userId = user._id;
                 req.body.database = user.database;
+                console.log(req.body)
                 const order = await PurchaseOrder.create(req.body)
                 if (order) {
                     let particular = "PurchaseInvoice";

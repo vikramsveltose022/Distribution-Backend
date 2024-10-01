@@ -511,12 +511,12 @@ export const ViewOverDueStock = async (body) => {
 export const savedd = async (req, res, next) => {
     try {
         let count = 0
-        const exist = await Stock.find({ database: req.params.database, })
+        const exist = await Product.find({ database: req.params.database, status: "Deactive" })
         if (exist.length === 0) {
             return res.status(404).json({ message: "warehouse not found", status: false })
         }
         for (let item of exist) {
-            // await Customer.findByIdAndDelete(item._id)
+            await Product.findByIdAndDelete(item._id)
             // const warehouse = await Warehouse.findOne({ "productItems.productId": item._id.toString() })
             // if (warehouse) {
             //     count++
@@ -548,8 +548,8 @@ export const savedd = async (req, res, next) => {
             //     }
             //     const updated = await Warehouse.updateOne({ _id: item.warehouse }, { $push: { productItems: ware }, }, { upsert: true });
             // }
-            item.date = new Date(item.createdAt)
-            await item.save()
+            // item.date = new Date(item.createdAt)
+            // await item.save()
         }
         return res.status(200).json({ message: "success", count, status: true })
     }

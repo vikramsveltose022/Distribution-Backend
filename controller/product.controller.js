@@ -627,32 +627,7 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
       if (stock.length === 0) {
         console.log("warehouse not found")
       } else {
-        for (let item of stock) {
-          const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
-          if (existingStock) {
-            if (item.date.toDateString() === dates.toDateString()) {
-              existingStock.pQty += (orderItem.qty);
-              existingStock.pRate = (orderItem.price);
-              existingStock.pBAmount += (orderItem.totalPrice)
-              existingStock.pTaxRate = warehouse.GSTRate;
-              existingStock.pTotal += (orderItem.totalPrice)
-              existingStock.gstPercentage = warehouse.GSTRate
-              existingStock.currentStock += orderItem.qty
-              existingStock.price = orderItem.price;
-              existingStock.totalPrice += (orderItem.qty * orderItem.price);
-              item.markModified('productItems');
-              await item.save();
-            } else {
-              existingStock.gstPercentage = warehouse.GSTRate
-              existingStock.currentStock += orderItem.qty
-              existingStock.price = orderItem.price;
-              existingStock.totalPrice += (orderItem.qty * orderItem.price);
-              item.markModified('productItems');
-              await item.save();
-            }
-          }
-        }
-        const existProductInStock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: startOfDay });
+        const existProductInStock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: startOfDay, "productItems.productId": warehouse._id.toString() });
         if (existProductInStock) {
           let productItems = {
             productId: warehouse._id.toString(),
@@ -670,6 +645,31 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
             pTaxRate: warehouse.GSTRate,
             pTotal: orderItem.totalPrice,
             date: date
+          }
+          for (let item of stock) {
+            const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+            if (existingStock) {
+              if (item.date.toDateString() === dates.toDateString()) {
+                existingStock.pQty += (orderItem.qty);
+                existingStock.pRate = (orderItem.price);
+                existingStock.pBAmount += (orderItem.totalPrice)
+                existingStock.pTaxRate = warehouse.GSTRate;
+                existingStock.pTotal += (orderItem.totalPrice)
+                existingStock.gstPercentage = warehouse.GSTRate
+                existingStock.currentStock += orderItem.qty
+                existingStock.price = orderItem.price;
+                existingStock.totalPrice += (orderItem.qty * orderItem.price);
+                item.markModified('productItems');
+                await item.save();
+              } else {
+                existingStock.gstPercentage = warehouse.GSTRate
+                existingStock.currentStock += orderItem.qty
+                existingStock.price = orderItem.price;
+                existingStock.totalPrice += (orderItem.qty * orderItem.price);
+                item.markModified('productItems');
+                await item.save();
+              }
+            }
           }
           existProductInStock.productItems.push(productItems);
           await existProductInStock.save();
