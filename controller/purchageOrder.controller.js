@@ -130,6 +130,7 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                         product.purchaseStatus = true
                         product.qty += orderItem.qty;
                         await product.save();
+                        console.log("calledd....")
                         await addProductInWarehouse3(product, product.warehouse, orderItem, req.body.date)
                     } else {
                         return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
