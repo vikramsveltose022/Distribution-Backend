@@ -650,33 +650,31 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
               item.markModified('productItems');
               await item.save();
             }
-          } else {
-            const existProductInStock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: startOfDay });
-            if (existProductInStock) {
-              let productItems = {
-                productId: warehouse._id.toString(),
-                gstPercentage: warehouse.GSTRate,
-                currentStock: warehouse.qty,
-                price: warehouse.Purchase_Rate,
-                totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
-                oQty: warehouse.Opening_Stock,
-                oRate: warehouse.Purchase_Rate,
-                oTaxRate: warehouse.GSTRate,
-                oTotal: (warehouse.qty * warehouse.Purchase_Rate),
-                pQty: orderItem.qty,
-                pRate: orderItem.price,
-                pBAmount: orderItem.totalPrice,
-                pTaxRate: warehouse.GSTRate,
-                pTotal: orderItem.totalPrice,
-                date: date
-              }
-              existProductInStock.productItems.push(productItems);
-              await existProductInStock.save();
-            }
           }
         }
+        const existProductInStock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: startOfDay });
+        if (existProductInStock) {
+          let productItems = {
+            productId: warehouse._id.toString(),
+            gstPercentage: warehouse.GSTRate,
+            currentStock: warehouse.qty,
+            price: warehouse.Purchase_Rate,
+            totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
+            oQty: warehouse.Opening_Stock,
+            oRate: warehouse.Purchase_Rate,
+            oTaxRate: warehouse.GSTRate,
+            oTotal: (warehouse.qty * warehouse.Purchase_Rate),
+            pQty: orderItem.qty,
+            pRate: orderItem.price,
+            pBAmount: orderItem.totalPrice,
+            pTaxRate: warehouse.GSTRate,
+            pTotal: orderItem.totalPrice,
+            date: date
+          }
+          existProductInStock.productItems.push(productItems);
+          await existProductInStock.save();
+        }
       }
-
     }
   } catch (err) {
     console.error(err);
