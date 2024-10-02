@@ -260,7 +260,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                             pro.sTotal += (orderItem.totalPrice + tax)
                             await warehouse.save();
                             await product.save()
-                            await ClosingSales(orderItem, orderItem.warehouse)
+                            // await ClosingSales(orderItem, orderItem.warehouse)
                             tax = 0
                         } else {
                             console.error(`Product Not Found In Warehouse Product ID ${orderItem.productId}`);

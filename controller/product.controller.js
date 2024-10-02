@@ -625,7 +625,7 @@ export const addProductInWarehouse3 = async (warehouse, warehouseId, orderItem, 
     } else {
       const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
       if (stock.length === 0) {
-        return console.log("warehouse not found")
+        console.log("warehouse not found")
       } else {
         for (let item of stock) {
           const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
