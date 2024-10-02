@@ -86,8 +86,8 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                         product.partyId = req.body.partyId;
                         product.purchaseStatus = true
                         product.qty += orderItem.qty;
+                        // await addProductInWarehouse3(product, product.warehouse, orderItem, req.body.date)
                         await product.save();
-                        await addProductInWarehouse2(product, product.warehouse, orderItem)
                     } else {
                         return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
                     }
