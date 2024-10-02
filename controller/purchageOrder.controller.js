@@ -185,18 +185,16 @@ export const PurchaseOrderDispatch = async (req, res, next) => {
                         orderItem.DamageQty = item.DamageQty
                         orderItem.status = "Received"
                         order.status = "Received"
-                    } else {
-                        if (orderItem.status === "Received") {
-                            order.status = "Received"
-                        } else {
-                            Checked.push(item)
-                            // order.status = "pending"
-                        }
+                        console.log("calledd-1")
                     }
                 }
             }
-            if (Checked.length !== 0) {
-                order.status = "pending"
+            for (const orderItem of order.orderItems) {
+                if (orderItem.status === "Received") {
+                    order.status = "Received"
+                } else {
+                    order.status = "pending"
+                }
             }
             order.NoOfPackage += req.body.NoOfPackage;
             const updatedOrder = order.save()
