@@ -989,7 +989,7 @@ export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, 
     } else {
       const existingStock = stock.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
       if (existingStock) {
-        if (item.date.toDateString() === dates.toDateString()) {
+        if (existingStock.date.toDateString() === dates.toDateString()) {
           existingStock.sQty += (orderItem.qty);
           existingStock.sRate = (orderItem.price);
           existingStock.sBAmount += (orderItem.totalPrice)
