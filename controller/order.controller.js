@@ -47,9 +47,9 @@ export const createOrder = async (req, res, next) => {
                         pro.currentStock -= (orderItem.qty);
                         product.qty -= orderItem.qty;
                         product.pendingQty += orderItem.qty;
+                        await addProductInWarehouse6(product, product.warehouse, orderItem, req.body.date)
                         await warehouse.save();
                         await product.save()
-                        await addProductInWarehouse6(product, product.warehouse, orderItem, req.body.date)
                     }
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
