@@ -60,6 +60,7 @@ export const createOrder = async (req, res, next) => {
             req.body.database = user.database
             req.body.orderNo = orderNo
             req.body.orderItems = orderItems
+            console.log(req.body)
             const savedOrder = CreateOrder.create(req.body)
             req.body.database = user.database;
             req.body.totalAmount = req.body.grandTotal;

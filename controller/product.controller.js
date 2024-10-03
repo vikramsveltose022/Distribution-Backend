@@ -839,11 +839,11 @@ export const addProductInWarehouse6 = async (warehouse, warehouseId, orderItem, 
         oRate: warehouse.Purchase_Rate,
         oTaxRate: warehouse.GSTRate,
         oTotal: (warehouse.qty * warehouse.Purchase_Rate),
-        sQty: orderItem.qty,
-        sRate: orderItem.price,
-        sBAmount: orderItem.totalPrice,
-        sTaxRate: warehouse.GSTRate,
-        sTotal: orderItem.totalPrice,
+        // sQty: orderItem.qty,
+        // sRate: orderItem.price,
+        // sBAmount: orderItem.totalPrice,
+        // sTaxRate: warehouse.GSTRate,
+        // sTotal: orderItem.totalPrice,
         date: date
       }
       let warehouses = {
