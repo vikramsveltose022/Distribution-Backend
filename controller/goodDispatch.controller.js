@@ -11,6 +11,7 @@ import { ledgerPartyForDebit } from "../service/ledger.js";
 import { OtpVerify } from "../model/otpVerify.model.js";
 import { ClosingSales } from "./createInvoice.controller.js";
 import { generateInvoice } from "../service/invoice.js";
+import { addProductInWarehouse7 } from "./product.controller.js";
 
 
 export const saveGoodDispatch = async (req, res) => {
@@ -252,6 +253,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                         const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                         if (pro) {
                             // pro.currentStock -= (orderItem.qty)
+                            const current = new Date()
                             product.pendingQty -= (orderItem.qty)
                             pro.sQty += (orderItem.qty);
                             pro.sRate = (orderItem.price);
@@ -260,6 +262,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                             pro.sTotal += (orderItem.totalPrice + tax)
                             await warehouse.save();
                             await product.save()
+                            addProductInWarehouse7(product, product.warehouse, orderItem, current)
                             // await ClosingSales(orderItem, orderItem.warehouse)
                             tax = 0
                         } else {
