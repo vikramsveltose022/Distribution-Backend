@@ -807,6 +807,195 @@ export const addProductInWarehouse5 = async (warehouse, warehouseId, orderItem, 
     console.error(err);
   }
 };
+export const addProductInWarehouse6 = async (warehouse, warehouseId, orderItem, date) => {
+  try {
+    const dates = new Date(date);
+    const startOfDay = new Date(dates);
+    const endOfDay = new Date(dates);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+    const user = await Warehouse.findById({ _id: warehouseId })
+    if (!user) {
+      return console.log("warehouse not found")
+    }
+    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
+    if (sourceProductItem) {
+      sourceProductItem.gstPercentage = warehouse.GSTRate
+      sourceProductItem.currentStock -= orderItem.qty
+      sourceProductItem.price = orderItem.price;
+      sourceProductItem.totalPrice -= (orderItem.qty * orderItem.price);
+      sourceProductItem.transferQty -= orderItem.qty;
+      user.markModified('productItems');
+      await user.save();
+    }
+    const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: startOfDay });
+    if (!stock) {
+      let productItems = {
+        productId: warehouse._id.toString(),
+        gstPercentage: warehouse.GSTRate,
+        currentStock: warehouse.qty,
+        price: warehouse.Purchase_Rate,
+        totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
+        oQty: warehouse.Opening_Stock,
+        oRate: warehouse.Purchase_Rate,
+        oTaxRate: warehouse.GSTRate,
+        oTotal: (warehouse.qty * warehouse.Purchase_Rate),
+        sQty: orderItem.qty,
+        sRate: orderItem.price,
+        sBAmount: orderItem.totalPrice,
+        sTaxRate: warehouse.GSTRate,
+        sTotal: orderItem.totalPrice,
+        date: date
+      }
+      let warehouses = {
+        database: warehouse.database,
+        warehouseId: warehouseId,
+        closingStatus: "closing",
+        productItems: productItems,
+        date: date
+      }
+      const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
+      if (stock.length === 0) {
+        console.log("warehouse not found")
+      } else {
+        for (let item of stock) {
+          const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+          if (existingStock) {
+            existingStock.gstPercentage = warehouse.GSTRate
+            existingStock.currentStock -= orderItem.qty
+            existingStock.price = orderItem.price;
+            existingStock.totalPrice -= (orderItem.qty * orderItem.price);
+            item.markModified('productItems');
+            await item.save();
+          }
+        }
+      }
+      await Stock.create(warehouses)
+    } else {
+      const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
+      if (stock.length === 0) {
+        return console.log("warehouse not found")
+      } else {
+        for (let item of stock) {
+          const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+          if (existingStock) {
+            if (item.date.toDateString() === dates.toDateString()) {
+              // existingStock.sQty += (orderItem.qty);
+              // existingStock.sRate = (orderItem.price);
+              // existingStock.sBAmount += (orderItem.totalPrice)
+              // existingStock.sTaxRate = warehouse.GSTRate;
+              // existingStock.sTotal += (orderItem.totalPrice)
+              existingStock.gstPercentage = warehouse.GSTRate
+              existingStock.currentStock -= orderItem.qty
+              existingStock.price = orderItem.price;
+              existingStock.totalPrice -= (orderItem.qty * orderItem.price);
+              item.markModified('productItems');
+              await item.save();
+            } else {
+              existingStock.gstPercentage = warehouse.GSTRate
+              existingStock.currentStock -= orderItem.qty
+              existingStock.price = orderItem.price;
+              existingStock.totalPrice -= (orderItem.qty * orderItem.price);
+              item.markModified('productItems');
+              await item.save();
+            }
+          }
+        }
+        const existProductInStock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: startOfDay });
+        if (existProductInStock) {
+          const existingProduct = existProductInStock.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+          if (!existingProduct) {
+            let productItems = {
+              productId: warehouse._id.toString(),
+              gstPercentage: warehouse.GSTRate,
+              currentStock: warehouse.qty,
+              price: warehouse.Purchase_Rate,
+              totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
+              oQty: warehouse.Opening_Stock,
+              oRate: warehouse.Purchase_Rate,
+              oTaxRate: warehouse.GSTRate,
+              oTotal: (warehouse.qty * warehouse.Purchase_Rate),
+              sQty: orderItem.qty,
+              sRate: orderItem.price,
+              sBAmount: orderItem.totalPrice,
+              sTaxRate: warehouse.GSTRate,
+              sTotal: orderItem.totalPrice,
+              date: date
+            }
+            existProductInStock.productItems.push(productItems);
+            await existProductInStock.save();
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, date) => {
+  try {
+    const dates = new Date(date);
+    const startOfDay = new Date(dates);
+    const endOfDay = new Date(dates);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+    const user = await Warehouse.findById({ _id: warehouseId })
+    if (!user) {
+      return console.log("warehouse not found")
+    }
+    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
+    if (sourceProductItem) {
+      sourceProductItem.gstPercentage = warehouse.GSTRate
+      sourceProductItem.currentStock -= orderItem.qty
+      sourceProductItem.price = orderItem.price;
+      sourceProductItem.totalPrice -= (orderItem.qty * orderItem.price);
+      sourceProductItem.transferQty -= orderItem.qty;
+      user.markModified('productItems');
+      await user.save();
+    }
+    const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: startOfDay });
+    if (!stock) {
+      let productItems = {
+        productId: warehouse._id.toString(),
+        gstPercentage: warehouse.GSTRate,
+        currentStock: warehouse.qty,
+        price: warehouse.Purchase_Rate,
+        totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
+        oQty: warehouse.Opening_Stock,
+        oRate: warehouse.Purchase_Rate,
+        oTaxRate: warehouse.GSTRate,
+        oTotal: (warehouse.qty * warehouse.Purchase_Rate),
+        sQty: orderItem.qty,
+        sRate: orderItem.price,
+        sBAmount: orderItem.totalPrice,
+        sTaxRate: warehouse.GSTRate,
+        sTotal: orderItem.totalPrice,
+        date: date
+      }
+      let warehouses = {
+        database: warehouse.database,
+        warehouseId: warehouseId,
+        closingStatus: "closing",
+        productItems: productItems,
+        date: date
+      }
+      await Stock.create(warehouses)
+    } else {
+      const existingStock = stock.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+      if (existingStock) {
+        if (item.date.toDateString() === dates.toDateString()) {
+          existingStock.sQty += (orderItem.qty);
+          existingStock.sRate = (orderItem.price);
+          existingStock.sBAmount += (orderItem.totalPrice)
+          existingStock.sTaxRate = warehouse.GSTRate;
+          existingStock.sTotal += (orderItem.totalPrice)
+          item.markModified('productItems');
+          await item.save();
+        }
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 // HSN SALES SUMMARY REPORT
 

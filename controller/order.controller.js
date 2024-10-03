@@ -21,7 +21,7 @@ import { ClosingStock } from "../model/closingStock.model.js";
 import { Receipt } from "../model/receipt.model.js";
 import { ClosingSales } from "./createInvoice.controller.js";
 import { ledgerPartyForDebit } from "../service/ledger.js";
-import { addProductInWarehouse5 } from "./product.controller.js";
+import { addProductInWarehouse5, addProductInWarehouse6 } from "./product.controller.js";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -49,7 +49,7 @@ export const createOrder = async (req, res, next) => {
                         product.pendingQty += orderItem.qty;
                         await warehouse.save();
                         await product.save()
-                        // await addProductInWarehouse5(product, product.warehouse, orderItem, req.body.date)
+                        await addProductInWarehouse6(product, product.warehouse, orderItem, req.body.date)
                     }
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
