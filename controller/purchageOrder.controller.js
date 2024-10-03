@@ -129,7 +129,8 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                         product.partyId = req.body.partyId;
                         product.purchaseStatus = true
                         product.qty += orderItem.qty;
-                        await product.save();
+                        // await product.save();
+                        console.log("calling")
                         await addProductInWarehouse3(product, product.warehouse, orderItem, req.body.date)
                     } else {
                         return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
@@ -137,7 +138,7 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                 }
                 req.body.userId = user._id;
                 req.body.database = user.database;
-                const order = await PurchaseOrder.create(req.body)
+                // const order = await PurchaseOrder.create(req.body)
                 if (order) {
                     let particular = "PurchaseInvoice";
                     await ledgerPartyForCredit(order, particular)
