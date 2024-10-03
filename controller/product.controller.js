@@ -949,16 +949,16 @@ export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, 
     if (!user) {
       return console.log("warehouse not found")
     }
-    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
-    if (sourceProductItem) {
-      sourceProductItem.gstPercentage = warehouse.GSTRate
-      sourceProductItem.currentStock -= orderItem.qty
-      sourceProductItem.price = orderItem.price;
-      sourceProductItem.totalPrice -= (orderItem.qty * orderItem.price);
-      sourceProductItem.transferQty -= orderItem.qty;
-      user.markModified('productItems');
-      await user.save();
-    }
+    // const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
+    // if (sourceProductItem) {
+    //   sourceProductItem.gstPercentage = warehouse.GSTRate
+    //   sourceProductItem.currentStock -= orderItem.qty
+    //   sourceProductItem.price = orderItem.price;
+    //   sourceProductItem.totalPrice -= (orderItem.qty * orderItem.price);
+    //   sourceProductItem.transferQty -= orderItem.qty;
+    //   user.markModified('productItems');
+    //   await user.save();
+    // }
     const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay, $lte: endOfDay } });
     if (!stock) {
       let productItems = {
