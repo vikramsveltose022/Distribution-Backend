@@ -173,7 +173,6 @@ export const UpdatePurchaseInvoiceOrder = async (req, res, next) => {
 };
 export const PurchaseOrderDispatch = async (req, res, next) => {
     try {
-        const Checked = []
         const order = await PurchaseOrder.findById({ _id: req.params.id });
         if (!order) {
             return res.status(401).json({ message: "Purchase Order Not Found", status: false });
@@ -185,7 +184,6 @@ export const PurchaseOrderDispatch = async (req, res, next) => {
                         orderItem.DamageQty = item.DamageQty
                         orderItem.status = "Received"
                         order.status = "Received"
-                        console.log("calledd-1")
                     }
                 }
             }

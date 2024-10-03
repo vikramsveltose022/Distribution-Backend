@@ -244,14 +244,14 @@ export const SavePurchaseInvoice = async (req, res, next) => {
                         product.SalesRate = (product.Purchase_Rate * (100 + product.ProfitPercentage) / 100);
                         product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
                     }
-                    const current = new Date(new Date())
+                    const current = new Date()
                     product.purchaseDate = current
                     product.partyId = purchase.partyId;
                     product.purchaseStatus = true
                     product.qty += orderItem.qty;
                     await product.save();
                     // await addProductInWarehouse2(product, product.warehouse, orderItem)
-                    await addProductInWarehouse3(product, product.warehouse, orderItem, purchase.date)
+                    await addProductInWarehouse3(product, product.warehouse, orderItem, current)
                     // await ClosingPurchase(orderItem, product.warehouse)
                 } else {
                     return res.status(404).json(`Product with ID ${orderItem.productId} not found`);
