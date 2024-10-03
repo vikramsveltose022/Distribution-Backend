@@ -41,6 +41,7 @@ export const createOrder = async (req, res, next) => {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
                     product.salesDate = new Date()
+                    const currect = new Date()
                     const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
                         const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
@@ -49,7 +50,7 @@ export const createOrder = async (req, res, next) => {
                         product.pendingQty += orderItem.qty;
                         await warehouse.save();
                         await product.save()
-                        await addProductInWarehouse6(product, product.warehouse, orderItem, req.body.date)
+                        await addProductInWarehouse6(product, product.warehouse, orderItem, currect)
                     }
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
