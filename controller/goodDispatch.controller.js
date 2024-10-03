@@ -258,7 +258,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                             pro.sQty += (orderItem.qty);
                             pro.sRate = (orderItem.price);
                             pro.sBAmount += orderItem.totalPrice;
-                            pro.sTaxRate = (orderItem.gstPercentage);
+                            pro.sTaxRate = (product.GSTRate);
                             pro.sTotal += (orderItem.totalPrice + tax)
                             await warehouse.save();
                             await product.save()
