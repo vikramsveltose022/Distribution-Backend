@@ -41,7 +41,6 @@ export const createOrder = async (req, res, next) => {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
                     product.salesDate = new Date()
-                    const currect = new Date()
                     const warehouse = await Warehouse.findById(product.warehouse)
                     if (warehouse) {
                         const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
@@ -50,7 +49,7 @@ export const createOrder = async (req, res, next) => {
                         product.pendingQty += orderItem.qty;
                         await warehouse.save();
                         await product.save()
-                        await addProductInWarehouse6(product, product.warehouse, orderItem, currect)
+                        await addProductInWarehouse6(product, product.warehouse, orderItem, req.body.date)
                     }
                 } else {
                     console.error(`Product with ID ${orderItem.productId} not found`);
@@ -60,7 +59,6 @@ export const createOrder = async (req, res, next) => {
             req.body.database = user.database
             req.body.orderNo = orderNo
             req.body.orderItems = orderItems
-            console.log(req.body)
             const savedOrder = CreateOrder.create(req.body)
             req.body.database = user.database;
             req.body.totalAmount = req.body.grandTotal;
