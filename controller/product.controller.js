@@ -995,8 +995,8 @@ export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, 
           existingStock.sBAmount += (orderItem.totalPrice)
           existingStock.sTaxRate = warehouse.GSTRate;
           existingStock.sTotal += (orderItem.totalPrice)
-          item.markModified('productItems');
-          await item.save();
+          existingStock.markModified('productItems');
+          await existingStock.save();
         }
       }
     }
