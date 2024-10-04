@@ -949,16 +949,6 @@ export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, 
     if (!user) {
       return console.log("warehouse not found")
     }
-    // const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
-    // if (sourceProductItem) {
-    //   sourceProductItem.gstPercentage = warehouse.GSTRate
-    //   sourceProductItem.currentStock -= orderItem.qty
-    //   sourceProductItem.price = orderItem.price;
-    //   sourceProductItem.totalPrice -= (orderItem.qty * orderItem.price);
-    //   sourceProductItem.transferQty -= orderItem.qty;
-    //   user.markModified('productItems');
-    //   await user.save();
-    // }
     const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay, $lte: endOfDay } });
     if (!stock) {
       let productItems = {
@@ -998,6 +988,26 @@ export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, 
           stock.markModified('productItems');
           await stock.save();
         }
+      } else {
+        let productItems = {
+          productId: warehouse._id.toString(),
+          gstPercentage: warehouse.GSTRate,
+          currentStock: warehouse.qty,
+          price: warehouse.Purchase_Rate,
+          totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
+          oQty: warehouse.Opening_Stock,
+          oRate: warehouse.Purchase_Rate,
+          oTaxRate: warehouse.GSTRate,
+          oTotal: (warehouse.qty * warehouse.Purchase_Rate),
+          sQty: orderItem.qty,
+          sRate: orderItem.price,
+          sBAmount: orderItem.totalPrice,
+          sTaxRate: warehouse.GSTRate,
+          sTotal: orderItem.totalPrice,
+          date: date
+        }
+        stock.productItems.push(productItems);
+        await stock.save();
       }
     }
   } catch (err) {
