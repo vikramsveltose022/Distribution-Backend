@@ -262,7 +262,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                             pro.sTotal += (orderItem.totalPrice + tax)
                             await warehouse.save();
                             await product.save()
-                            addProductInWarehouse7(product, product.warehouse, orderItem, current, orders.date)
+                            await addProductInWarehouse7(product, product.warehouse, orderItem, current, orders.date)
                             // await ClosingSales(orderItem, orderItem.warehouse)
                             tax = 0
                         } else {
