@@ -94,7 +94,7 @@ export const createOrderWithInvoice = async (req, res, next) => {
                             product.qty -= orderItem.qty;
                             await warehouse.save();
                             await product.save()
-                            // await addProductInWarehouse5(product, product.warehouse, orderItem, req.body.date)
+                            await addProductInWarehouse5(product, product.warehouse, orderItem, req.body.date)
                         }
                     } else {
                         console.error(`Product with ID ${orderItem.productId} not found`);
