@@ -222,7 +222,7 @@ export const deleteSalesOrder = async (req, res, next) => {
                 //     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
                 //     pro.currentStock += (orderItem.qty);
                 product.qty += orderItem.qty;
-                product.pendingQty += orderItem.qty;
+                product.pendingQty -= orderItem.qty;
                 //     if (pro.currentStock < 0) {
                 //         return res.status(404).json({ message: "Product Out Of Stock", status: false })
                 //     }

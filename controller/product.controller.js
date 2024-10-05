@@ -824,33 +824,19 @@ export const addProductInWarehouse6 = async (warehouse, warehouseId, orderItem, 
     if (!user) {
       return console.log("warehouse not found")
     }
-    // const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === warehouse._id.toString());
-    // if (sourceProductItem) {
-    //   sourceProductItem.gstPercentage = warehouse.GSTRate
-    //   sourceProductItem.currentStock -= orderItem.qty
-    //   sourceProductItem.price = orderItem.price;
-    //   sourceProductItem.totalPrice -= (orderItem.qty * orderItem.price);
-    //   sourceProductItem.transferQty -= orderItem.qty;
-    //   user.markModified('productItems');
-    //   await user.save();
-    // }
     const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay, $lte: endOfDay } });
     if (!stock) {
       let productItems = {
         productId: warehouse._id.toString(),
         gstPercentage: warehouse.GSTRate,
         currentStock: warehouse.qty,
+        pendingStock: warehouse.qty,
         price: warehouse.Purchase_Rate,
         totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
         oQty: warehouse.Opening_Stock,
         oRate: warehouse.Purchase_Rate,
         oTaxRate: warehouse.GSTRate,
         oTotal: (warehouse.qty * warehouse.Purchase_Rate),
-        // sQty: orderItem.qty,
-        // sRate: orderItem.price,
-        // sBAmount: orderItem.totalPrice,
-        // sTaxRate: warehouse.GSTRate,
-        // sTotal: orderItem.totalPrice,
         date: date
       }
       let warehouses = {
@@ -886,11 +872,6 @@ export const addProductInWarehouse6 = async (warehouse, warehouseId, orderItem, 
           const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
           if (existingStock) {
             if (item.date.toDateString() === dates.toDateString()) {
-              // existingStock.sQty += (orderItem.qty);
-              // existingStock.sRate = (orderItem.price);
-              // existingStock.sBAmount += (orderItem.totalPrice)
-              // existingStock.sTaxRate = warehouse.GSTRate;
-              // existingStock.sTotal += (orderItem.totalPrice)
               existingStock.gstPercentage = warehouse.GSTRate
               existingStock.currentStock -= orderItem.qty
               existingStock.price = orderItem.price;
@@ -915,17 +896,13 @@ export const addProductInWarehouse6 = async (warehouse, warehouseId, orderItem, 
               productId: warehouse._id.toString(),
               gstPercentage: warehouse.GSTRate,
               currentStock: warehouse.qty,
+              pendingStock: warehouse.qty,
               price: warehouse.Purchase_Rate,
               totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
               oQty: warehouse.Opening_Stock,
               oRate: warehouse.Purchase_Rate,
               oTaxRate: warehouse.GSTRate,
               oTotal: (warehouse.qty * warehouse.Purchase_Rate),
-              // sQty: orderItem.qty,
-              // sRate: orderItem.price,
-              // sBAmount: orderItem.totalPrice,
-              // sTaxRate: warehouse.GSTRate,
-              // sTotal: orderItem.totalPrice,
               date: date
             }
             existProductInStock.productItems.push(productItems);
@@ -938,7 +915,7 @@ export const addProductInWarehouse6 = async (warehouse, warehouseId, orderItem, 
     console.error(err);
   }
 };
-export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, date) => {
+export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, date,orderDate) => {
   try {
     const dates = new Date(date);
     const startOfDay = new Date(dates);
@@ -1010,10 +987,36 @@ export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, 
         await stock.save();
       }
     }
+    await addProductInWarehouse8(warehouse, warehouseId, orderItem, orderDate)
   } catch (err) {
     console.error(err);
   }
 };
+export const addProductInWarehouse8 = async (warehouse, warehouseId, orderItem, date) => {
+  try {
+    const dates = new Date(date);
+    const startOfDay = new Date(dates);
+    const endOfDay = new Date(dates);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+    const user = await Warehouse.findById({ _id: warehouseId })
+    if (!user) {
+      return console.log("warehouse not found")
+    }
+    const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay, $lte: endOfDay } });
+    if (stock) {
+      const existingStock = stock.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+      if (existingStock) {
+        existingStock.pendingStock -= (orderItem.qty);
+        stock.markModified('productItems');
+        await stock.save();
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
 // HSN SALES SUMMARY REPORT
 
