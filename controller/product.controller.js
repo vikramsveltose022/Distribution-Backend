@@ -830,7 +830,7 @@ export const addProductInWarehouse6 = async (warehouse, warehouseId, orderItem, 
         productId: warehouse._id.toString(),
         gstPercentage: warehouse.GSTRate,
         currentStock: warehouse.qty,
-        pendingStock: warehouse.qty,
+        pendingStock: orderItem.qty,
         price: warehouse.Purchase_Rate,
         totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
         oQty: warehouse.Opening_Stock,
@@ -874,6 +874,7 @@ export const addProductInWarehouse6 = async (warehouse, warehouseId, orderItem, 
             if (item.date.toDateString() === dates.toDateString()) {
               existingStock.gstPercentage = warehouse.GSTRate
               existingStock.currentStock -= orderItem.qty
+              existingStock.pendingStock += orderItem.qty
               existingStock.price = orderItem.price;
               existingStock.totalPrice -= (orderItem.qty * orderItem.price);
               item.markModified('productItems');
@@ -896,7 +897,7 @@ export const addProductInWarehouse6 = async (warehouse, warehouseId, orderItem, 
               productId: warehouse._id.toString(),
               gstPercentage: warehouse.GSTRate,
               currentStock: warehouse.qty,
-              pendingStock: warehouse.qty,
+              pendingStock: orderItem.qty,
               price: warehouse.Purchase_Rate,
               totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
               oQty: warehouse.Opening_Stock,
@@ -915,7 +916,7 @@ export const addProductInWarehouse6 = async (warehouse, warehouseId, orderItem, 
     console.error(err);
   }
 };
-export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, date,orderDate) => {
+export const addProductInWarehouse7 = async (warehouse, warehouseId, orderItem, date, orderDate) => {
   try {
     const dates = new Date(date);
     const startOfDay = new Date(dates);
