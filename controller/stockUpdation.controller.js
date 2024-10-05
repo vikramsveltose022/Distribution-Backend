@@ -413,7 +413,18 @@ export const ViewAllWarehouse1 = async () => {
 };
 export const viewStockClosingWarehouse = async (req, res, next) => {
     try {
+        let stockProduct = []
+        let sqty = 0;
         const warehouse = await Stock.find({ database: req.params.database }).sort({ date: 1, sortorder: -1 }).populate({ path: "productItems.productId", model: "product" }).populate({ path: "warehouseId", model: "warehouse" })
+        // for (let item of warehouse) {
+        //     stockProduct = stockProduct.concat(item.productItems)
+        // }
+        // for (let item of stockProduct) {
+        //     if (item.productId._id.toString() === "66e41abaa70581a120e79254") {
+        //         console.log(item.productId._id.toString() + " " + item.sQty + " " + item.date)
+        //         sqty += item.sQty
+        //     }
+        // }
         return (warehouse.length > 0) ? res.status(200).json({ Warehouse: warehouse, status: true }) : res.status(404).json({ message: "Not Found", status: false })
     }
     catch (err) {
