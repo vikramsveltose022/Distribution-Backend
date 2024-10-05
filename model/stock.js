@@ -66,7 +66,8 @@ const stockSchema = new mongoose.Schema({
             type: Number
         },
         pendingStock: {
-            type: Number
+            type: Number,
+            default: 0
         },
         gstPercentage: {
             type: String
