@@ -68,9 +68,7 @@ import UserBranchRouter from "./routes/userBranch.route.js";
 import mongoose from "mongoose";
 import cors from "cors";
 import { increasePercentage } from "./controller/targetCreation.controller.js";
-import { closingStockUpdated, increaseTargetCreation, viewOpeningStockWarehouse } from "./cron-node/cron-node-service.js";
 import customerCheckRouter from "./routes/customerCheck.route.js";
-import { ViewAllWarehouse } from "./controller/stockUpdation.controller.js";
 import { StockClose } from "./controller/warehouse.controller.js";
 const app = express();
 app.use(cors());
@@ -167,11 +165,8 @@ mongoose.connect(process.env.DATABASE_URL, { useUnifiedTopology: true, useNewUrl
 cron.schedule('0 20 * * *', () => {
   // ViewAllWarehouse()
   // closingStockUpdated();
-  StockClose()
+  // StockClose()
 });
-// cron.schedule('0 9 * * *', () => {
-//   viewOpeningStockWarehouse()
-// })
 cron.schedule('1 0 1 * *', () => {
   increasePercentage();
 });

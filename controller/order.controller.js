@@ -22,6 +22,7 @@ import { Receipt } from "../model/receipt.model.js";
 import { ClosingSales } from "./createInvoice.controller.js";
 import { ledgerPartyForDebit } from "../service/ledger.js";
 import { addProductInWarehouse5, addProductInWarehouse6 } from "./product.controller.js";
+import { Stock } from "../model/stock.js";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -215,20 +216,16 @@ export const deleteSalesOrder = async (req, res, next) => {
         for (const orderItem of order.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId });
             if (product) {
-                // ware = product.warehouse
-                // product.salesDate = new Date()
-                // const warehouse = await Warehouse.findById(product.warehouse)
-                // if (warehouse) {
-                //     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
-                //     pro.currentStock += (orderItem.qty);
-                product.qty += orderItem.qty;
-                product.pendingQty -= orderItem.qty;
-                //     if (pro.currentStock < 0) {
-                //         return res.status(404).json({ message: "Product Out Of Stock", status: false })
-                //     }
-                // await warehouse.save();
-                await product.save()
-                // }
+                const warehouse = await Warehouse.findById(product.warehouse)
+                if (warehouse) {
+                    const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
+                    pro.currentStock += (orderItem.qty);
+                    product.qty += orderItem.qty;
+                    product.pendingQty -= orderItem.qty;
+                    await warehouse.save();
+                    await product.save()
+                    await deleteProductInStock(product, product.warehouse, orderItem, order.date)
+                }
             } else {
                 console.error(`Product With ID ${orderItem.productId} Not Found`);
             }
@@ -660,21 +657,16 @@ export const deletedSalesOrder = async (req, res, next) => {
         for (const orderItem of order.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId });
             if (product) {
-                // ware = product.warehouse
-                // product.salesDate = new Date()
                 const warehouse = await Warehouse.findById(orderItem.warehouse)
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
                     pro.currentStock += (orderItem.qty);
                     product.qty += orderItem.qty;
                     product.pendingQty -= orderItem.qty;
-                    if (pro.currentStock < 0) {
-                        return res.status(404).json({ message: "Product Out Of Stock", status: false })
-                    }
-                    // pro.pendingStock -= (orderItem.qty)
                     await warehouse.save();
                     await product.save()
-                    await DeleteClosingSales(orderItem, orderItem.warehouse)
+                    await deleteProductInStock(product, product.warehouse, orderItem, order.date)
+                    // await DeleteClosingSales(orderItem, orderItem.warehouse)
                 }
             } else {
                 console.error(`Product With ID ${orderItem.productId} Not Found`);
@@ -690,6 +682,39 @@ export const deletedSalesOrder = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
+export const deleteProductInStock = async (warehouse, warehouseId, orderItem, date) => {
+    try {
+        const dates = new Date(date);
+        const startOfDay = new Date(dates);
+        const endOfDay = new Date(dates);
+        startOfDay.setUTCHours(0, 0, 0, 0);
+        endOfDay.setUTCHours(23, 59, 59, 999);
+        const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
+        if (stock.length === 0) {
+            return console.log("warehouse not found")
+        } else {
+            for (let item of stock) {
+                const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+                if (existingStock) {
+                    if (item.date.toDateString() === dates.toDateString()) {
+                        existingStock.pendingStock -= orderItem.qty
+                        existingStock.currentStock += orderItem.qty
+                        existingStock.totalPrice -= (orderItem.qty * orderItem.price);
+                        item.markModified('productItems');
+                        await item.save();
+                    } else {
+                        existingStock.currentStock += orderItem.qty
+                        existingStock.totalPrice -= (orderItem.qty * orderItem.price);
+                        item.markModified('productItems');
+                        await item.save();
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.error(err);
+    }
+};
 export const DeleteClosingSales = async (orderItem, warehouse) => {
     try {
         let cgstRate = 0;
