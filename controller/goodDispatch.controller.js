@@ -12,6 +12,7 @@ import { OtpVerify } from "../model/otpVerify.model.js";
 import { ClosingSales } from "./createInvoice.controller.js";
 import { generateInvoice } from "../service/invoice.js";
 import { addProductInWarehouse7 } from "./product.controller.js";
+import { deleteProductInStock } from "./order.controller.js";
 
 
 export const saveGoodDispatch = async (req, res) => {
@@ -380,6 +381,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                         product.qty += item.qty;
                         product.pendingQty -= item.qty;
                         // pro.pendingStock -= (item.qty)
+                        await deleteProductInStock(product, product.warehouse, item, existingOrder.date)
                         await warehouse.save();
                         await product.save()
                     }

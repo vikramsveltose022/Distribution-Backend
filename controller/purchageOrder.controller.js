@@ -5,9 +5,7 @@ import { Product } from "../model/product.model.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
 import { User } from "../model/user.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
-import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
-import { generateInvoice } from "../service/invoice.js";
-import { addProductInWarehouse, addProductInWarehouse2, addProductInWarehouse3 } from "./product.controller.js";
+import { addProductInWarehouse3 } from "./product.controller.js";
 import { Receipt } from "../model/receipt.model.js";
 import { CustomerGroup } from "../model/customerGroup.model.js";
 import { ledgerPartyForCredit } from "../service/ledger.js";
@@ -575,10 +573,7 @@ export const Purch = async (req, res, next) => {
         const startOfDay = new Date(date);
         const endOfDay = new Date(date);
         endOfDay.setUTCHours(23, 59, 59, 999);
-        const stock = await Stock.find({
-            warehouseId: req.params.id.toString(), "productItems.productId": req.body.productId,
-            createdAt: { $gte: startOfDay }
-        });
+        const stock = await Stock.find({ warehouseId: req.params.id.toString(), "productItems.productId": req.body.productId, createdAt: { $gte: startOfDay } });
         if (stock.length === 0) return res.status(404).json({ message: "Warehouse not found", status: false });
         // console.log("Stock found:", stock);
         // const existingStock = stock.productItems.find((item) => item.productId.toString() === req.body.productId.toString());
