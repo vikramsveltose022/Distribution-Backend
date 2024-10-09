@@ -3,13 +3,11 @@ import { Order } from "../model/order.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import transporter from "../service/email.js";
 import { User } from "../model/user.model.js";
-import { getGoodDispatchHierarchy, getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
+import { getGoodDispatchHierarchy } from "../rolePermission/RolePermission.js";
 import { Customer } from "../model/customer.model.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { Product } from "../model/product.model.js";
 import { ledgerPartyForDebit } from "../service/ledger.js";
-import { OtpVerify } from "../model/otpVerify.model.js";
-import { ClosingSales } from "./createInvoice.controller.js";
 import { generateInvoice } from "../service/invoice.js";
 import { addProductInWarehouse7 } from "./product.controller.js";
 import { deleteProductInStock } from "./order.controller.js";
@@ -348,7 +346,7 @@ export const ViewWarehouseByOrder = async (req, res, next) => {
 }
 export const ViewWarehouseOrderCancel = async (req, res, next) => {
     try {
-        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Cancel in process", status: { $ne: "Deactive" } }).populate({ path: "orderItems.productId", model: "product" })
+        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Cancel in process" }).populate({ path: "orderItems.productId", model: "product" })
         if (order.length === 0) {
             return res.status(404).json({ message: "warehouse stock not found", status: false })
         }
