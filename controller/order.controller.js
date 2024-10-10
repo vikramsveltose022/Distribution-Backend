@@ -219,12 +219,14 @@ export const deleteSalesOrder = async (req, res, next) => {
                 const warehouse = await Warehouse.findById(product.warehouse)
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId === orderItem.productId.toString())
-                    pro.currentStock += (orderItem.qty);
-                    product.qty += orderItem.qty;
-                    product.pendingQty -= orderItem.qty;
-                    await warehouse.save();
-                    await product.save()
-                    await deleteProductInStock(product, product.warehouse, orderItem, order.date)
+                    if (pro) {
+                        pro.currentStock += (orderItem.qty);
+                        product.qty += orderItem.qty;
+                        product.pendingQty -= orderItem.qty;
+                        await deleteProductInStock(product, product.warehouse, orderItem, order.date)
+                        await warehouse.save();
+                        await product.save()
+                    }
                 }
             } else {
                 console.error(`Product With ID ${orderItem.productId} Not Found`);
@@ -665,7 +667,7 @@ export const deletedSalesOrder = async (req, res, next) => {
                     product.pendingQty -= orderItem.qty;
                     await warehouse.save();
                     await product.save()
-                    await deleteProductInStock(product, product.warehouse, orderItem, order.date)
+                    // await deleteProductInStock(product, product.warehouse, orderItem, order.date)
                     // await DeleteClosingSales(orderItem, orderItem.warehouse)
                 }
             } else {
