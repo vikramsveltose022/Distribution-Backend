@@ -42,7 +42,7 @@ export const SaveProduct = async (req, res) => {
     }
     const product = await Product.create(req.body);
     await addProductInWarehouse1(req.body, product.warehouse, product)
-    await addProductInStock(req.body, product.warehouse, product)
+    // await addProductInStock(req.body, product.warehouse, product)
     return product ? res.status(200).json({ message: "product save successfully", status: true }) : res.status(400).json({ message: "something went wrong", status: false });
   } catch (err) {
     console.error(err);
@@ -478,7 +478,6 @@ export const addProductInStock = async (warehouse, warehouseId, id) => {
     const user = await Stock.findOne({ warehouseId: warehouseId, "productItems.productId": id._id.toString() })
     const existingWarehouse = await Stock.findOne({ warehouseId: warehouseId })
     if (!user) {
-      console.log("first")
       let productItems = {
         productId: id._id.toString(),
         gstPercentage: warehouse.GSTRate,
@@ -499,10 +498,8 @@ export const addProductInStock = async (warehouse, warehouseId, id) => {
         date: new Date()
       }
       if (existingWarehouse) {
-        console.log("existing.................")
         const updated = await Stock.updateOne({ warehouseId: warehouseId }, { $push: { productItems: productItems }, }, { upsert: true });
       } else {
-        console.log("createddd.........")
         await Stock.create(warehouses)
       }
     }
