@@ -480,7 +480,7 @@ export const addProductInStock = async (warehouse, warehouseId, id) => {
     if (!user) {
       console.log("first")
       let productItems = {
-        productId: warehouse._id.toString(),
+        productId: id._id.toString(),
         gstPercentage: warehouse.GSTRate,
         currentStock: warehouse.qty,
         price: warehouse.Purchase_Rate,
