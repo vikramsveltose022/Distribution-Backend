@@ -42,6 +42,7 @@ export const SaveProduct = async (req, res) => {
     }
     const product = await Product.create(req.body);
     await addProductInWarehouse1(req.body, product.warehouse, product)
+    await addProductInStock(req.body, product.warehouse, product)
     return product ? res.status(200).json({ message: "product save successfully", status: true }) : res.status(400).json({ message: "something went wrong", status: false });
   } catch (err) {
     console.error(err);
@@ -474,58 +475,33 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
 };
 export const addProductInStock = async (warehouse, warehouseId, id) => {
   try {
-    const user = await Stock.findById({ _id: warehouseId })
+    const user = await Stock.findOne({ warehouseId: warehouseId, "productItems.productId": id._id.toString() })
+    const existingWarehouse = await Stock.findOne({ warehouseId: warehouseId })
     if (!user) {
       let productItems = {
         productId: warehouse._id.toString(),
         gstPercentage: warehouse.GSTRate,
         currentStock: warehouse.qty,
-        pendingStock: warehouse.qty,
         price: warehouse.Purchase_Rate,
         totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
         oQty: warehouse.Opening_Stock,
         oRate: warehouse.Purchase_Rate,
         oTaxRate: warehouse.GSTRate,
         oTotal: (warehouse.qty * warehouse.Purchase_Rate),
-        date: date
+        date: new Date()
       }
       let warehouses = {
         database: warehouse.database,
         warehouseId: warehouseId,
         closingStatus: "closing",
         productItems: productItems,
-        date: date
+        date: new Date()
       }
-      await Stock.create(warehouses)
-    }
-    const sourceProductItem = user.productItems.find(
-      (pItem) => pItem.productId === id.productId);
-    if (sourceProductItem) {
-      sourceProductItem.currentStock = warehouse.qty
-      sourceProductItem.price = warehouse.Purchase_Rate;
-      sourceProductItem.totalPrice = (warehouse.qty * warehouse.Purchase_Rate);
-      sourceProductItem.transferQty = warehouse.qty;
-      user.markModified('productItems');
-      await user.save();
-    } else {
-      let ware = {
-        productId: id._id.toString(),
-        primaryUnit: warehouse.primaryUnit,
-        secondaryUnit: warehouse.secondaryUnit,
-        secondarySize: warehouse.secondarySize,
-        currentStock: warehouse.qty,
-        transferQty: warehouse.qty,
-        price: warehouse.Purchase_Rate,
-        totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
-        gstPercentage: warehouse.GSTRate,
-        igstType: warehouse.igstType,
-        oQty: warehouse.qty,
-        oRate: warehouse.Purchase_Rate,
-        oBAmount: (((warehouse.qty * warehouse.Purchase_Rate) * 100) / (warehouse.GSTRate + 100)),
-        oTaxRate: (warehouse.GSTRate),
-        oTotal: (warehouse.qty * warehouse.Purchase_Rate),
+      if (existingWarehouse) {
+        const updated = await Stock.updateOne({ warehouseId: warehouseId }, { $push: { productItems: productItems }, }, { upsert: true });
+      } else {
+        await Stock.create(warehouses)
       }
-      const updated = await Stock.updateOne({ _id: warehouseId }, { $push: { productItems: ware }, }, { upsert: true });
     }
   } catch (error) {
     console.error(error);
@@ -547,6 +523,29 @@ export const addProductInWarehouse = async (warehouse, warehouseId, productId) =
       sourceProductItem.oQty = parseInt(warehouse.Opening_Stock)
       sourceProductItem.oRate = parseInt(warehouse.Purchase_Rate)
       sourceProductItem.oBAmount = (((parseInt(warehouse.Opening_Stock) * parseInt(warehouse.Purchase_Rate)) * 100) / (parseInt(warehouse.GSTRate) + 100))
+      sourceProductItem.oTaxRate = parseInt(warehouse.GSTRate)
+      sourceProductItem.oTotal = (parseInt(warehouse.Opening_Stock) * parseInt(warehouse.Purchase_Rate))
+      user.markModified('productItems');
+      await user.save();
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+export const addProductInStockUpdated = async (warehouse, warehouseId, productId) => {
+  try {
+    const user = await Stock.findOne({ warehouseId: warehouseId })
+    if (!user) {
+      return console.log("warehouse not found")
+    }
+    const sourceProductItem = user.productItems.find((pItem) => pItem.productId.toString() === productId._id.toString());
+    if (sourceProductItem) {
+      sourceProductItem.gstPercentage = parseInt(warehouse.GSTRate)
+      sourceProductItem.currentStock = parseInt(warehouse.qty)
+      sourceProductItem.price = parseInt(warehouse.Purchase_Rate);
+      sourceProductItem.totalPrice = (parseInt(warehouse.qty) * parseInt(warehouse.Purchase_Rate));
+      sourceProductItem.oQty = parseInt(warehouse.Opening_Stock)
+      sourceProductItem.oRate = parseInt(warehouse.Purchase_Rate)
       sourceProductItem.oTaxRate = parseInt(warehouse.GSTRate)
       sourceProductItem.oTotal = (parseInt(warehouse.Opening_Stock) * parseInt(warehouse.Purchase_Rate))
       user.markModified('productItems');
