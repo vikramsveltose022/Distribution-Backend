@@ -478,6 +478,7 @@ export const addProductInStock = async (warehouse, warehouseId, id) => {
     const user = await Stock.findOne({ warehouseId: warehouseId, "productItems.productId": id._id.toString() })
     const existingWarehouse = await Stock.findOne({ warehouseId: warehouseId })
     if (!user) {
+      console.log("first")
       let productItems = {
         productId: warehouse._id.toString(),
         gstPercentage: warehouse.GSTRate,
@@ -498,8 +499,10 @@ export const addProductInStock = async (warehouse, warehouseId, id) => {
         date: new Date()
       }
       if (existingWarehouse) {
+        console.log("existing.................")
         const updated = await Stock.updateOne({ warehouseId: warehouseId }, { $push: { productItems: productItems }, }, { upsert: true });
       } else {
+        console.log("createddd.........")
         await Stock.create(warehouses)
       }
     }
