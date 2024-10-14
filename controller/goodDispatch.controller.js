@@ -392,9 +392,9 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                 return res.status(404).json({ message: "this product already received", status: false })
             }
         }
-        if (!productFound) {
-            return res.status(404).json({ message: "Product Not Found in Order", status: false });
-        }
+        // if (!productFound) {
+        //     return res.status(404).json({ message: "Product Not Found in Order", status: false });
+        // }
         for (const item of existingOrder.orderItems) {
             if (item.status === "Cancelled") {
                 existingOrder.status = "Cancelled"
