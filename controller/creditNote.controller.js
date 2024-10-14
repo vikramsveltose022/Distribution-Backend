@@ -6,7 +6,7 @@ export const viewCreateNote = async (req, res, next) => {
     try {
         // const userId = req.params.id;
         // const adminDetail = await getCreditNoteHierarchy(userId);
-        const credit = await CreditNote.find({ database: req.params.database }).populate({ path: "productItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" })
+        const credit = await CreditNote.find({ database: req.params.database }).populate({ path: "productItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" }).populate({ path: "orderId", model: "purchaseOrder" })
         return (credit.length > 0) ? res.status(200).json({ CreditNote: credit, status: true }) : res.status(400).json({ message: "Not Found", status: false })
     }
     catch (err) {

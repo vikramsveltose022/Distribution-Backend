@@ -146,11 +146,13 @@ export const UpdateCustomer = async (req, res, next) => {
                 if (existingCustomer.limit !== req.body.limit) {
                     const diff = req.body.limit - existingCustomer.limit
                     req.body.remainingLimit = (existingCustomer.remainingLimit || 0 + diff);
+                    req.body.autoBillingStatus = (req.body.remainingLimit > 0) ? "open" : "locked"
                 }
             } else {
                 if (req.body.paymentTerm !== "cash") {
                     if (req.body.limit) {
                         req.body.remainingLimit = req.body.limit;
+                        req.body.autoBillingStatus = (req.body.remainingLimit > 0) ? "open" : "locked"
                     }
                 }
             }
