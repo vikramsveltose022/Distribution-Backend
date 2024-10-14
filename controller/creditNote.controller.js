@@ -38,7 +38,7 @@ export const CreditDebitNoteReport = async (req, res) => {
             targetQuery.createdAt = { $gte: startDate, $lte: endDate };
         }
         const credit = await CreditNote.find(targetQuery).sort({ sortorder: -1 }).populate({ path: "productItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "orderId", model: "createOrder" })
-        const debit = await DebitNote.find(targetQuery).populate({ path: "productItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "orderId", model: "createOrder" }).sort({ sortorder: -1 })
+        const debit = await DebitNote.find(targetQuery).populate({ path: "productItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "orderId", model: "purchaseOrder" }).sort({ sortorder: -1 })
         const cdnr = credit.concat(debit)
         return res.status(200).json({ CDNR: cdnr, status: true })
     }
