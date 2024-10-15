@@ -37,13 +37,13 @@ export const DebitNoteNO = async (body) => {
     const debitNote = await DebitNote.find({ database: body.database, debitType: "D" }).sort({ sortorder: -1 });
     if (debitNote.length === 0) {
         const no = 1
-        const DebitNoteNo = `${"DN"}${no}`;
+        const DebitNoteNo = `${"DN00"}${no}`;
         return DebitNoteNo;
     } else {
         const existNote = debitNote[debitNote.length - 1].NoteNumber
-        const lastestNote = existNote.Splice(2)
-        let Note = existNote.toString().padStart(3, '0')
-        const DebitNoteNo = `${"DN"}${Note}`;
+        const lastestNote = existNote.slice(2)
+        let Note = lastestNote.toString().padStart(3, '0')
+        const DebitNoteNo = `${"DN"}${parseInt(Note + 1)}`;
         return DebitNoteNo;
     }
 };

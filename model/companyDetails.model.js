@@ -71,6 +71,12 @@ const CompanySchema = new mongoose.Schema({
     branchName: {
         type: String
     },
+    bankAddress: {
+        type: String
+    },
+    bankMicr: {
+        type: String
+    },
     upiId: {
         type: String
     },

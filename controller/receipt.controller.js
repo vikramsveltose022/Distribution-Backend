@@ -24,18 +24,8 @@ export const saveReceipt = async (req, res, next) => {
             const rece = await Receipt.find({ status: "Active", paymentMode, }).sort({ sortorder: -1 });
             if (rece.length > 0) {
                 const latestReceipt = rece[rece.length - 1];
-                if (isBankPayment) {
-                    // req.body.runningAmount = latestReceipt.runningAmount + item.amount;
-                } else {
-                    // req.body.cashRunningAmount = latestReceipt.cashRunningAmount + item.amount;
-                }
                 req.body.voucherNo = latestReceipt.voucherNo + 1;
             } else {
-                if (isBankPayment) {
-                    // req.body.runningAmount = item.amount;
-                } else {
-                    // req.body.cashRunningAmount = item.amount;
-                }
                 req.body.voucherNo = 1;
             }
             req.body.voucherType = "receipt";
@@ -69,6 +59,7 @@ export const saveReceipt = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
+
 export const UpdateReceipt = async (req, res, next) => {
     try {
         const existingReceipt = await Receipt.findById(req.params.id);
