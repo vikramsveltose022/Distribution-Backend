@@ -365,7 +365,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
         }
         let productFound = false;
         for (const item of existingOrder.orderItems) {
-            if (item.productId.toString() === req.params.productId) {
+            if (item.productId.toString() === req.params.productId && item.status !== "Cancelled") {
                 item.status = "Cancelled";
                 existingOrder.status = "Cancelled"
                 productFound = true;
