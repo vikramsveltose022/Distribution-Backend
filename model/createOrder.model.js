@@ -304,6 +304,10 @@ const createOrderSchema = new mongoose.Schema({
     },
     NoOfPackage: {
         type: Number
+    },
+    paymentStatus: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 
