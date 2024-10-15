@@ -796,3 +796,32 @@ export const PartyPurchaseqty = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
+
+export const CheckPartyPayment = async (req, res, next) => {
+    try {
+        let amount = 100000
+        const Orders = await CreateOrder.find({ partyId: "66e42d7b3e4aac5818e47e1a", paymentStatus: { $ne: true } })
+        if (Orders.length === 0) {
+            return res.status(404).json({ message: "Order's Not Found", status: false })
+        }
+        for (let item of Orders) {
+            const remaining = amount - item.grandTotal;
+            console.log("-------------------------------")
+            console.log(item.grandTotal)
+            console.log("-------------------------------")
+            if (remaining < 0) {
+                console.log("Negetive Value", item.grandTotal)
+                return false
+            } else {
+                console.log("Positive ", item.grandTotal)
+                amount = remaining
+                console.log(remaining)
+                Orders.paymentStatus = true;
+                console.log(Orders.paymentStatus)
+            }
+        }
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
