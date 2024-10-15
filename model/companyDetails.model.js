@@ -81,7 +81,7 @@ const CompanySchema = new mongoose.Schema({
         type: String
     },
     gpay_PhonepayNumber: {
-        type: Number
+        type: String
     },
     imagePosition: {
         type: String
