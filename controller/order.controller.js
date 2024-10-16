@@ -37,28 +37,31 @@ export const createOrder = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ message: "No user found", status: false });
         } else {
-            // if (party.paymentTerm.toLowerCase() !== "cash") {
-            //     const due = await OverDueReport.findOne({ partyId: req.body.partyId, activeStatus: "Active" })
-            //     if (due) {
-            //         const lastOrderDate = due?.createdAt
-            //         const currentDate = new Date();
-            //         const timeDifference = currentDate - lastOrderDate;
-            //         const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
-            //         // if (days >= party.lockInTime && due.remainingAmount > 0) {
-            //         //     party.autoBillingStatus = "locked";
-            //         //     due.dueStatus = "overDue"
-            //         //     await due.save()
-            //         //     await party.save()
-            //         //     return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
-            //         // } else if (due?.remainingAmount > 0 && due?.lockingAmount <= due?.remainingAmount) {
-            //         //     party.autoBillingStatus = "locked";
-            //         //     due.dueStatus = "overDue";
-            //         //     await due.save()
-            //         //     await party.save()
-            //         //     return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
-            //         // }
-            //     }
-            // }
+            if (party.paymentTerm.toLowerCase() !== "cash") {
+                // const due = await OverDueReport.findOne({ partyId: req.body.partyId, activeStatus: "Active" })
+                const existOrders = await CreateOrder.find({ partyId: req.body.partyId, paymentStatus: false }).sort({ date: 1, sortorder: -1 })
+                if (existOrders.length > 0) {
+                    const due = existOrders[0]
+                    const lastOrderDate = due?.date
+                    const currentDate = new Date();
+                    const timeDifference = currentDate - lastOrderDate;
+                    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
+                    if (days >= party.lockInTime) {
+                        // party.autoBillingStatus = "locked";
+                        // due.dueStatus = "overDue"
+                        // await due.save()
+                        // await party.save()
+                        return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
+                    }
+                    //  else if (due?.remainingAmount > 0 && due?.lockingAmount <= due?.remainingAmount) {
+                    //     party.autoBillingStatus = "locked";
+                    //     due.dueStatus = "overDue";
+                    //     await due.save()
+                    //     await party.save()
+                    //     return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
+                    // }
+                }
+            }
             const orderNo = await generateOrderNo(user.database);
             for (const orderItem of orderItems) {
                 const product = await Product.findById({ _id: orderItem.productId });

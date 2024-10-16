@@ -5,7 +5,7 @@ const TabSchemaDashboard = new mongoose.Schema({
     },
     tab: [{
         key: {
-            type: String
+            type: Number
         },
         value: {
             type: String

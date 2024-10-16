@@ -153,7 +153,7 @@ export const viewTab = async (req, res, next) => {
 }
 export const saveDashboardTabs = async (req, res, next) => {
     try {
-        const user = await DashboardTab.findOne({ userId: req.body.userId })
+        const user = await DashboardTab.findOne({ userId: req.body.userId.toString() })
         if (user) {
             for (let item of req.body.tab) {
                 const existingId = await user.tab.find((items) => items.key === item.key)
@@ -167,9 +167,11 @@ export const saveDashboardTabs = async (req, res, next) => {
                 }
             }
             await user.save();
+            return res.status(200).json({ message: "data save successfull", status: true })
+        } else {
+            const tab = await DashboardTab.create(req.body)
+            return res.status(200).json({ message: "data save successfull", status: true })
         }
-        const tab = await DashboardTab.create(req.body)
-        return res.status(200).json({ message: "data save successfull", status: true })
     }
     catch (err) {
         console.log(err);

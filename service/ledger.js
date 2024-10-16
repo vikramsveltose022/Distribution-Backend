@@ -60,16 +60,16 @@ export const ledgerPartyForCredit = async function ledger(body, particular) {
     try {
         const part = particular
         const credit = body.grandTotal || body.amount;
-        // await PartyPayment(body)
-        // const party = await Customer.findById(body.partyId)
-        // if (party && party.paymentTerm.toLowerCase() !== "cash") {
-        //     party.remainingLimit += credit
-        //     if (party.remainingLimit > party.limit) {
-        //         let advance = party.remainingLimit - party.limit;
-        //         party.limit += advance
-        //     }
-        //     await party.save()
-        // }
+        await PartyPayment(body)
+        const party = await Customer.findById(body.partyId)
+        if (party && party.paymentTerm.toLowerCase() !== "cash") {
+            party.remainingLimit += credit
+            if (party.remainingLimit > party.limit) {
+                let advance = party.remainingLimit - party.limit;
+                party.limit += advance
+            }
+            await party.save()
+        }
         const ledger = await Ledger.find({ partyId: body.partyId, ledgerType: "party" }).sort({ sortorder: -1 })
         if (ledger.length > 0) {
             const first = await ledger[ledger.length - 1]
@@ -457,16 +457,20 @@ export const ledgerTransporterForDebit = async function ledger(body, particular)
 export const PartyPayment = async (body) => {
     try {
         let amount = body.grandTotal || body.amount
-        const Orders = await CreateOrder.find({ partyId: body.partyId, paymentStatus: { $ne: true } })
+        const Orders = await CreateOrder.find({ partyId: body.partyId, paymentStatus: false })
         if (Orders.length === 0) {
             console.log("Order's Not Found")
         } else {
             for (let item of Orders) {
                 const remaining = amount - item.grandTotal;
-                if (remaining < 0) break
-                amount = remaining
-                Orders.paymentStatus = true;
-                await Orders.save()
+                if (remaining < 0) {
+                    Orders.dummyAmount = amount
+                    await Orders.save()
+                } else {
+                    amount = remaining
+                    Orders.paymentStatus = true;
+                    await Orders.save()
+                }
             }
         }
     }
