@@ -462,14 +462,14 @@ export const PartyPayment = async (body) => {
             console.log("Order's Not Found")
         } else {
             for (let item of Orders) {
-                const remaining = amount - item.grandTotal;
+                const remaining = ((amount + item.dummyAmount) - item.grandTotal);
                 if (remaining < 0) {
-                    Orders.dummyAmount = amount
-                    await Orders.save()
+                    item.dummyAmount = amount
+                    await item.save()
                 } else {
                     amount = remaining
-                    Orders.paymentStatus = true;
-                    await Orders.save()
+                    item.paymentStatus = true;
+                    await item.save()
                 }
             }
         }
