@@ -308,6 +308,10 @@ const createOrderSchema = new mongoose.Schema({
     paymentStatus: {
         type: Boolean,
         default: false
+    },
+    dummyAmount: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true })
 
