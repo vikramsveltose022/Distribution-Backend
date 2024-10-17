@@ -178,6 +178,10 @@ const CustomerSchema = new mongoose.Schema({
   },
   remark: {
     type: []
+  },
+  dummyAmount: {
+    type: Number,
+    default: 0
   }
 
 }, { timestamps: true });

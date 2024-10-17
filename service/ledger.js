@@ -458,18 +458,21 @@ export const PartyPayment = async (body) => {
     try {
         let amount = body.grandTotal || body.amount
         const Orders = await CreateOrder.find({ partyId: body.partyId, paymentStatus: false })
+        const customer = await Customer.findById(body.partyId)
         if (Orders.length === 0) {
             console.log("Order's Not Found")
         } else {
             for (let item of Orders) {
-                const remaining = ((amount + item.dummyAmount) - item.grandTotal);
+                const remaining = ((amount + customer.dummyAmount || 0) - item.grandTotal);
+                customer.dummyAmount = 0
                 if (remaining < 0) {
-                    item.dummyAmount = amount
-                    await item.save()
+                    customer.dummyAmount = amount
+                    await customer.save()
                 } else {
                     amount = remaining
                     item.paymentStatus = true;
                     await item.save()
+                    await customer.save()
                 }
             }
         }

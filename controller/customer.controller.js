@@ -678,7 +678,7 @@ export const overDueReport = async (req, res) => {
 export const lockParty = async (req, res, next) => {
     try {
         const customer = await Customer.find({ autoBillingStatus: "locked" })
-        if (!customer.length > 0) {
+        if (customer.length === 0) {
             return res.status(404).json({ message: "party not found", status: false })
         }
         return res.status(200).json({ customer, status: true })
