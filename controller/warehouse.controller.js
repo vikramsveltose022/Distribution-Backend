@@ -422,21 +422,22 @@ export const StockCalculate = async (req, res, next) => {
             // return res.status(404).json({ message: "Warehouse Not Found", status: false });
         }
         const openingData = await Stock.find({
-            database: req.params.database, createdAt: { $gte: twoDaysAgoEnd }
+            database: req.params.database, date: { $gte: twoDaysAgoEnd }
         }).sort({ sortorder: -1 });
         warehouses.forEach(warehouse => {
             warehouse.productItems.forEach(item => {
                 WarehouseStock.WarehouseStock += item?.currentStock || 0;
+                WarehouseStock.ClosingStock += item?.currentStock || 0;
                 WarehouseStock.DamageStock += item?.damageItem?.transferQty || 0;
             });
         });
-        openingData.forEach(stock => {
-            stock.productItems.forEach(item => {
-                WarehouseStock.ClosingStock += item.currentStock || 0;
-            });
-        });
+        // openingData.forEach(stock => {
+        //     stock.productItems.forEach(item => {
+        //         WarehouseStock.ClosingStock += item.currentStock || 0;
+        //     });
+        // });
         products.forEach(product => {
-            WarehouseStock.OpeningStock += product.qty || 0;
+            WarehouseStock.OpeningStock += product.Opening_Stock || 0;
         });
         WarehouseStock.DamageStock = isNaN(WarehouseStock.DamageStock) ? 0 : WarehouseStock.DamageStock;
         WarehouseStock.DeadStock = await ViewOverDueStock(req.params.database);
@@ -457,7 +458,7 @@ export const ViewOverDueStock = async (body) => {
         if (!productsNotOrderedLastMonth || productsNotOrderedLastMonth.length === 0) {
             // return res.status(404).json({ message: "No products found", status: false });
         }
-        const orderedProductsLastMonth = await CreateOrder.find({ database: body.database, createdAt: { $gte: startOfLastMonth.toDate() } }).distinct('orderItems');
+        const orderedProductsLastMonth = await CreateOrder.find({ database: body.database, date: { $gte: startOfLastMonth.toDate() } }).distinct('orderItems');
         if (orderedProductsLastMonth.length > 0) {
             const orderedProductIdsLastMonth = orderedProductsLastMonth.map(orderItem => orderItem.productId.toString());
             const productsToProcess = productsNotOrderedLastMonth.filter(product =>
