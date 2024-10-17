@@ -511,12 +511,14 @@ export const ViewOverDueStock = async (body) => {
 export const savedd = async (req, res, next) => {
     try {
         let count = 0
-        const exist = await Product.find({ database: req.params.database, status: "Deactive" })
+        const exist = await Customer.find({ database: req.params.database, status: "Active" })
         if (exist.length === 0) {
             return res.status(404).json({ message: "warehouse not found", status: false })
         }
         for (let item of exist) {
-            await Product.findByIdAndDelete(item._id)
+            // await Product.findByIdAndDelete(item._id)
+            item.remainingLimit = item.limit
+            await item.save()
             // const warehouse = await Warehouse.findOne({ "productItems.productId": item._id.toString() })
             // if (warehouse) {
             //     count++
