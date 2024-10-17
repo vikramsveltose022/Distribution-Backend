@@ -473,7 +473,7 @@ export const PartyPayment = async (body) => {
                     amount = remaining
                     item.paymentStatus = true;
                     await item.save()
-                    // await customer.save()
+                    await customer.save()
                 }
             }
         }
