@@ -979,29 +979,81 @@ export const DeleteCustomer11 = async (req, res, next) => {
 }
 
 // same stock-updation
+// export const ViewDeadParty = async (req, res, next) => {
+//     try {
+//         const userId = req.params.id;
+//         const database = req.params.database;
+//         const currentDate = moment();
+//         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
+//         const hierarchy = await Customer.find({ database: database, status: 'Active', createdAt: { $lt: startOfLastMonth } }).populate({ path: "created_by", model: "user" }).lean();
+//         // const allOrderedParties = await CreateOrder.find({ database: database, createdAt: { $gte: startOfLastMonth.toDate() } }).lean();
+//         const receiptMap = {};
+//         await Promise.all(hierarchy.map(async (item) => {
+//             const payment = await Receipt.findOne({ type: "receipt", partyId: item._id }).sort({ createdAt: -1 }).lean();
+//             receiptMap[item._id] = payment ? payment.createdAt : "0";
+//         }));
+//         const result = await Promise.all(hierarchy.map(async (item) => {
+//             // const party = await partyHierarchy(item.created_by, database);
+//             // return { id: item, party: party, lastDays: receiptMap[item._id] };
+//             return { id: item, lastDays: receiptMap[item._id] };
+//         }));
+//         return res.status(200).json({ Parties: result, status: true });
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).json({ error: "Internal Server Error", status: false });
+//     }
+// };
 export const ViewDeadParty = async (req, res, next) => {
     try {
+        let days = 0
+        const Parties = []
         const userId = req.params.id;
         const database = req.params.database;
         const currentDate = moment();
         const startOfLastMonth = currentDate.clone().subtract(30, 'days');
-        const hierarchy = await Customer.find({ database: database, status: 'Active', createdAt: { $lt: startOfLastMonth } }).populate({ path: "created_by", model: "user" }).lean();
 
-        // const allOrderedParties = await CreateOrder.find({ database: database, createdAt: { $gte: startOfLastMonth.toDate() } }).lean();
+        const hierarchy = await Customer.find({ database: database, status: 'Active', leadStatusCheck: "false", createdAt: { $lt: startOfLastMonth } }).populate({ path: "created_by", model: "user" }).populate({ path: "category", model: "customerGroup" })
 
-        const receiptMap = {};
-        await Promise.all(hierarchy.map(async (item) => {
-            const payment = await Receipt.findOne({ type: "receipt", partyId: item._id }).sort({ createdAt: -1 }).lean();
-            receiptMap[item._id] = payment ? payment.createdAt : "0";
-        }));
-
-        const result = await Promise.all(hierarchy.map(async (item) => {
-            // const party = await partyHierarchy(item.created_by, database);
-            // return { id: item, party: party, lastDays: receiptMap[item._id] };
-            return { id: item, lastDays: receiptMap[item._id] };
-        }));
-
-        return res.status(200).json({ Parties: result, status: true });
+        const allOrderedParties = await CreateOrder.find({ database: database, createdAt: { $gte: startOfLastMonth.toDate() } })
+        let allParty = []
+        let result = []
+        for (let item of hierarchy) {
+            const party = allOrderedParties.find((items) => items.partyId.toString() === item._id.toString())
+            if (!party) {
+                allParty.push(item)
+            }
+        }
+        let lastDays = ""
+        for (let id of allParty) {
+            // const payment = await Receipt.find({ type: "receipt", partyId: id._id })
+            // if (payment.length > 0) {
+            //     const lastPayment = payment[payment.length - 1]
+            //     lastDays = lastPayment.createdAt;
+            // } else {
+            //     lastDays = "0"
+            // }
+            let purchaseDate = "";
+            const purchase = await PurchaseOrder.find({ partyId: id._id.toString() }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
+            if (purchase.length > 0) {
+                purchaseDate = purchase[purchase.length - 1].createdAt;
+                const lastDate = purchaseDate;
+                const lastOrderDate = new Date(lastDate);
+                const currentDates = new Date();
+                const timeDifference = currentDates - lastOrderDate;
+                days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            }
+            const products = {
+                Party: id,
+                purchaseDate: purchaseDate,
+                days: days
+            };
+            Parties.push(products);
+            days = 0;
+            // const party = await partyHierarchy(id.created_by, database);
+            // const resultItem = { id, party, lastDays };
+            // result.push(resultItem);
+        }
+        return res.status(200).json({ Parties: Parties, status: true });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal Server Error", status: false });
