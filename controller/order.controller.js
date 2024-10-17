@@ -620,16 +620,16 @@ export const SalesOrderCalculate = async (req, res, next) => {
             return res.status(404).json({ message: "Sales Order Not Found", status: false });
         }
         let completedOrdersLastMonth = [];
-        const lastMonth = orders[0].createdAt.getMonth() + 1
+        const lastMonth = orders[0].date.getMonth() + 1
         orders.forEach(order => {
-            if (order.status === "Completed") {
+            if (order.status.toLowerCase() === "completed") {
                 salesOrders.totalAmount += order.grandTotal;
-                if (moment(order.createdAt).isBetween(previousMonthStart, previousMonthEnd, null, '[]')) {
+                if (moment(order.date).isBetween(previousMonthStart, previousMonthEnd, null, '[]')) {
                     completedOrdersLastMonth.push(order);
                 }
-            } else if (order.status === "pending") {
+            } else if (order.status.toLowerCase() === "pending") {
                 salesOrders.totalPending++;
-            } else if (order.status === "Pending for Delivery") {
+            } else if (order.status.toLowerCase() === "pending for delivery") {
                 salesOrders.totalDelivery++;
             }
         });
@@ -660,12 +660,11 @@ export const DebitorCalculate = async (req, res, next) => {
         const startOfDay = moment().startOf('month').toDate();
         const endOfDay = moment().endOf('month').toDate();
         const [salesOrder, salesOrderCurrentMonth, receipt, receipts] = await Promise.all([
-            CreateOrder.find({ database: req.params.database, status: "Completed" }).sort({ sortorder: -1 }),
-            CreateOrder.find({ database: req.params.database, status: "Completed", createdAt: { $gte: startOfDay, $lte: endOfDay } }).sort({ sortorder: -1 }),
+            CreateOrder.find({ database: req.params.database, status: "completed" }).sort({ sortorder: -1 }),
+            CreateOrder.find({ database: req.params.database, status: "completed", date: { $gte: startOfDay, $lte: endOfDay } }).sort({ sortorder: -1 }),
             Receipt.find({ database: req.params.database, type: "receipt", status: "Active" }).sort({ sortorder: -1 }),
-            Receipt.find({ database: req.params.database, type: "receipt", createdAt: { $gte: startOfDay, $lte: endOfDay }, status: "Active" }).sort({ sortorder: -1 })
+            Receipt.find({ database: req.params.database, type: "receipt", date: { $gte: startOfDay, $lte: endOfDay }, status: "Active" }).sort({ sortorder: -1 })
         ]);
-
         // Calculate totals
         Debtor.totalDue = salesOrder.reduce((sum, item) => sum + item.grandTotal, 0);
         currentSales = salesOrderCurrentMonth.reduce((sum, item) => sum + item.grandTotal, 0);
