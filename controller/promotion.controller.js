@@ -25,11 +25,53 @@ export const ViewPromotion = async (req, res, next) => {
         // if (!adminDetail.length > 0) {
         //     return res.status(404).json({ error: "Product Not Found", status: false })
         // }
-        const promotion = await Promotion.find({ database: database }).sort({ sortorder: -1 })
+        const promotion = await Promotion.find({ database: database, status: "Active" }).sort({ sortorder: -1 })
         return (promotion.length > 0) ? res.status(200).json({ Promotion: promotion, status: true }) : res.status(404).json({ message: "Not Found", status: false })
     }
     catch (err) {
         console.log(err);
-        return res.status(500).json({ error: err, status: false })
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const ViewPromotionById = async (req, res, next) => {
+    try {
+        const promotion = await Promotion.findById(req.params.id)
+        if (!promotion) {
+            return res.status(404).json({ message: "Promotion No found", status: false });
+        }
+        return res.status(200).json({ Promotion: promotion, status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+export const UpdatedPromotion = async (req, res, next) => {
+    try {
+        const id = req.params.id
+        const promotion = await Promotion.findById(id)
+        if (promotion) {
+            return res.status(404).json({ message: "Promotion No Found", status: false });
+        }
+        const udpatedDate = req.body;
+        await Promotion.findByIdAndUpdate(id, udpatedDate, { new: true })
+        return res.status(200).json({ message: "promotion updated successfull", status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+export const deletePromotion = async (req, res, next) => {
+    try {
+        const promotion = await Promotion.findById(req.params.id)
+        if (!promotion) {
+            return res.status(404).json({ message: "Promotion Not Found", status: false })
+        }
+        promotion.status = "Deactive"
+        await promotion.save();
+        return res.status(200).json({ message: "promotion delete successfull", status: true })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
