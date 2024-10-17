@@ -32,6 +32,8 @@ export const saveReceipt = async (req, res, next) => {
             req.body.voucherDate = new Date();
             req.body.lockStatus = "No";
             const receiptData = { ...req.body, ...item };
+            // const particular = item.paymentMode + " " + "receipt";
+            // await ledgerPartyForCredit(item, particular);
             const receipt = await Receipt.create(receiptData);
             if (receipt.type === "receipt") {
                 const particular = receipt.paymentMode + " " + "receipt";
