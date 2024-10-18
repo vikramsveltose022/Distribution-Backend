@@ -1,3 +1,4 @@
+import { CreateOrder } from "../model/createOrder.model.js";
 import { Promotion } from "../model/promotion.model.js";
 import { User } from "../model/user.model.js";
 import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
@@ -73,5 +74,108 @@ export const deletePromotion = async (req, res, next) => {
     catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const PromotionApply = async (req, res, next) => {
+    try {
+        const partyId = req.body.partyId
+        const dates = new Date()
+        // const dates = new Date(date);
+        const startOfDay = new Date(dates);
+        const endOfDay = new Date(dates);
+        startOfDay.setUTCHours(0, 0, 0, 0);
+        endOfDay.setUTCHours(23, 59, 59, 999);
+        const existPromotion = await Promotion.find({ database: req.params.database, status: "Active" })
+        if (existPromotion.length === 0) {
+            return res.status(404).json({ message: "Promotion Not Found", status: false })
+        }
+        for (let item of existPromotion) {
+            if (item.productWise.length > 0) {
+                const status = await CheckDate(item.productWise[0])
+                status === true ? await ProductWise(item.productWise[0], partyId) : console.log("Not Found")
+            } else if (item.amountWise.length > 0) {
+                const status = await CheckDate(item.amountWise[0])
+                status === true ? await AmountWise(item.amountWise[0], partyId) : console.log("Amount Not Found")
+            } else if (item.percentageWise.length > 0) {
+                const status = await CheckDate(item.percentageWise[0])
+                status === true ? await PercentageWise(item.percentageWise[0], partyId) : console.log(" Percentage Not Found")
+            } else if (item.promoCodeWise.length > 0) {
+                const status = await CheckDate(item.promoCodeWise[0])
+                status === true ? await PromoWise(item.promoCodeWise[0], partyId) : console.log(" Promo Not Found")
+            }
+        }
+        return res.status(200).json({ messge: "success", status: true })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error", status: false })
+    }
+}
+export const ProductWise = async (product, partyId) => {
+    try {
+        let totalQty = 0
+        const startOfDay = new Date(product.startDate);
+        const endOfDay = new Date(product.endDate);
+        startOfDay.setUTCHours(0, 0, 0, 0);
+        endOfDay.setUTCHours(23, 59, 59, 999);
+        const existOrder = await CreateOrder.find({ partyId: partyId, date: { $gte: startOfDay, $lte: endOfDay } })
+        if (existOrder.length === 0) {
+            console.log("Order Not Found")
+        } else {
+            for (let item of existOrder) {
+                item.orderItems.forEach((item) => {
+                    if (item.productId.toString() === product.productId.toString()) {
+                        console.log("calling")
+                        totalQty += item.qty;
+                    }
+                })
+            }
+            if (product.productQty < totalQty) {
+                console.log("Gift.............")
+            }
+        }
+        console.log("Product-Wise")
+    }
+    catch (err) {
+        console.log(err);
+    }
+}
+export const AmountWise = async (amount) => {
+    try {
+        console.log("Amount-Wise")
+    }
+    catch (err) {
+        console.log(err);
+    }
+}
+export const PercentageWise = async (percentage) => {
+    try {
+        console.log("Percentage wise")
+    }
+    catch (err) {
+        console.log(err);
+    }
+}
+export const PromoWise = async (promise) => {
+    try {
+        console.log("Promocode wise")
+    }
+    catch (err) {
+        console.log(err);
+    }
+}
+export const CheckDate = async (body) => {
+    try {
+        const currentDate = new Date();
+        const date1 = new Date(body.startDate);
+        const date2 = new Date(body.endDate);
+        if (date1 <= currentDate && currentDate <= date2) {
+            return true
+        } else {
+            return false
+        }
+    }
+    catch (err) {
+        console.log(err);
     }
 }
