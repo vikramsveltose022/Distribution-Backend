@@ -49,7 +49,7 @@ export const UpdatedPromotion = async (req, res, next) => {
     try {
         const id = req.params.id
         const promotion = await Promotion.findById(id)
-        if (promotion) {
+        if (!promotion) {
             return res.status(404).json({ message: "Promotion No Found", status: false });
         }
         const udpatedDate = req.body;
