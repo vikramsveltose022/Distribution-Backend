@@ -101,7 +101,7 @@ export const ViewPromotion = async (req, res, next) => {
         // if (!adminDetail.length > 0) {
         //     return res.status(404).json({ error: "Product Not Found", status: false })
         // }
-        const promotion = await Promotion.find({ database: database, status: "Active" }).sort({ sortorder: -1 })
+        const promotion = await Promotion.find({ database: database, status: "Active" }).populate({ path: "activityId", model: "activity" }).sort({ sortorder: -1 })
         return (promotion.length > 0) ? res.status(200).json({ Promotion: promotion, status: true }) : res.status(404).json({ message: "Not Found", status: false })
     }
     catch (err) {
