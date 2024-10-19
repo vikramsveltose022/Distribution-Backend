@@ -8,6 +8,9 @@ const PromotionSchema = new mongoose.Schema({
     database: {
         type: String
     },
+    activityId: {
+        type: String
+    },
     percentageWise: [{
         totalAmount: {
             type: Number
@@ -52,10 +55,9 @@ const PromotionSchema = new mongoose.Schema({
     }],
     productWise: [{
         productId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "product"
+            type: String
         },
-        productQty: {
+        targetQty: {
             type: Number
         },
         discountAmount: {
@@ -70,19 +72,17 @@ const PromotionSchema = new mongoose.Schema({
         endDate: {
             type: String
         },
-        freeSameProductQty: {
+        freeProductQty: {
             type: Number
         },
-        freeOtherProducts: [{
-            productId: {
-                type: String
-            },
-            freeProductQty: {
-                type: Number
-            }
-        }]
+        freeProduct: {
+            type: String
+        }
     }],
     promoCodeWise: [{
+        activityId: {
+            type: String
+        },
         promoCode: {
             type: String
         },
