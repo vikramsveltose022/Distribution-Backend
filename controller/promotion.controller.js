@@ -1,8 +1,83 @@
+import { Activity } from "../model/createActivity.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { Promotion } from "../model/promotion.model.js";
 import { User } from "../model/user.model.js";
 import { getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 
+export const SaveActivity = async (req, res, next) => {
+    try {
+        const existingActivity = await Activity.find({ status: "Active" }).sort({ sortorder: -1 });
+        if (existingActivity.length === 0) {
+            const no = 1;
+            req.body.Code = `PA24-25${no.toString().padStart(4, '0')}`;
+        } else {
+            const existCode = existingActivity[existingActivity.length - 1].Code;
+            const latestCode = parseInt(existCode.slice(7)) + 1;
+            const paddedCode = latestCode.toString().padStart(4, '0');
+            req.body.Code = `PA24-25${paddedCode}`;
+        }
+        const newActivity = await Activity.create(req.body)
+        return (newActivity) ? res.status(200).json({ message: "Save Successfull", status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: "Internal Server Error", status: false })
+    }
+}
+export const ViewActivity = async (req, res, next) => {
+    try {
+        const database = req.params.database;
+        const activity = await Activity.find({ database: database, status: "Active" }).sort({ sortorder: -1 })
+        return (activity.length > 0) ? res.status(200).json({ Activity: activity, status: true }) : res.status(404).json({ message: "Not Found", status: false })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
+export const ViewActivityById = async (req, res, next) => {
+    try {
+        const activity = await Activity.findById(req.params.id)
+        if (!activity) {
+            return res.status(404).json({ message: "Activity No found", status: false });
+        }
+        return res.status(200).json({ Activity: activity, status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+export const UpdatedActivity = async (req, res, next) => {
+    try {
+        const id = req.params.id
+        const activity = await Activity.findById(id)
+        if (!activity) {
+            return res.status(404).json({ message: "Activity No Found", status: false });
+        }
+        const udpatedDate = req.body;
+        req.body.Code = undefined
+        await Activity.findByIdAndUpdate(id, udpatedDate, { new: true })
+        return res.status(200).json({ message: "activity updated successfull", status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+export const deleteActivity = async (req, res, next) => {
+    try {
+        const activity = await Activity.findById(req.params.id)
+        if (!activity) {
+            return res.status(404).json({ message: "Activity Not Found", status: false })
+        }
+        activity.status = "Deactive"
+        await activity.save();
+        return res.status(200).json({ message: "activity delete successfull", status: true })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
 export const SavePromotion = async (req, res, next) => {
     try {
         const user = await User.findById({ _id: req.body.created_by })

@@ -1,7 +1,13 @@
 import express from "express";
-import { deletePromotion, PromotionApply, SavePromotion, UpdatedPromotion, ViewPromotion, ViewPromotionById } from "../controller/promotion.controller.js";
+import { deleteActivity, deletePromotion, PromotionApply, SaveActivity, SavePromotion, UpdatedActivity, UpdatedPromotion, ViewActivity, ViewActivityById, ViewPromotion, ViewPromotionById } from "../controller/promotion.controller.js";
 
 const router = express.Router();
+
+router.post("/save-activity", SaveActivity)
+router.get("/view-activity", ViewActivity)
+router.get("/view-activity-by-id/:id", ViewActivityById)
+router.delete("/delete-activity/:id", deleteActivity)
+router.put("/update-activity/:id", UpdatedActivity)
 
 router.post("/save-promotion", SavePromotion);
 router.get("/view-promotion/:id/:database", ViewPromotion)
