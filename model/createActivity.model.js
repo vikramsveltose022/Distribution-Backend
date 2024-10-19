@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 
 const ActivitySchema = new mongoose.Schema({
+    database: {
+        type: String
+    },
     ActivityName: {
         type: String
     },
