@@ -4,7 +4,7 @@ import { deleteActivity, deletePromotion, PromotionApply, SaveActivity, SaveProm
 const router = express.Router();
 
 router.post("/save-activity", SaveActivity)
-router.get("/view-activity", ViewActivity)
+router.get("/view-activity/:database", ViewActivity)
 router.get("/view-activity-by-id/:id", ViewActivityById)
 router.delete("/delete-activity/:id", deleteActivity)
 router.put("/update-activity/:id", UpdatedActivity)
