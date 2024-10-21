@@ -166,17 +166,14 @@ export const PromotionApply = async (req, res, next) => {
         }
         for (let item of existPromotion) {
             if (item.productWise.length > 0) {
-                const status = await CheckDate(item.productWise[0])
-                status === true ? await ProductWise(item.productWise[0], partyId) : console.log("Not Found")
+                const status = await CheckDate(item.activityId)
+                status === true ? await ProductWise(item.productWise, partyId) : console.log("Not Found")
             } else if (item.amountWise.length > 0) {
-                const status = await CheckDate(item.amountWise[0])
+                const status = await CheckDate(item.activityId)
                 status === true ? await AmountWise(item.amountWise[0], partyId) : console.log("Amount Not Found")
             } else if (item.percentageWise.length > 0) {
-                const status = await CheckDate(item.percentageWise[0])
+                const status = await CheckDate(item.activityId)
                 status === true ? await PercentageWise(item.percentageWise[0], partyId) : console.log(" Percentage Not Found")
-            } else if (item.promoCodeWise.length > 0) {
-                const status = await CheckDate(item.promoCodeWise[0])
-                status === true ? await PromoWise(item.promoCodeWise[0], partyId) : console.log(" Promo Not Found")
             }
         }
         return res.status(200).json({ messge: "success", status: true })
@@ -231,19 +228,11 @@ export const PercentageWise = async (percentage) => {
         console.log(err);
     }
 }
-export const PromoWise = async (promise) => {
-    try {
-        console.log("Promocode wise")
-    }
-    catch (err) {
-        console.log(err);
-    }
-}
 export const CheckDate = async (body) => {
     try {
         const currentDate = new Date();
-        const date1 = new Date(body.startDate);
-        const date2 = new Date(body.endDate);
+        const date1 = new Date(body.FromDate);
+        const date2 = new Date(body.ToDate);
         if (date1 <= currentDate && currentDate <= date2) {
             return true
         } else {

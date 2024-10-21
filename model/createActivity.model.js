@@ -16,6 +16,9 @@ const ActivitySchema = new mongoose.Schema({
     ToDate: {
         type: Date
     },
+    NoOfDays: {
+        type: String
+    },
     status: {
         type: String
     }
