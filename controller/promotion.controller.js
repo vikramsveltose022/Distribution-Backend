@@ -146,7 +146,7 @@ export const UpdatedPromotionProductWise = async (req, res, next) => {
         }
         promotion.activityId = await req.body.activityId || promotion.activityId
         for (let item of promotion.productWise) {
-            if (item.productId.toString() === req.body.productId) {
+            if (item._id.toString() === id) {
                 item.productId = req.body.productId || item.productId;
                 item.targetQty = req.body.targetQty || item.targetQty;
                 item.freeProductQty = req.body.freeProductQty || item.freeProductQty;
@@ -162,7 +162,6 @@ export const UpdatedPromotionProductWise = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-
 export const deletePromotion = async (req, res, next) => {
     try {
         const promotion = await Promotion.findById(req.params.id)
