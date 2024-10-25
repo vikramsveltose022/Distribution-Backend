@@ -1800,6 +1800,9 @@ export const SalesPersonAchievement = async (database) => {
         const salesTarget = salesPerson.map(salesPerson => {
             if (Array.isArray(salesPerson.achievements) && salesPerson.achievements.length === 1) {
                 salesPerson.achievements = salesPerson.achievements[0];
+            } else {
+                salesPerson.achievements = salesPerson.achievements[0];
+
             }
             return salesPerson;
         });
