@@ -180,7 +180,7 @@ export const deletePromotion = async (req, res, next) => {
 export const PromotionApply = async (req, res, next) => {
     try {
         const customers = [];
-        const existPromotion = await Promotion.find({ database: req.params.database, status: "Active" }).populate({ path: "activityId", model: "activity" })
+        const existPromotion = await Promotion.find({ database: req.params.database, status: "Active" }).populate({ path: "activityId", model: "activity" }).populate({ path: "productWise.freeProduct", model: "product" })
         if (existPromotion.length === 0) {
             return res.status(404).json({ message: "Promotion Not Found", status: false })
         }
@@ -221,36 +221,38 @@ export const PromotionApply = async (req, res, next) => {
                             let freeProductName = ""
                             productItems.forEach((item) => {
                                 if (item.productId._id.toString() === items.productId.toString()) {
-                                    totalProductQty += item.productId.qty;
+                                    totalProductQty += item.qty;
                                     productName += item.productId.Product_Title;
                                 }
                             })
                             if (items.targetQty < totalProductQty) {
                                 AchieveQty = totalProductQty
                                 if (items.freeProductQty) {
-                                    offerQty = items.freeProductQty
-                                    freeProductName = items.freeProduct
+                                    offerQty = `${items.freeProductQty} qty`
+                                    freeProductName = items.freeProduct.Product_Title
                                 } else if (items.discountPercentage) {
-                                    offerQty = items.discountPercentage
+                                    offerQty = `${items.discountPercentage}%`
                                 } else {
-                                    offerQty = items.discountAmount
+                                    offerQty = `${items.discountAmount} dis`
                                 }
                                 status = "Completed"
                             } else {
+                                AchieveQty = totalProductQty
                                 remainingQty = items.targetQty - totalProductQty
                             }
                             let Obj = {
                                 partyId: party,
                                 productName: productName,
-                                TargetAmount: items.targetQty,
-                                AchieveAmount: AchieveQty,
-                                RemainingAmount: remainingQty,
+                                Target: items.targetQty,
+                                Achieved: AchieveQty,
+                                Balance: remainingQty,
                                 Status: status,
                                 OfferAmount: offerQty,
                                 FreeProduct: freeProductName,
+                                type: "ProductWise"
                             }
                             if (productName) {
-                                await customers.push(Obj)
+                                // await customers.push(Obj)
                             }
                         }
                     } else if (item.amountWise.length > 0) {
@@ -260,17 +262,18 @@ export const PromotionApply = async (req, res, next) => {
                         if (item.amountWise[0].totalAmount <= totalAmount) {
                             remainingAmount = 0
                             status = "Completed"
-                            offerAmount = item.amountWise[0].percentageAmount
+                            offerAmount = `${item.amountWise[0].percentageAmount}₹`
                         } else {
                             remainingAmount = item.amountWise[0].totalAmount - totalAmount;
                         }
                         let Obj = {
                             partyId: party,
-                            TargetAmount: item.amountWise[0].totalAmount,
-                            AchieveAmount: totalAmount,
-                            RemainingAmount: remainingAmount,
+                            Target: item.amountWise[0].totalAmount,
+                            Achieved: totalAmount,
+                            Balance: remainingAmount,
                             Status: status,
-                            OfferAmount: offerAmount
+                            OfferAmount: offerAmount,
+                            type: "AmountWise"
                         }
                         await customers.push(Obj)
                     } else if (item.percentageWise.length > 0) {
@@ -280,108 +283,28 @@ export const PromotionApply = async (req, res, next) => {
                         if (item.percentageWise[0].totalAmount <= totalAmount) {
                             remainingAmount = 0
                             status = "Completed"
-                            offerPercentage = item.percentageWise[0].percentageDiscount
+                            offerPercentage = `${item.percentageWise[0].percentageDiscount}%`
                         } else {
                             remainingAmount = item.percentageWise[0].totalAmount - totalAmount;
                         }
                         let Obj = {
                             partyId: party,
-                            TargetAmount: item.percentageWise[0].totalAmount,
-                            AchieveAmount: totalAmount,
-                            RemainingAmount: remainingAmount,
+                            Target: item.percentageWise[0].totalAmount,
+                            Achieved: totalAmount,
+                            Balance: remainingAmount,
                             Status: status,
-                            OfferAmount: offerPercentage
+                            OfferAmount: offerPercentage,
+                            type: "PercentageWise"
                         }
-                        await customers.push(Obj)
+                        // await customers.push(Obj)
                     }
                 }
             }
         }
-        console.log(customers.length)
-        return res.status(200).json({ customers, messge: "success", status: true })
+        return res.status(200).json({ Promotion: customers, messge: "success", status: true })
     }
     catch (err) {
         console.log(err);
         return res.status(500).json({ message: "Internal Server Error", status: false })
-    }
-}
-export const ProductWise = async (product, partyId) => {
-    try {
-        let totalQty = 0
-        const startOfDay = new Date(product.startDate);
-        const endOfDay = new Date(product.endDate);
-        startOfDay.setUTCHours(0, 0, 0, 0);
-        endOfDay.setUTCHours(23, 59, 59, 999);
-        const existOrder = await CreateOrder.find({ partyId: partyId, date: { $gte: startOfDay, $lte: endOfDay } })
-        if (existOrder.length === 0) {
-            console.log("Order Not Found")
-        } else {
-            for (let item of existOrder) {
-                item.orderItems.forEach((item) => {
-                    if (item.productId.toString() === product.productId.toString()) {
-                        console.log("calling")
-                        totalQty += item.qty;
-                    }
-                })
-            }
-            if (product.productQty < totalQty) {
-                console.log("Gift.............")
-            }
-        }
-        console.log("Product-Wise")
-    }
-    catch (err) {
-        console.log(err);
-    }
-}
-export const AmountWise = async (amount, partyId, dates) => {
-    try {
-        let totalAmount = 0
-        const startOfDay = new Date(dates.activityId.FromDate);
-        const endOfDay = new Date(dates.activityId.ToDate);
-        startOfDay.setUTCHours(0, 0, 0, 0);
-        endOfDay.setUTCHours(23, 59, 59, 999);
-        const existOrder = await CreateOrder.find({ partyId: partyId, date: { $gte: startOfDay, $lte: endOfDay } })
-        if (existOrder.length === 0) {
-            console.log("Order Not Found")
-        } else {
-            for (let item of existOrder) {
-                console.log(item.grandTotal)
-                totalAmount += item.grandTotal
-            }
-            if (amount.totalAmount <= totalAmount) {
-                console.log("gift.............")
-            } else {
-                console.log("Not Gift.........")
-            }
-        }
-        console.log(totalAmount)
-        console.log("Amount-Wise")
-    }
-    catch (err) {
-        console.log(err);
-    }
-}
-export const PercentageWise = async (percentage) => {
-    try {
-        console.log("Percentage wise")
-    }
-    catch (err) {
-        console.log(err);
-    }
-}
-export const CheckDate = async (body) => {
-    try {
-        const currentDate = new Date();
-        const date1 = new Date(body.FromDate);
-        const date2 = new Date(body.ToDate);
-        if (date1 <= currentDate && currentDate <= date2) {
-            return true
-        } else {
-            return false
-        }
-    }
-    catch (err) {
-        console.log(err);
     }
 }
