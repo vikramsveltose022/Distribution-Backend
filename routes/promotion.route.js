@@ -15,6 +15,6 @@ router.get("/view-promotion-by-id/:id", ViewPromotionById)
 router.put("/update-promotion/:id", UpdatedPromotion)
 router.put("/update-product-promotion/:id", UpdatedPromotionProductWise)
 router.delete("/delete-promotion/:id", deletePromotion)
-router.post("/promotion-apply/:database", PromotionApply)
+router.get("/promotion-apply/:database", PromotionApply)
 
 export default router;
