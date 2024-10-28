@@ -233,7 +233,7 @@ export const PromotionApply = async (req, res, next) => {
                                 } else if (items.discountPercentage) {
                                     offerQty = `${items.discountPercentage}%`
                                 } else {
-                                    offerQty = `${items.discountAmount} dis`
+                                    offerQty = `₹${items.discountAmount}`
                                 }
                                 status = "Completed"
                             } else {
@@ -252,7 +252,7 @@ export const PromotionApply = async (req, res, next) => {
                                 type: "ProductWise"
                             }
                             if (productName) {
-                                // await customers.push(Obj)
+                                await customers.push(Obj)
                             }
                         }
                     } else if (item.amountWise.length > 0) {
@@ -262,7 +262,7 @@ export const PromotionApply = async (req, res, next) => {
                         if (item.amountWise[0].totalAmount <= totalAmount) {
                             remainingAmount = 0
                             status = "Completed"
-                            offerAmount = `${item.amountWise[0].percentageAmount}₹`
+                            offerAmount = `₹${item.amountWise[0].percentageAmount}`
                         } else {
                             remainingAmount = item.amountWise[0].totalAmount - totalAmount;
                         }
@@ -296,7 +296,7 @@ export const PromotionApply = async (req, res, next) => {
                             OfferAmount: offerPercentage,
                             type: "PercentageWise"
                         }
-                        // await customers.push(Obj)
+                        await customers.push(Obj)
                     }
                 }
             }

@@ -186,6 +186,7 @@ export const SavePurchaseInvoice = async (req, res, next) => {
         if (!purchase) {
             return res.status(404).json({ message: "Purchase Order Not Found", status: false });
         }
+        const existingCustomer = await Customer.findById(purchase.partyId)
         const existingInvoice = await PurchaseOrder.findOne({ _id: orderId, invoiceStatus: true });
         if (existingInvoice) {
             return res.status(400).json({ message: "Invoice already created for this order", status: false });
@@ -240,7 +241,12 @@ export const SavePurchaseInvoice = async (req, res, next) => {
             purchase.invoiceStatus = true
             purchase.status = req.body.status;
             const invoiceList = await purchase.save()
+            if (existingCustomer.paymentTerm.toLowerCase() !== "cash") {
+                existingCustomer.limit += purchase.grandTotal
+                existingCustomer.remainingLimit += purchase.grandTotal
+            }
             if (invoiceList) {
+                // await existingCustomer.save()
                 await ledgerPartyForCredit(invoiceList, particular)
             }
             return res.status(201).json({ message: "InvoiceList created successfully", Invoice: invoiceList, status: true });
