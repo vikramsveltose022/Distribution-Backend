@@ -37,7 +37,7 @@ export const CreditNoteNo = async (body) => {
     const creditNote = await CreditNote.find({ database: body.database, creditType: "C" }).sort({ sortorder: -1 })
     if (creditNote.length === 0) {
         const no = 1
-        const CreditNoteNo = `${"CN"}${no.toString().padStart(2, '0')}`;
+        const CreditNoteNo = `${"CN"}${no.toString().padStart(3, '0')}`;
         return CreditNoteNo;
     } else {
         const existNote = creditNote[creditNote.length - 1].NoteNumber
@@ -51,7 +51,7 @@ export const DebitNoteNO = async (body) => {
     const debitNote = await DebitNote.find({ database: body.database, debitType: "D" }).sort({ sortorder: -1 });
     if (debitNote.length === 0) {
         const no = 1
-        const DebitNoteNo = `${"DN"}${no.toString().padStart(2, '0')}`;
+        const DebitNoteNo = `${"DN"}${no.toString().padStart(3, '0')}`;
         return DebitNoteNo;
     } else {
         const existNote = debitNote[debitNote.length - 1].NoteNumber
