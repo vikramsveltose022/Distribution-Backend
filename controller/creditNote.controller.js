@@ -52,9 +52,8 @@ export const SaveCreditNote = async (req, res) => {
     try {
         const note = await CreditNoteNo(req.body)
         req.body.NoteNumber = note;
-        console.log(req.body)
-        // const credit = await CreditNote.create(req.body)
-        // return credit ? res.status(200).json({ message: "Credit Note Saved Successfull!", status: true }) : res.status(400).json({ message: "Bad Request", status: false })
+        const credit = await CreditNote.create(req.body)
+        return credit ? res.status(200).json({ message: "Credit Note Saved Successfull!", status: true }) : res.status(400).json({ message: "Bad Request", status: false })
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: 'Internal Server Error', status: false });
