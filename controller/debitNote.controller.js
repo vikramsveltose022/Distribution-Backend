@@ -6,9 +6,9 @@ import { DebitNoteNO } from "../service/invoice.js";
 export const SaveDebitNote = async (req, res) => {
     try {
         const note = await DebitNoteNO(req.body)
-        console.log(note)
-        // const debit = await DebitNote.create(req.body)
-        // return debit ? res.status(200).json({ message: "Debit Note Saved Successfull!", status: true }) : res.status(400).json({ message: "Bad Request", status: false })
+        req.body.NoteNumber = note;
+        const debit = await DebitNote.create(req.body)
+        return debit ? res.status(200).json({ message: "Debit Note Saved Successfull!", status: true }) : res.status(400).json({ message: "Bad Request", status: false })
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: 'Internal Server Error', status: false });

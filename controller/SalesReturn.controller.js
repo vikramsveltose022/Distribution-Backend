@@ -121,7 +121,7 @@ export const saveSalesReturnOrder = async (req, res) => {
         return res.status(200).json({ message: 'Order returns processed successfully', SalesReturn: salesReturns });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: error, status: false });
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
 export const viewSalesReturnCreateOrder = async (req, res, next) => {

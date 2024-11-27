@@ -1,6 +1,7 @@
 import { CreditNote } from "../model/creditNote.model.js";
 import { DebitNote } from "../model/debitNote.model.js";
 import { getCreditNoteHierarchy } from "../rolePermission/RolePermission.js";
+import { CreditNoteNo } from "../service/invoice.js";
 
 export const viewCreateNote = async (req, res, next) => {
     try {
@@ -49,6 +50,8 @@ export const CreditDebitNoteReport = async (req, res) => {
 }
 export const SaveCreditNote = async (req, res) => {
     try {
+        const note = await CreditNoteNo(req.body)
+        req.body.NoteNumber = note;
         const credit = await CreditNote.create(req.body)
         return credit ? res.status(200).json({ message: "Credit Note Saved Successfull!", status: true }) : res.status(400).json({ message: "Bad Request", status: false })
     } catch (err) {
