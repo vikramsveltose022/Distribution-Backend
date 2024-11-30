@@ -137,6 +137,21 @@ export const UpdatedPromotion = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
+export const deletePromotion = async (req, res, next) => {
+    try {
+        const promotion = await Promotion.findById(req.params.id)
+        if (!promotion) {
+            return res.status(404).json({ message: "Promotion Not Found", status: false })
+        }
+        promotion.status = "Deactive"
+        await promotion.save();
+        return res.status(200).json({ message: "promotion delete successfull", status: true })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false })
+    }
+}
 export const UpdatedPromotionProductWise = async (req, res, next) => {
     try {
         const id = req.params.id;
@@ -162,21 +177,6 @@ export const UpdatedPromotionProductWise = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
-export const deletePromotion = async (req, res, next) => {
-    try {
-        const promotion = await Promotion.findById(req.params.id)
-        if (!promotion) {
-            return res.status(404).json({ message: "Promotion Not Found", status: false })
-        }
-        promotion.status = "Deactive"
-        await promotion.save();
-        return res.status(200).json({ message: "promotion delete successfull", status: true })
-    }
-    catch (err) {
-        console.log(err);
-        return res.status(500).json({ error: "Internal Server Error", status: false })
-    }
-}
 export const PromotionApply = async (req, res, next) => {
     try {
         const customers = [];
