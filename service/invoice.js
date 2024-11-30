@@ -11,7 +11,6 @@ export const generateInvoice = async (database) => {
 
     return generatedInvoice;
 };
-
 export const generateOrderNo = async (database) => {
     const companyDetail = await CompanyDetails.findOne({ database: database });
     const invoice = companyDetail.orderNo + 1;
@@ -22,7 +21,6 @@ export const generateOrderNo = async (database) => {
 
     return generatedOrderNo;
 };
-
 export const warehouseNo = async (database) => {
     const companyDetail = await CompanyDetails.findOne({ database: database });
     const invoice = companyDetail.warehouseDummy + 1;
@@ -32,7 +30,6 @@ export const warehouseNo = async (database) => {
 
     return warehouseNo;
 };
-
 export const CreditNoteNo = async (body) => {
     const creditNote = await CreditNote.find({ database: body.database, creditType: "C" }).sort({ sortorder: -1 })
     if (creditNote.length === 0) {
