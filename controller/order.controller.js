@@ -8,18 +8,16 @@ import pdf from 'html-pdf'
 import { User } from "../model/user.model.js";
 import { Product } from "../model/product.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
-import { generateInvoice, generateOrderNo } from "../service/invoice.js";
+import {generateOrderNo } from "../service/invoice.js";
 import { getCreateOrderHierarchy, getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 import { Customer } from "../model/customer.model.js";
 import { createInvoiceTemplate } from "../Invoice/invoice.js";
 import transporter from "../service/email.js";
 import { Warehouse } from "../model/warehouse.model.js";
 import { UpdateCheckLimitSales, checkLimit } from "../service/checkLimit.js";
-import { PartyOrderLimit } from "../model/partyOrderLimit.model.js";
 import { Ledger } from "../model/ledger.model.js";
 import { ClosingStock } from "../model/closingStock.model.js";
 import { Receipt } from "../model/receipt.model.js";
-import { ClosingSales } from "./createInvoice.controller.js";
 import { ledgerPartyForDebit } from "../service/ledger.js";
 import { addProductInWarehouse5, addProductInWarehouse6 } from "./product.controller.js";
 import { Stock } from "../model/stock.js";
@@ -41,7 +39,6 @@ export const createOrder = async (req, res, next) => {
         } else {
             if (date1.toDateString() === date2.toDateString()) {
                 if (party.paymentTerm.toLowerCase() !== "cash") {
-                    // const due = await OverDueReport.findOne({ partyId: req.body.partyId, activeStatus: "Active" })
                     const existOrders = await CreateOrder.find({ partyId: req.body.partyId, paymentStatus: false }).sort({ date: 1, sortorder: -1 })
                     if (existOrders.length > 0) {
                         const due = existOrders[0]
@@ -50,19 +47,8 @@ export const createOrder = async (req, res, next) => {
                         const timeDifference = currentDate - lastOrderDate;
                         const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
                         if (days >= party.lockInTime) {
-                            // party.autoBillingStatus = "locked";
-                            // due.dueStatus = "overDue"
-                            // await due.save()
-                            // await party.save()
                             return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
                         }
-                        //  else if (due?.remainingAmount > 0 && due?.lockingAmount <= due?.remainingAmount) {
-                        //     party.autoBillingStatus = "locked";
-                        //     due.dueStatus = "overDue";
-                        //     await due.save()
-                        //     await party.save()
-                        //     return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
-                        // }
                     }
                 }
                 const orderNo = await generateOrderNo(user.database);
@@ -148,7 +134,6 @@ export const createOrderWithInvoice = async (req, res, next) => {
                         const warehouse = await Warehouse.findById(product.warehouse)
                         if (warehouse) {
                             const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                            // pro.currentStock -= (orderItem.qty);
                             product.qty -= orderItem.qty;
                             await warehouse.save();
                             await product.save()
@@ -180,8 +165,6 @@ export const createOrderWithInvoice = async (req, res, next) => {
 export const createOrderHistoryByUserId = async (req, res, next) => {
     try {
         const userId = req.params.id;
-        // const userHierarchy = await findUserDetails(userId);
-        // const adminDetail = (userHierarchy[userHierarchy.length - 1])
         const orders = await CreateOrder.find({ userId: userId }).populate({ path: 'orderItems.productId', model: 'product' }).populate({ path: "partyId", model: "customer" }).exec();
         if (!orders || orders.length === 0) {
             return res.status(404).json({ message: "No orders found for the user", status: false });
@@ -216,7 +199,6 @@ export const createOrderHistoryByUserId = async (req, res, next) => {
                 longitude: req.body.longitude,
                 currentAddress: req.body.currentAddress,
                 status: order.status,
-                // adminDetail: adminDetail,
                 createdAt: order.createdAt,
                 updatedAt: order.updatedAt
             };
@@ -308,15 +290,6 @@ export const OrdertoBilling = async (req, res) => {
                 const warehouse = await Warehouse.findById(orderItem.warehouse)
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
-                    // pro.currentStock -= (orderItem.qty);
-                    // product.qty -= orderItem.qty;
-                    // if (pro.currentStock < 0) {
-                    // return res.status(404).json({ message: `Product Out Of Stock ${product.Product_Title}`, status: false })
-                    // }
-                    // pro.pendingStock += (orderItem.qty)
-                    // await warehouse.save();
-                    // await product.save()
-                    // await ClosingSales(orderItem, orderItem.warehouse)
                 }
             } else {
                 console.error(`Product with ID ${orderItem.productId._id} not found`);
@@ -654,9 +627,6 @@ export const DebitorCalculate = async (req, res, next) => {
             currentOutstanding: 0,
             totalOutstanding: 0
         };
-        let currentSales;
-        // const startOfDay = moment().startOf('day').toDate();
-        // const endOfDay = moment().endOf('day').toDate();
         const startOfDay = moment().startOf('month').toDate();
         const endOfDay = moment().endOf('month').toDate();
         const [salesOrder, salesOrderCurrentMonth, receipt, receipts] = await Promise.all([
@@ -665,13 +635,10 @@ export const DebitorCalculate = async (req, res, next) => {
             Receipt.find({ database: req.params.database, type: "receipt", status: "Active" }).sort({ sortorder: -1 }),
             Receipt.find({ database: req.params.database, type: "receipt", date: { $gte: startOfDay, $lte: endOfDay }, status: "Active" }).sort({ sortorder: -1 })
         ]);
-        // Calculate totals
         Debtor.totalDue = salesOrder.reduce((sum, item) => sum + item.grandTotal, 0);
         currentSales = salesOrderCurrentMonth.reduce((sum, item) => sum + item.grandTotal, 0);
         Debtor.totalReceipt = receipt.reduce((sum, item) => sum + item.amount, 0);
         Debtor.currentReceipt = receipts.reduce((sum, item) => sum + item.amount, 0);
-        // Debtor.totalOutstanding = Debtor.totalDue - Debtor.totalReceipt;
-        // Debtor.currentOutstanding = currentSales - Debtor.currentReceipt;
 
         res.status(200).json({ Debtor, status: true });
     } catch (err) {
@@ -698,8 +665,6 @@ export const deletedSalesOrder = async (req, res, next) => {
                     product.pendingQty -= orderItem.qty;
                     await warehouse.save();
                     await product.save()
-                    // await deleteProductInStock(product, product.warehouse, orderItem, order.date)
-                    // await DeleteClosingSales(orderItem, orderItem.warehouse)
                 }
             } else {
                 console.error(`Product With ID ${orderItem.productId} Not Found`);
@@ -770,9 +735,7 @@ export const DeleteClosingSales = async (orderItem, warehouse) => {
             stock.sTaxRate -= tax;
             stock.sTotal -= (orderItem.totalPrice + tax)
             await stock.save()
-            // console.log("ClosingSales : " + stock)
         }
-        // return true
     }
     catch (err) {
         console.log(err)

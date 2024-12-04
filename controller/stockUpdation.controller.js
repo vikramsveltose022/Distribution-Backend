@@ -52,25 +52,11 @@ export const stockTransferToWarehouse = async (req, res) => {
                 const sourceProductItem = sourceProduct.productItems.find(
                     (pItem) => pItem.productId.toString() === item.productId.toString());
                 if (sourceProductItem) {
-                    // sourceProductItem.price = item.price;
                     sourceProductItem.currentStock -= (item.transferQty);
                     sourceProductItem.pendingStock += (item.transferQty);
                     sourceProductItem.totalPrice -= item.totalPrice;
                     sourceProduct.markModified('productItems');
                     await sourceProduct.save();
-                    // const destinationProduct = await Warehouse.findOne({
-                    //     _id: warehouseToId,
-                    //     'productItems.productId': item.productId,
-                    // });
-                    // if (destinationProduct) {
-                    //     const destinationProductItem = destinationProduct.productItems.find((pItem) => pItem.productId.toString() === item.productId.toString());
-                    //     destinationProductItem.price = item.price;
-                    //     destinationProductItem.currentStock += (item.transferQty);
-                    //     destinationProductItem.totalPrice += item.totalPrice;
-                    //     await destinationProduct.save();
-                    // } else {
-                    //     await Warehouse.updateOne({ _id: warehouseToId }, { $push: { productItems: item } }, { upsert: true });
-                    // }
                 } else {
                     return res.status(400).json({ error: 'Insufficient quantity in the source warehouse or product not found' });
                 }
@@ -130,9 +116,6 @@ export const updateWarehousetoWarehouse = async (req, res, next) => {
                 const sourceProductItem = sourceProduct.productItems.find(
                     (pItem) => pItem.productId.toString() === item.productId.toString());
                 if (sourceProductItem) {
-                    // sourceProductItem.price = item.price;
-                    // sourceProductItem.currentStock -= (item.transferQty);
-                    // sourceProductItem.totalPrice -= item.totalPrice;
                     sourceProductItem.pendingStock -= (item.transferQty);
                     sourceProduct.markModified('productItems');
                     await sourceProduct.save();
@@ -151,13 +134,7 @@ export const updateWarehousetoWarehouse = async (req, res, next) => {
                         await Warehouse.updateOne({ _id: existingFactory.warehouseToId },
                             { $push: { productItems: item }, $set: { stockTransferDate: existingFactory.stockTransferDate, transferStatus: existingFactory.transferStatus, grandTotal: existingFactory.grandTotal, warehouseFromId: existingFactory.warehouseFromId } }, { upsert: true });
                     }
-                    // await ClosingSales(item, existingFactory.warehouseFromId)
-                    // await ClosingPurchase(item, existingFactory.warehouseToId)
-                } else {
-                    // return res.status(400).json({ error: 'Insufficient quantity in the source warehouse or product not found' });
                 }
-            } else {
-                // return res.status(400).json({ error: 'Product not found in the source warehouse' });
             }
         }
         return res.status(200).json({ message: "status updated successfull!", status: true });
@@ -381,12 +358,11 @@ export const ViewAllWarehouse1 = async () => {
         let array = []
         const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
         if (!ware) {
-            // return res.status(404).json({ message: "Not Found", status: false })
+
         }
         for (let id of ware) {
             let userData = await Warehouse.findById({ _id: id._id }).sort({ sortorder: -1 })
             const { _id, warehouseName, address, mobileNo, landlineNumber, productItems, damageItem, database } = userData
-            // const stocks = await ClosingStocks(id._id, productItems)
             const warehouse = {
                 warehouseId: _id,
                 warehouseName: warehouseName,
@@ -399,16 +375,12 @@ export const ViewAllWarehouse1 = async () => {
                 closingStatus: "closing"
             }
             if (warehouse) {
-                // array.push(warehouse)
                 const stock = await Stock.create(warehouse)
             }
         }
-        // }
         await deleteModel()
-        // return res.status(200).json({ message: "data saved successful", status: true });
     } catch (err) {
         console.error(err);
-        // return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
 export const viewStockClosingWarehouse = async (req, res, next) => {
@@ -416,15 +388,6 @@ export const viewStockClosingWarehouse = async (req, res, next) => {
         let stockProduct = []
         let sqty = 0;
         const warehouse = await Stock.find({ database: req.params.database }).sort({ date: 1, sortorder: -1 }).populate({ path: "productItems.productId", model: "product" }).populate({ path: "warehouseId", model: "warehouse" })
-        // for (let item of warehouse) {
-        //     stockProduct = stockProduct.concat(item.productItems)
-        // }
-        // for (let item of stockProduct) {
-        //     if (item.productId._id.toString() === "66e41abaa70581a120e79254") {
-        //         console.log(item.productId._id.toString() + " " + item.sQty + " " + item.date)
-        //         sqty += item.sQty
-        //     }
-        // }
         return (warehouse.length > 0) ? res.status(200).json({ Warehouse: warehouse, status: true }) : res.status(404).json({ message: "Not Found", status: false })
     }
     catch (err) {
@@ -508,8 +471,6 @@ export const ViewOverDueStock = async (req, res, next) => {
         const orderedProductIdsLastMonth = orderedProductsLastMonth.map(orderItem => orderItem.productId.toString());
         const productsToProcess = productsNotOrderedLastMonth.filter(product =>
             !orderedProductIdsLastMonth.includes(product._id.toString()));
-        // const warehouseIds = productsToProcess.map(product => product.warehouse);
-        // const warehouses = await Warehouse.find({ _id: { $in: warehouseIds } });
         for (let item of productsToProcess) {
             let partyId = "";
             let days = 0;
@@ -528,9 +489,7 @@ export const ViewOverDueStock = async (req, res, next) => {
             const products = {
                 product: item,
                 overDue: days,
-                // supplierName: partyId
             };
-
             allProduct.push(products);
         }
         return res.status(200).json({ allProduct, status: true });
@@ -561,13 +520,6 @@ export const ViewDeadParty = async (req, res, next) => {
         }
         let lastDays = ""
         for (let id of allParty) {
-            // const payment = await Receipt.find({ type: "receipt", partyId: id._id })
-            // if (payment.length > 0) {
-            //     const lastPayment = payment[payment.length - 1]
-            //     lastDays = lastPayment.createdAt;
-            // } else {
-            //     lastDays = "0"
-            // }
             let purchaseDate = "";
             const purchase = await PurchaseOrder.find({ partyId: id._id.toString() }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
             if (purchase.length > 0) {
@@ -585,9 +537,6 @@ export const ViewDeadParty = async (req, res, next) => {
             };
             Parties.push(products);
             days = 0;
-            // const party = await partyHierarchy(id.created_by, database);
-            // const resultItem = { id, party, lastDays };
-            // result.push(resultItem);
         }
         return res.status(200).json({ Parties: Parties, status: true });
     } catch (err) {
@@ -605,14 +554,6 @@ export const ViewDeadParty1 = async (req, res, next) => {
         const hierarchy = await Customer.find({ database: database, status: 'Active', leadStatusCheck: "false", createdAt: { $lt: startOfLastMonth } }).populate({ path: "created_by", model: "user" }).populate({ path: "category", model: "customerGroup" }).lean();
         const allOrderedParties = await CreateOrder.find({ database: database, createdAt: { $gte: startOfLastMonth.toDate() } }).lean();
         const receiptMap = {};
-        // await Promise.all(hierarchy.map(async (item) => {
-        //     const payment = await Receipt.findOne({ type: "receipt", partyId: item._id }).sort({ createdAt: -1 }).lean();
-        //     receiptMap[item._id] = payment ? payment.createdAt : "0";
-        // }));
-        // const result = await Promise.all(hierarchy.map(async (item) => {
-        //     const party = await partyHierarchy(item.created_by, database);
-        //     return { id: item, party: party, lastDays: receiptMap[item._id] };
-        // }));
         for (let item of hierarchy) {
             let purchaseDate = "";
             const purchase = await PurchaseOrder.find({ partyId: item._id.toString() }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" });
@@ -626,7 +567,6 @@ export const ViewDeadParty1 = async (req, res, next) => {
 
             Parties.push(products);
         }
-
         return res.status(200).json({ Parties: Parties, status: true });
     } catch (err) {
         console.error(err);
@@ -660,7 +600,7 @@ export const ViewAllWarehouse = async () => {
         let array = []
         const ware = await Warehouse.find({}).sort({ sortorder: -1 }).select('_id');
         if (!ware) {
-            // return res.status(404).json({ message: "Not Found", status: false })
+
         }
         for (let id of ware) {
             let userData = await Warehouse.findById({ _id: id._id }).sort({ sortorder: -1 }).populate({ path: "productItems.productId", model: "product" })
@@ -681,12 +621,9 @@ export const ViewAllWarehouse = async () => {
                 const stock = await Stock.create(warehouse)
             }
         }
-        // }
         await deleteModel()
-        // return res.status(200).json({ message: "data saved successful", status: true });
     } catch (err) {
         console.error(err);
-        // return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
 export const ClosingStocks = async (warehouse, productItem) => {
@@ -798,7 +735,6 @@ export const ClosingPurchase = async (orderItem, warehouse) => {
             igstRate = (((orderItem.transferQty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
             tax = igstRate
         }
-        // tax = (orderItem.igstRate + orderItem.cgstRate + orderItem.sgstRate)
         const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: orderItem.productId })
         if (stock) {
             stock.pQty += (orderItem.transferQty);
@@ -832,7 +768,6 @@ export const ClosingSales = async (orderItem, warehouse) => {
             igstRate = (((orderItem.transferQty) * orderItem.price) * parseInt(orderItem.gstPercentage)) / 100;
             tax = igstRate
         }
-        // tax = (orderItem.igstRate + orderItem.cgstRate + orderItem.sgstRate)
         const stock = await ClosingStock.findOne({ warehouseId1: warehouse, productId: orderItem.productId })
         if (stock) {
             stock.sQty += (orderItem.transferQty);
