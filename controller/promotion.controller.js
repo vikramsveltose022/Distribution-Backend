@@ -328,8 +328,6 @@ export const PromotionApplyForSalesPerson = async (req, res, next) => {
                 endOfDay = new Date(item.activityId.ToDate);
                 startOfDay.setUTCHours(0, 0, 0, 0);
                 endOfDay.setUTCHours(23, 59, 59, 999);
-                console.log(startOfDay)
-                console.log(endOfDay)
             }
             const customer = await Customer.find({ status: "Active",created_by:req.params.id }).populate({ path: "created_by", model: "user" })
             if (customer.length === 0) {
@@ -391,7 +389,8 @@ export const PromotionApplyForSalesPerson = async (req, res, next) => {
                                 Status: status,
                                 OfferAmount: offerQty,
                                 FreeProduct: freeProductName,
-                                type: "ProductWise"
+                                type: "ProductWise",
+                                ActivityId:item.activityId
                             }
                             if (productName) {
                                 await customers.push(Obj)
@@ -415,7 +414,8 @@ export const PromotionApplyForSalesPerson = async (req, res, next) => {
                             Balance: remainingAmount,
                             Status: status,
                             OfferAmount: offerAmount,
-                            type: "AmountWise"
+                            type: "AmountWise",
+                            ActivityId:item.activityId
                         }
                         await customers.push(Obj)
                     } else if (item.percentageWise.length > 0) {
@@ -436,7 +436,8 @@ export const PromotionApplyForSalesPerson = async (req, res, next) => {
                             Balance: remainingAmount,
                             Status: status,
                             OfferAmount: offerPercentage,
-                            type: "PercentageWise"
+                            type: "PercentageWise",
+                            ActivityId:item.activityId
                         }
                         await customers.push(Obj)
                     }
