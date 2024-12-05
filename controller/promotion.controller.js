@@ -243,6 +243,150 @@ export const PromotionApply = async (req, res, next) => {
                             let Obj = {
                                 partyId: party,
                                 productName: productName,
+                                Target: items.targetQty+" qty",
+                                Achieved: AchieveQty,
+                                Balance: remainingQty,
+                                Status: status,
+                                OfferAmount: offerQty,
+                                FreeProduct: freeProductName,
+                                type: "ProductWise"
+                            }
+                            if (productName) {
+                                await customers.push(Obj)
+                            }
+                        }
+                    } else if (item.amountWise.length > 0) {
+                        let remainingAmount = 0;
+                        let status = "Pending";
+                        let offerAmount = 0;
+                        if (item.amountWise[0].totalAmount <= totalAmount) {
+                            remainingAmount = 0
+                            status = "Completed"
+                            offerAmount = `₹${item.amountWise[0].percentageAmount}`
+                        } else {
+                            remainingAmount = item.amountWise[0].totalAmount - totalAmount;
+                        }
+                        let Obj = {
+                            partyId: party,
+                            Target: item.amountWise[0].totalAmount+"₹",
+                            Achieved: totalAmount,
+                            Balance: remainingAmount,
+                            Status: status,
+                            OfferAmount: offerAmount,
+                            type: "AmountWise"
+                        }
+                        await customers.push(Obj)
+                    } else if (item.percentageWise.length > 0) {
+                        let remainingAmount = 0;
+                        let status = "Pending";
+                        let offerPercentage = 0;
+                        if (item.percentageWise[0].totalAmount <= totalAmount) {
+                            remainingAmount = 0
+                            status = "Completed"
+                            offerPercentage = `${item.percentageWise[0].percentageDiscount}%`
+                        } else {
+                            remainingAmount = item.percentageWise[0].totalAmount - totalAmount;
+                        }
+                        let Obj = {
+                            partyId: party,
+                            Target: item.percentageWise[0].totalAmount,
+                            Achieved: totalAmount,
+                            Balance: remainingAmount,
+                            Status: status,
+                            OfferAmount: offerPercentage,
+                            type: "PercentageWise"
+                        }
+                        await customers.push(Obj)
+                    }
+                }
+            }
+        }
+        return res.status(200).json({ Promotion: customers, messge: "success", status: true })
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error", status: false })
+    }
+}
+export const PromotionApply1 = async (req, res, next) => {
+    try {
+        const customers = [];
+        const existPromotion = await Promotion.find({ database: req.params.database, status: "Active" }).populate({ path: "activityId", model: "activity" }).populate({ path: "productWise.freeProduct", model: "product" })
+        if (existPromotion.length === 0) {
+            return res.status(404).json({ message: "Promotion Not Found", status: false })
+        }
+        for (let item of existPromotion) {
+            let startOfDay;
+            let endOfDay;
+            if(req.body.startDate && req.body.endDate){
+                startOfDay = new Date(req.body.startDate);
+                endOfDay = new Date(req.body.endDate);
+                startOfDay.setUTCHours(0, 0, 0, 0);
+                endOfDay.setUTCHours(23, 59, 59, 999);
+            } else{
+                startOfDay = new Date(item.activityId.FromDate);
+                endOfDay = new Date(item.activityId.ToDate);
+                startOfDay.setUTCHours(0, 0, 0, 0);
+                endOfDay.setUTCHours(23, 59, 59, 999);
+            }
+            // const startOfDay = new Date(item.activityId.FromDate);
+            // const endOfDay = new Date(item.activityId.ToDate);
+            // startOfDay.setUTCHours(0, 0, 0, 0);
+            // endOfDay.setUTCHours(23, 59, 59, 999);
+            const customer = await Customer.find({ status: "Active" }).populate({ path: "created_by", model: "user" })
+            if (customer.length === 0) {
+                return res.status(404).json({ message: "Party Not Found", status: false })
+            }
+            for (let id of customer) {
+                let totalAmount = 0;
+                let totalQty = 0;
+                let party = {};
+                const existOrder = await CreateOrder.find({ partyId: id._id.toString(), date: { $gte: startOfDay, $lte: endOfDay } }).populate({ path: "partyId", model: "customer" }).populate({ path: "orderItems.productId", model: "product" })
+                if (existOrder.length === 0) {
+                    continue
+                } else {
+                    for (let item of existOrder) {
+                        totalAmount += item.grandTotal
+                        totalQty += item.qty
+                        party = id
+                    }
+                    if (item.productWise.length > 0) {
+                        let productItems = [];
+                        for (let item of existOrder) {
+                            productItems = productItems.concat(item.orderItems)
+                        }
+                        for (let items of item.productWise) {
+                            let totalProductQty = 0;
+                            let offerQty = 0;
+                            let status = "Pending";
+                            let AchieveQty = 0;
+                            let remainingQty = 0;
+                            let productName = ""
+                            let freeProductName = ""
+                            productItems.forEach((item) => {
+                                if (item.productId._id.toString() === items.productId.toString()) {
+                                    totalProductQty += item.qty;
+                                    productName += item.productId.Product_Title;
+                                }
+                            })
+                            if (items.targetQty < totalProductQty) {
+                                AchieveQty = totalProductQty
+                                if (items.freeProductQty) {
+                                    offerQty = `${items.freeProductQty} qty`
+                                    freeProductName = items.freeProduct.Product_Title
+                                } else if (items.discountPercentage) {
+                                    offerQty = `${items.discountPercentage}%`
+                                } else {
+                                    offerQty = `₹${items.discountAmount}`
+                                }
+                                status = "Completed"
+                            } else {
+                                AchieveQty = totalProductQty
+                                remainingQty = items.targetQty - totalProductQty
+                            }
+                            let Obj = {
+                                partyId: party,
+                                productName: productName,
                                 Target: items.targetQty,
                                 Achieved: AchieveQty,
                                 Balance: remainingQty,
