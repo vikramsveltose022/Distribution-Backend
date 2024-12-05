@@ -636,7 +636,7 @@ export const DebitorCalculate = async (req, res, next) => {
             Receipt.find({ database: req.params.database, type: "receipt", date: { $gte: startOfDay, $lte: endOfDay }, status: "Active" }).sort({ sortorder: -1 })
         ]);
         Debtor.totalDue = salesOrder.reduce((sum, item) => sum + item.grandTotal, 0);
-        currentSales = salesOrderCurrentMonth.reduce((sum, item) => sum + item.grandTotal, 0);
+        let currentSales = salesOrderCurrentMonth.reduce((sum, item) => sum + item.grandTotal, 0);
         Debtor.totalReceipt = receipt.reduce((sum, item) => sum + item.amount, 0);
         Debtor.currentReceipt = receipts.reduce((sum, item) => sum + item.amount, 0);
 
