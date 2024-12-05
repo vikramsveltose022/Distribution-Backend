@@ -268,7 +268,7 @@ export const PromotionApply = async (req, res, next) => {
                         }
                         let Obj = {
                             partyId: party,
-                            Target: item.amountWise[0].totalAmount+"₹",
+                            Target: "₹"+item.amountWise[0].totalAmount,
                             Achieved: totalAmount,
                             Balance: remainingAmount,
                             Status: status,
@@ -289,7 +289,7 @@ export const PromotionApply = async (req, res, next) => {
                         }
                         let Obj = {
                             partyId: party,
-                            Target: item.percentageWise[0].totalAmount,
+                            Target: "₹"+item.percentageWise[0].totalAmount,
                             Achieved: totalAmount,
                             Balance: remainingAmount,
                             Status: status,
