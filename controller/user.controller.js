@@ -203,7 +203,7 @@ export const SignIn = async (req, res, next) => {
       return res.json({ message: "Login successful", user: { ...existingAccount.toObject(), password: undefined, token }, status: true, });
     }
     if (existingCustomer) {
-      await Customer.updateOne({ email }, { $set: { latitude, longitude, currentAddress } });
+      await Customer.updateOne({ email }, { $set: { latitude, longitude, currentAddress,loginDate:new Date() } });
       return res.json({ message: "Login successful", user: { ...existingCustomer.toObject(), password: undefined, token }, status: true, });
     }
   } catch (err) {
