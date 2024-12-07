@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { AssignLeadParty, Check, DeleteBulkCustomer, DeleteCustomer, DeleteSalesLead, DeleteSalesLeadMultiple, LeadPartyList, LeadPartyListById, PartyWithSalesPerson, SaveCustomer, SaveLeadPartyExcel, SaveRemark, SignIn, SignInWithMobile, SuperAdminList, UpdateCustomer, UpdateSalesLead, ViewCustomer, ViewCustomerById, ViewDeadParty, deleteAssignLeadParty, dueParty, forgetPassword, lockParty, otpVerify, overDueReport, paymentDueReport, saveExcelFile, updateExcelFile, updatePassword } from "../controller/customer.controller.js";
+import { AssignLeadParty, Check, DeleteBulkCustomer, DeleteCustomer, DeleteSalesLead, DeleteSalesLeadMultiple, GPSReport, LeadPartyList, LeadPartyListById, PartyWithSalesPerson, SaveCustomer, SaveLeadPartyExcel, SaveRemark, SignIn, SignInWithMobile, SuperAdminList, UpdateCustomer, UpdateSalesLead, ViewCustomer, ViewCustomerById, ViewDeadParty, deleteAssignLeadParty, dueParty, forgetPassword, lockParty, otpVerify, overDueReport, paymentDueReport, saveExcelFile, updateExcelFile, updatePassword } from "../controller/customer.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -28,6 +28,7 @@ router.get("/view-customer-by-id/:id", ViewCustomerById);
 router.get("/delete-customer/:id", DeleteCustomer);
 router.post("/delete-bulk-customer/:database", DeleteBulkCustomer);
 router.post("/update-customer/:id", upload.any("files"), UpdateCustomer);
+router.get("/view-gps-report/:database", GPSReport);
 
 router.post("/login", SignInWithMobile)
 router.post("/signIn", SignIn)

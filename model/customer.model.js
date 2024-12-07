@@ -166,6 +166,9 @@ const CustomerSchema = new mongoose.Schema({
   longitude: {
     type: String
   },
+  loginDate: {
+    type: String
+  },
   currentAddress: {
     type: String
   },

@@ -188,6 +188,90 @@ export const UpdateCustomer1 = async (req, res, next) => {
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 };
+export const GPSReport1 = async (req,res,next)=>{
+    try{
+        const customer = await Customer.find({database:req.params.database},{ createdAt: 1, CompanyName: 1, latitude: 1, longitude: 1 }).sort({sortorder:-1})
+        if(customer.length ===0){
+            return res.status(404).json({message:"Not Found",status:false})
+        }
+        return res.status(200).json({report:customer,status:true})
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({error:"Internal Server Error",status:false})
+    }
+}
+export const GPSReport2 = async (req, res, next) => {
+    try {
+        const customers = await Customer.find({ database: req.params.database },{ createdAt: 1, CompanyName: 1, latitude: 1, longitude: 1 }).sort({ sortorder: -1 });
+        if (customers.length === 0) {
+            return res.status(404).json({ message: "Not Found", status: false });
+        }
+        const report = customers.map((customer) => {
+            const createdAt = new Date(customer.createdAt);
+            const istOffset = 23.5 * 60 * 60 * 1000 + 30 * 60 * 1000
+            const istTime = new Date(createdAt.getTime() + istOffset);
+            console.log(istTime)
+            const date = istTime.toISOString().split('T')[0];
+            const time = istTime.toTimeString().split(' ')[0];
+            return {
+                _id: customer._id,
+                CompanyName: customer.CompanyName,
+                date,
+                time,
+            };
+        });
+        return res.status(200).json({ report, status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+export const GPSReport = async (req, res, next) => {
+    try {
+        const customers = await Customer.find(
+            { database: req.params.database },
+            { createdAt: 1, CompanyName: 1, latitude: 1, longitude: 1 }
+        ).sort({ sortorder: -1 });
+
+        if (customers.length === 0) {
+            return res.status(404).json({ message: "Not Found", status: false });
+        }
+
+        const report = customers.map((customer) => {
+            const createdAt = new Date(customer.createdAt);
+
+            // Convert to Indian Standard Time using Intl.DateTimeFormat
+            const formatter = new Intl.DateTimeFormat('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+            });
+            const [datePart, timePart] = formatter.format(createdAt).split(', ');
+
+            const [day, month, year] = datePart.split('/');
+            const formattedDate = `${year}-${month}-${day}`;
+
+            return {
+                _id: customer._id,
+                CompanyName: customer.CompanyName,
+                date: formattedDate,
+                time: timePart,
+            };
+        });
+
+        return res.status(200).json({ report, status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
+
+
+
 //---------------------------------------------------------------
 export const SuperAdminList = async (req, res, next) => {
     try {
