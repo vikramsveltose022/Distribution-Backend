@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path"
-import { OrderCancelWarehouse, ProductInWarehouse, ViewOtp, ViewWarehouseByOrder, ViewWarehouseByOrderInvoice, ViewWarehouseOrderCancel, ViewWarehouseOrderCompletedOrCancel, deleteGoodDispatch, saveGoodDispatch, sendOtp, updateGoodDispatch, updateOrderStatusByDeliveryBoy, viewGoodDispatch, viewGoodDispatchById, viewOrderForDeliveryBoy } from "../controller/goodDispatch.controller.js";
+import { OrderCancelWarehouse, ProductInWarehouse, SendOtpToDeliveryWarehouse, ViewOtp, ViewOtpWarehouse, ViewWarehouseByOrder, ViewWarehouseByOrderInvoice, ViewWarehouseOrderCancel, ViewWarehouseOrderCompletedOrCancel, deleteGoodDispatch, saveGoodDispatch, sendOtp, updateGoodDispatch, updateOrderStatusByDeliveryBoy, viewGoodDispatch, viewGoodDispatchById, viewOrderForDeliveryBoy } from "../controller/goodDispatch.controller.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -30,6 +30,8 @@ router.post("/verify-authentication/:id", upload.single("file"), updateOrderStat
 router.get("/view-order-warehouse/:id", ViewWarehouseByOrder);
 router.get("/view-order-warehouse-invoice/:id", ViewWarehouseByOrderInvoice);
 router.get("/view-cancel-order-warehouse/:id", ViewWarehouseOrderCancel);
+router.post("/send-otp-warehouse-deliver/:id",SendOtpToDeliveryWarehouse)
+router.get("/view-otp-warehouse-deliver/:id",ViewOtpWarehouse)
 router.get("/cancel-warehouse-order/:id/:productId", OrderCancelWarehouse);
 router.get("/view-warehouse-order-history/:id", ViewWarehouseOrderCompletedOrCancel);
 router.get("/product-warehouse/:productId", ProductInWarehouse);

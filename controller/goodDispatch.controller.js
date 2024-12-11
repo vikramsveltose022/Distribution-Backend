@@ -333,7 +333,7 @@ export const ViewOtp = async (req, res) => {
 };
 export const ViewWarehouseByOrder = async (req, res, next) => {
     try {
-        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Billing", status: { $ne: "Deactive" } }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" })
+        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: "Billing", status: { $ne: "Deactive" } }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "AssignDeliveryBoy", model: "user" })
         if (order.length === 0) {
             return res.status(404).json({ message: "warehouse stock not found", status: false })
         }
@@ -370,6 +370,50 @@ export const ViewWarehouseOrderCancel = async (req, res, next) => {
         return res.status(500).json({ error: "Internal Server Error", status: false })
     }
 }
+export const SendOtpToDeliveryWarehouse = async (req, res) => {
+    try {
+        const otp = Math.floor(1000 + Math.random() * 9000);
+        const existing = await CreateOrder.findById(req.params.id)
+        if (!existing) {
+            return res.status(404).json({ message: "order not found", status: false })
+        }
+        const user = await User.findOne({ _id: req.body.deliveryBoyId, status: "Active" })
+        if (!user) {
+            return res.status(404).json({ message: "user not found", status: false })
+        }
+         const warehouse = await Warehouse.findOne({ _id: req.body.warehouseId, status: "Active" })
+        if (!warehouse) {
+            return res.status(404).json({ message: "warehouse not found", status: false })
+        }
+        user.otpVerify = otp
+        await user.save()
+        warehouse.otp = otp
+        await warehouse.save()
+        console.log(otp)
+        return res.status(200).json({ message: "otp send successfull!", status: true });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
+export const ViewOtpWarehouse = async (req, res) => {
+    try {
+        // const query = { $or: [{ userId }, { partyId }], type: "order" };
+        const orderData = await Warehouse.findById(req.params.id).select('otp')
+        if (orderData) {
+            return res.status(200).json({ otp: orderData, status: true });
+        } else {
+            const orderData = await User.findById(req.params.id).select('otpVerify')
+            if (orderData) {
+                return res.status(200).json({ otp: orderData, status: true });
+            }
+            return res.status(404).json({ message: 'otp not found', status: false });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error', status: false });
+    }
+};
 export const OrderCancelWarehouse = async (req, res, next) => {
     try {
         const existingOrder = await CreateOrder.findById(req.params.id)
