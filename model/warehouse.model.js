@@ -164,6 +164,9 @@ const WarehouseSchema = new mongoose.Schema({
   },
   warehouseNo: {
     type: String
+  },
+  otp:{
+    type:Number
   }
 }, { timestamps: true })
 
