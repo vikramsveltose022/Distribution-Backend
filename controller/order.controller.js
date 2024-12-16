@@ -331,6 +331,7 @@ export const OrdertoDispatch = async (req, res) => {
                 order.status = "Billing"
             }
         }
+        order.Remark = req.body.Remark;
         await order.save();
         return res.status(200).json({ message: "Order Dispatch Seccessfull!", Order: order, status: true });
     } catch (error) {

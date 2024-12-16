@@ -308,6 +308,9 @@ const createOrderSchema = new mongoose.Schema({
     paymentStatus: {
         type: Boolean,
         default: false
+    },
+    Remark:{
+        type:String
     }
 }, { timestamps: true })
 
