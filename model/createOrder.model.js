@@ -311,6 +311,10 @@ const createOrderSchema = new mongoose.Schema({
     },
     Remark:{
         type:String
+    },
+    DispatchStatus:{
+        type:Boolean,
+        default:false
     }
 }, { timestamps: true })
 

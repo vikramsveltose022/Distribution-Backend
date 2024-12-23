@@ -222,13 +222,13 @@ export const PromotionApply = async (req, res, next) => {
                             productItems.forEach((item) => {
                                 if (item.productId._id.toString() === items.productId.toString()) {
                                     totalProductQty += item.qty;
-                                    productName += item.productId.Product_Title;
+                                    productName = item.productId.Product_Title;
                                 }
                             })
                             if (items.targetQty < totalProductQty) {
                                 AchieveQty = totalProductQty
                                 if (items.freeProductQty) {
-                                    offerQty = `${items.freeProductQty} qty`
+                                    offerQty = `${items.freeProductQty} qty`;
                                     freeProductName = items.freeProduct.Product_Title
                                 } else if (items.discountPercentage) {
                                     offerQty = `${items.discountPercentage}%`
