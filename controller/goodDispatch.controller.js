@@ -385,11 +385,10 @@ export const SendOtpToDeliveryWarehouse = async (req, res) => {
         if (!warehouse) {
             return res.status(404).json({ message: "warehouse not found", status: false })
         }
-        user.otpVerify = otp
-        await user.save()
+        // user.otpVerify = otp
+        // await user.save()
         warehouse.otp = otp
         await warehouse.save()
-        console.log(otp)
         return res.status(200).json({ message: "otp send successfull!", status: true });
     } catch (error) {
         console.error(error);

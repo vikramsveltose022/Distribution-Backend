@@ -313,11 +313,19 @@ export const OrdertoDispatch = async (req, res) => {
         if (!order) {
             return res.status(404).json({ message: 'Sales Order Not Found', status: false });
         }
-        for (const orderItem of order.orderItems) {
-            if (orderItem.warehouse.toString() === req.body.warehouse.toString()) {
-                orderItem.status = "Dispatch";
+        if(order.DispatchStatus===false){
+            order.orderItems = req.body.orderItems;
+            order.DispatchStatus = true;
+        } else{
+            for(let item of req.body.orderItems){
+                order.orderItems.push(item)
             }
         }
+        // for (const orderItem of order.orderItems) {
+        //     if (orderItem.warehouse.toString() === req.body.warehouse.toString()) {
+        //         orderItem.status = "Dispatch";
+        //     }
+        // }
         if (order.NoOfPackage) {
             order.NoOfPackage += req.body.NoOfPackage
         } else {
@@ -332,8 +340,42 @@ export const OrdertoDispatch = async (req, res) => {
             }
         }
         order.Remark = req.body.Remark;
-        await order.save();
-        return res.status(200).json({ message: "Order Dispatch Seccessfull!", Order: order, status: true });
+        const orders = await order.save();
+        
+        // const cancelOrder = {
+        //     orderNo:req.body.OrderNo,
+        //     partyId:req.body.PartyId,
+        //     orderItems:req.body.OrderItems,
+        //     status:"Cancelled"
+        // }
+        // for (const item of req.body.OrderItems) {
+        //     if (item.status !== "Cancelled") {
+        //         item.status = "Cancelled";
+        //         const product = await Product.findById({ _id: item.productId });
+        //         if (product) {
+        //             // const warehouse = await Warehouse.findById(item.warehouse)
+        //             const warehouse = await Warehouse.findById(product.warehouse)
+        //             if (warehouse) {
+        //                 const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString())
+        //                 if (pro) {
+        //                     pro.currentStock += (item.qty);
+        //                     product.qty += item.qty;
+        //                     product.pendingQty -= item.qty;
+        //                     await deleteProductInStock(product, product.warehouse, item, order.date)
+        //                     await warehouse.save();
+        //                     await product.save()
+        //                 }
+        //             }
+        //         } else {
+        //             console.error(`Product with ID ${orderItem.productId} not found`);
+        //         }
+        //     } else {
+        //         console.log("Not Found")
+        //     }
+        // }
+        // await CreateOrder.create(cancelOrder);
+       
+        return res.status(200).json({ message: "Order Dispatch Seccessfull!", Order: orders, status: true });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: "Internal Server Error", status: false });
@@ -690,7 +732,7 @@ export const deleteProductInStock = async (warehouse, warehouseId, orderItem, da
         endOfDay.setUTCHours(23, 59, 59, 999);
         const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
         if (stock.length === 0) {
-            return console.log("warehouse not found")
+            return console.log("warehouse not found");
         } else {
             for (let item of stock) {
                 const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
