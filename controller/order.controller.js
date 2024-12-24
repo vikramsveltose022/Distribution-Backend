@@ -313,19 +313,19 @@ export const OrdertoDispatch = async (req, res) => {
         if (!order) {
             return res.status(404).json({ message: 'Sales Order Not Found', status: false });
         }
-        if(order.DispatchStatus===false){
-            order.orderItems = req.body.orderItems;
-            order.DispatchStatus = true;
-        } else{
-            for(let item of req.body.orderItems){
-                order.orderItems.push(item)
-            }
-        }
-        // for (const orderItem of order.orderItems) {
-        //     if (orderItem.warehouse.toString() === req.body.warehouse.toString()) {
-        //         orderItem.status = "Dispatch";
+        // if(order.DispatchStatus===false){
+        //     order.orderItems = req.body.orderItems;
+        //     order.DispatchStatus = true;
+        // } else{
+        //     for(let item of req.body.orderItems){
+        //         order.orderItems.push(item)
         //     }
         // }
+        for (const orderItem of order.orderItems) {
+            if (orderItem.warehouse.toString() === req.body.warehouse.toString()) {
+                orderItem.status = "Dispatch";
+            }
+        }
         if (order.NoOfPackage) {
             order.NoOfPackage += req.body.NoOfPackage
         } else {
@@ -339,7 +339,6 @@ export const OrdertoDispatch = async (req, res) => {
                 order.status = "Billing"
             }
         }
-        order.Remark = req.body.Remark;
         const orders = await order.save();
         
         // const cancelOrder = {
@@ -361,9 +360,9 @@ export const OrdertoDispatch = async (req, res) => {
         //                     pro.currentStock += (item.qty);
         //                     product.qty += item.qty;
         //                     product.pendingQty -= item.qty;
-        //                     await deleteProductInStock(product, product.warehouse, item, order.date)
+        //                     await deleteProductInStock(product, product.warehouse, item, order.date);
         //                     await warehouse.save();
-        //                     await product.save()
+        //                     await product.save();
         //                 }
         //             }
         //         } else {
