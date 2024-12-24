@@ -17,6 +17,7 @@ import mongoose from "mongoose";
 import { WorkingHours } from "../model/workingHours.model.js";
 import { UserBranch } from "../model/userBranch.model.js";
 import { LoginVerificationMail } from "../service/sendmail.js";
+// import { SubscriptionAdminPlan } from "../service/checkSubscriptionPlan.js";
 dotenv.config();
 
 
@@ -46,7 +47,10 @@ export const SaveUser = async (req, res, next) => {
         req.body.billAmount = sub.subscriptionCost
         req.body.userAllotted = sub.noOfUser
       }
-    }
+    } 
+    // else{
+    //   const userCount = await SubscriptionAdminPlan(req.body);
+    // }
     if (req.body.warehouse) {
       req.body.warehouse = await JSON.parse(req.body.warehouse)
       // await assingWarehouse(req.body.warehouse, user._id)
