@@ -1,5 +1,5 @@
 import express from "express";
-import { CheckPartyPayment, DebitorCalculate, OrdertoBilling, OrdertoDispatch, PartyPurchaseqty, ProductWiseSalesReport, SalesOrderCalculate, SalesOrderList, ViewOrderHistoryForPartySalesPerson, checkPartyOrderLimit, createOrder, createOrderHistory, createOrderHistoryById, createOrderHistoryByPartyId, createOrderHistoryByUserId, createOrderWithInvoice, deleteSalesOrder, deletedSalesOrder, updateCreateOrder, updateCreateOrderStatus } from "../controller/order.controller.js";
+import { CheckPartyPayment, DebitorCalculate, DispatchOrderCancelFromWarehouse, OrdertoBilling, OrdertoDispatch, PartyPurchaseqty, ProductWiseSalesReport, SalesOrderCalculate, SalesOrderList, ViewOrderHistoryForPartySalesPerson, checkPartyOrderLimit, createOrder, createOrderHistory, createOrderHistoryById, createOrderHistoryByPartyId, createOrderHistoryByUserId, createOrderWithInvoice, deleteSalesOrder, deletedSalesOrder, updateCreateOrder, updateCreateOrderStatus } from "../controller/order.controller.js";
 
 const router = express.Router();
 
@@ -13,6 +13,7 @@ router.put("/update-create-order/:id", updateCreateOrder);
 router.put("/update-create-order-status/:id", updateCreateOrderStatus);
 router.post("/order-billing/:id", OrdertoBilling)
 router.post("/order-dispatch/:id", OrdertoDispatch)
+router.post("/order-dispatch-cancel/:id", DispatchOrderCancelFromWarehouse)
 router.get("/sales-order-by-id/:id", createOrderHistoryById)
 router.get("/view-sales-order/:id/:database", SalesOrderList);
 router.get("/view-order-party/:id", ViewOrderHistoryForPartySalesPerson);

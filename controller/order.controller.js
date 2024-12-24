@@ -380,6 +380,23 @@ export const OrdertoDispatch = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 };
+// Order To Dispatch
+export const DispatchOrderCancelFromWarehouse = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const order = await CreateOrder.findById({ _id: orderId })
+        if (!order) {
+            return res.status(404).json({ message: 'Sales Order Not Found', status: false });
+        }
+        order.status = "pending";
+        order.Remark = req.body.Remark;
+        const orders = await order.save();
+        return res.status(200).json({ message: "Order Dispatch Cancel Seccessfull!", Order: orders, status: true });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
+    }
+};
 export const updateCreateOrder = async (req, res, next) => {
     try {
         const orderId = req.params.id;
