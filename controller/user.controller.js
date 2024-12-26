@@ -35,32 +35,50 @@ export const SaveUser = async (req, res, next) => {
       req.body.profileImage = req.file.filename;
     }
     if (req.body.setRule) {
-      req.body.setRule = await JSON.parse(req.body.setRule)
+      req.body.setRule = await JSON.parse(req.body.setRule);
     }
     if (req.body.subscriptionPlan) {
-      const sub = await Subscription.findById(req.body.subscriptionPlan)
+      const sub = await Subscription.findById(req.body.subscriptionPlan);
       if (sub) {
         // const { _id, ...subWithoutId } = sub.toObject();
         const date = new Date();
         req.body.planStart = date;
         req.body.planEnd = new Date(date.getTime() + (sub.days * 24 * 60 * 60 * 1000));
-        req.body.billAmount = sub.subscriptionCost
-        req.body.userAllotted = sub.noOfUser
+        req.body.billAmount = sub.subscriptionCost;
+        req.body.userAllotted = sub.noOfUser;
+        req.body.planStatus = "paid";
       }
-    } 
-    // else{
-    //   const userCount = await SubscriptionAdminPlan(req.body);
-    // }
+    } else{
+        const existRole = await Role.findOne({roleName:"SuperAdmin",database:body.database});
+        if(!existRole){
+          console.log("Role Not Found");
+        }
+        const existingSuperAdmin = await User.findOne({database:body.database,rolename:existRole._id.toString()})
+        if(!existingSuperAdmin){
+          console.log("user not found");
+        } else{
+            if(existingSuperAdmin.planStatus!=="paid"){
+              return res.status(404).json({ message: "User is not subscribed to the plan", status: false })
+            } else{
+                existingSuperAdmin.userRegister += 1;
+                if(existingSuperAdmin.userRegister <=existingSuperAdmin.userAllotted){
+                    await existingSuperAdmin.save();
+                } else{
+                  return res.status(400).json({ message: "You have reached your plan's user limit", status: false })
+                }
+            }
+        }
+    }
     if (req.body.warehouse) {
-      req.body.warehouse = await JSON.parse(req.body.warehouse)
+      req.body.warehouse = await JSON.parse(req.body.warehouse);
       // await assingWarehouse(req.body.warehouse, user._id)
     }
     const user = await User.create(req.body);
     if (req.body.warehouse) {
-      await assingWarehouse(user.warehouse, user._id)
+      await assingWarehouse(user.warehouse, user._id);
     }
     if (user) {
-      await setSalary(user)
+      await setSalary(user);
     }
     return user ? res.status(200).json({ message: "Data Save Successfull", User: user, status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false });
   } catch (err) {
