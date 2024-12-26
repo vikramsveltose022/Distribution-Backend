@@ -384,7 +384,7 @@ export const OrdertoDispatch = async (req, res) => {
 export const DispatchOrderCancelFromWarehouse = async (req, res) => {
     try {
         const orderId = req.params.id;
-        const order = await CreateOrder.findById({ _id: orderId })
+        const order = await CreateOrder.findById({ _id: orderId });
         if (!order) {
             return res.status(404).json({ message: 'Sales Order Not Found', status: false });
         }
