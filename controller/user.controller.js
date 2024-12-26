@@ -49,11 +49,11 @@ export const SaveUser = async (req, res, next) => {
         req.body.planStatus = "paid";
       }
     } else{
-        const existRole = await Role.findOne({roleName:"SuperAdmin",database:body.database});
+        const existRole = await Role.findOne({roleName:"SuperAdmin",database:req.body.database});
         if(!existRole){
           console.log("Role Not Found");
         }
-        const existingSuperAdmin = await User.findOne({database:body.database,rolename:existRole._id.toString()})
+        const existingSuperAdmin = await User.findOne({database:req.body.database,rolename:existRole._id.toString()})
         if(!existingSuperAdmin){
           console.log("user not found");
         } else{
