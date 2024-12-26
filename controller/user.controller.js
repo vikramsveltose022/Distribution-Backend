@@ -870,29 +870,42 @@ export const updatePlan = async (req, res, next) => {
     const user = await User.findById(req.params.id).populate({ path: "subscriptionPlan", model: "subscription" })
     if (!user) {
       return res.status(404).json({ message: "user not found", status: false })
+    } else{
+      if (req.body.subscriptionPlan) {
+        const sub = await Subscription.findById(req.body.subscriptionPlan)
+        if (sub) {
+          // const { _id, ...subWithoutId } = sub.toObject();
+          const date = new Date();
+          user.planStart = date;
+          user.planEnd = new Date(date.getTime() + (sub.days * 24 * 60 * 60 * 1000));
+          user.billAmount = sub.subscriptionCost
+          user.userAllotted = sub.noOfUser
+          await user.save();
+        }
+      } 
     }
-    const userPlan = await User.findOne({ _id: req.params.id, subscriptionPlan: req.body.subscriptionPlan })
-    if (userPlan) {
-      return res.status(400).json({ message: "this plan already exist !", status: false })
-    }
-    if (req.body.subscriptionPlan) {
-      const sub = await Subscription.findById(req.body.subscriptionPlan)
-      if (sub) {
-        let perDayAmount = user.billAmount / user.subscriptionPlan.days
-        const previousDate = new Date(user.planStart);
-        // const { _id, ...subWithoutId } = sub.toObject();
-        const date = new Date();
-        const differenceInTime = date.getTime() - previousDate.getTime();
-        const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
-        user.planStart = date;
-        user.planEnd = new Date(date.getTime() + (sub.days * 24 * 60 * 60 * 1000));
-        user.billAmount = sub.subscriptionCost - (differenceInDays * perDayAmount)
-        user.userAllotted = sub.noOfUser
-        user.subscriptionPlan = req.body.subscriptionPlan
-        await user.save()
-        return res.status(200).json({ message: "plan updated successfull!", status: true })
-      }
-    }
+    // const userPlan = await User.findOne({ _id: req.params.id, subscriptionPlan: req.body.subscriptionPlan })
+    // if (!userPlan) {
+    //   return res.status(400).json({ message: "this plan already exist !", status: false })
+    // }
+    // if (req.body.subscriptionPlan) {
+    //   const sub = await Subscription.findById(req.body.subscriptionPlan)
+    //   if (sub) {
+    //     let perDayAmount = user.billAmount / user.subscriptionPlan.days
+    //     const previousDate = new Date(user.planStart);
+    //     // const { _id, ...subWithoutId } = sub.toObject();
+    //     const date = new Date();
+    //     const differenceInTime = date.getTime() - previousDate.getTime();
+    //     const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
+    //     user.planStart = date;
+    //     user.planEnd = new Date(date.getTime() + (sub.days * 24 * 60 * 60 * 1000));
+    //     user.billAmount = sub.subscriptionCost - (differenceInDays * perDayAmount)
+    //     user.userAllotted = sub.noOfUser
+    //     user.subscriptionPlan = req.body.subscriptionPlan
+    //     await user.save()
+    //     return res.status(200).json({ message: "plan updated successfull!", status: true })
+    //   }
+    // }
   }
   catch (err) {
     console.log(err);
