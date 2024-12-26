@@ -872,7 +872,7 @@ export const updatePlan = async (req, res, next) => {
       return res.status(404).json({ message: "user not found", status: false })
     }
     const userPlan = await User.findOne({ _id: req.params.id, subscriptionPlan: req.body.subscriptionPlan })
-    if (!userPlan) {
+    if (userPlan) {
       return res.status(400).json({ message: "this plan already exist !", status: false })
     }
     if (req.body.subscriptionPlan) {
