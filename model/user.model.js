@@ -191,10 +191,12 @@ const UserSchema = new mongoose.Schema({
     type: String
   },
   userRegister: {
-    type: Number
+    type: Number,
+    default:0
   },
   userAllotted: {
-    type: Number
+    type: Number,
+    default:0
   },
   billAmount: {
     type: Number
