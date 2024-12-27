@@ -32,7 +32,7 @@ router.get("/view-order-warehouse-invoice/:id", ViewWarehouseByOrderInvoice);
 router.get("/view-cancel-order-warehouse/:id", ViewWarehouseOrderCancel);
 router.post("/send-otp-warehouse-deliver/:id",SendOtpToDeliveryWarehouse)
 router.get("/view-otp-warehouse-deliver/:id",ViewOtpWarehouse)
-router.get("/cancel-warehouse-order/:id/:productId", OrderCancelWarehouse);
+router.post("/cancel-warehouse-order/:id", OrderCancelWarehouse);
 router.get("/view-warehouse-order-history/:id", ViewWarehouseOrderCompletedOrCancel);
 router.get("/product-warehouse/:productId", ProductInWarehouse);
 

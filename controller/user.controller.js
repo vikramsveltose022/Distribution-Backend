@@ -17,7 +17,7 @@ import mongoose from "mongoose";
 import { WorkingHours } from "../model/workingHours.model.js";
 import { UserBranch } from "../model/userBranch.model.js";
 import { LoginVerificationMail } from "../service/sendmail.js";
-// import { SubscriptionAdminPlan } from "../service/checkSubscriptionPlan.js";
+import { SubscriptionAdminPlan } from "../service/checkSubscriptionPlan.js";
 dotenv.config();
 
 
@@ -378,6 +378,7 @@ export const saveUserWithExcel = async (req, res) => {
     const roles = [];
     const shiftss = [];
     const branchss = [];
+    const planLimit = [];
     const IdNotExisting = [];
     for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
       const dataRow = worksheet.getRow(rowIndex);
@@ -415,31 +416,37 @@ export const saveUserWithExcel = async (req, res) => {
                   existingIds.push(document.id)
                 } else {
                   if (document.Pan_No) {
-                    // document[code] = document.Pan_No;
                     const existingRecord = await User.findOne({
                       Pan_No: document.Pan_No, database: document.database, status: "Active"
                     });
                     if (!existingRecord) {
-                      const insertedDocument = await User.create(document);
-                      insertedDocuments.push(insertedDocument);
+                      const userLimit = await SubscriptionAdminPlan(document);
+                      if(userLimit){
+                        const insertedDocument = await User.create(document);
+                        insertedDocuments.push(insertedDocument);
+                      } else{
+                        planLimit.push(document.id);
+                      }
                     } else {
                       existingParts.push(document.Pan_No);
                     }
                   } else {
                     if (document.Aadhar_No) {
-                      // const codes = document.Aadhar_No;
-                      // document[code] = codes;
                       const existingRecord = await User.findOne({
                         Aadhar_No: document.Aadhar_No, database: document.database, status: "Active"
                       });
                       if (!existingRecord) {
-                        const insertedDocument = await User.create(document);
-                        insertedDocuments.push(insertedDocument);
+                        const userLimit = await SubscriptionAdminPlan(document);
+                        if(userLimit){
+                          const insertedDocument = await User.create(document);
+                          insertedDocuments.push(insertedDocument);
+                        } else{
+                          planLimit.push(document.id);
+                        }
                       } else {
                         existingParts.push(document.Aadhar_No);
                       }
                     } else {
-                      // const insertedDocument = await Customer.create(document);
                       panMobile.push(document.Aadhar_No);
                     }
                   }
@@ -471,6 +478,8 @@ export const saveUserWithExcel = async (req, res) => {
       message = `this user's shift id is required : ${shiftss.join(', ')}`;
     } else if (branchss.length > 0) {
       message = `this user's branch id is required : ${branchss.join(', ')}`;
+    } if(planLimit.length>0){
+      message = `You may have reached your plan's user limit or may not be subscribed to a plan : ${planLimit.join(', ')}`;
     }
     return res.status(200).json({ message, status: true });
   } catch (err) {

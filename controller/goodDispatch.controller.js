@@ -363,7 +363,7 @@ export const ViewWarehouseOrderCancel = async (req, res, next) => {
         if (order.length === 0) {
             return res.status(404).json({ message: "warehouse stock not found", status: false })
         }
-        return res.status(200).json({ Order: order, status: false })
+        return res.status(200).json({ Order: order, status: false });
     }
     catch (err) {
         console.log(err)
@@ -377,21 +377,15 @@ export const SendOtpToDeliveryWarehouse = async (req, res) => {
         if (!existing) {
             return res.status(404).json({ message: "order not found", status: false })
         }
-        const user = await User.findOne({ _id: req.body.deliveryBoyId, status: "Active" })
-        if (!user) {
-            return res.status(404).json({ message: "user not found", status: false })
-        }
          const warehouse = await Warehouse.findOne({ _id: req.body.warehouseId, status: "Active" })
         if (!warehouse) {
             return res.status(404).json({ message: "warehouse not found", status: false })
         }
-        // user.otpVerify = otp
-        // await user.save()
         warehouse.otp = otp
         await warehouse.save()
         return res.status(200).json({ message: "otp send successfull!", status: true });
     } catch (error) {
-        console.error(error);
+        console.log(error);
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 };
@@ -402,14 +396,10 @@ export const ViewOtpWarehouse = async (req, res) => {
         if (orderData) {
             return res.status(200).json({ otp: orderData, status: true });
         } else {
-            const orderData = await User.findById(req.params.id).select('otpVerify')
-            if (orderData) {
-                return res.status(200).json({ otp: orderData, status: true });
-            }
             return res.status(404).json({ message: 'otp not found', status: false });
         }
     } catch (error) {
-        console.error(error);
+        console.log(error);
         return res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 };
@@ -421,7 +411,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
         }
         let productFound = false;
         for (const item of existingOrder.orderItems) {
-            if (item.productId.toString() === req.params.productId && item.status !== "Cancelled") {
+            if (item.status !== "Cancelled") {
                 item.status = "Cancelled";
                 existingOrder.status = "Cancelled"
                 productFound = true;
@@ -429,7 +419,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                 if (product) {
                     // const warehouse = await Warehouse.findById(item.warehouse)
                     const warehouse = await Warehouse.findById(product.warehouse)
-                    if (warehouse) {
+                    if (warehouse && warehouse.otp ===req.body.otp) {
                         const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString())
                         if (pro) {
                             pro.currentStock += (item.qty);
@@ -440,9 +430,11 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                             await warehouse.save();
                             await product.save()
                         }
+                    } else{
+                        return res.status(400).json({ message: "otp does not matched", status: false }) 
                     }
                 } else {
-                    console.error(`Product with ID ${orderItem.productId} not found`);
+                    console.error(`Product with ID ${item.productId} not found`);
                 }
             } else {
                 console.log("Not Found")
