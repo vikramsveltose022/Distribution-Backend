@@ -3,7 +3,6 @@ import { User } from "../model/user.model.js";
 
 export const SubscriptionAdminPlan = async (body)=>{
     try{
-        let msg;
        const existRole = await Role.findOne({roleName:"SuperAdmin",database:body.database});
        if(!existRole){
         console.log("Role Not Found");
@@ -13,13 +12,14 @@ export const SubscriptionAdminPlan = async (body)=>{
         console.log("user not found");
        }
        if(existingSuperAdmin.planStatus!=="paid"){
-        return msg="subscription not found";
+        return false;
        } else{
         existingSuperAdmin.userRegister += 1;
         if(existingSuperAdmin.userRegister <=existingSuperAdmin.userAllotted){
-            return msg="subscription done";
+            await existingSuperAdmin.save();
+            return true;
         } else{
-            return msg="subscription limit full";
+            return false
         }
        }
     }
