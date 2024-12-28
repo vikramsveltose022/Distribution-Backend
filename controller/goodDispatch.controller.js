@@ -407,61 +407,65 @@ export const OrderCancelWarehouse = async (req, res, next) => {
     try {
         const existingOrder = await CreateOrder.findById(req.params.id)
         if (!existingOrder) {
+            console.log("orderdddd")
             return res.status(404).json({ message: "Order Not Found", status: false })
         }
         let productFound = false;
         for (const item of existingOrder.orderItems) {
             if (item.status !== "Cancelled") {
                 item.status = "Cancelled";
-                existingOrder.status = "Cancelled"
+                existingOrder.status = "Cancelled";
                 productFound = true;
                 const product = await Product.findById({ _id: item.productId });
                 if (product) {
-                    // const warehouse = await Warehouse.findById(item.warehouse)
-                    const warehouse = await Warehouse.findById(product.warehouse)
-                    if (warehouse && warehouse.otp ===req.body.otp) {
-                        const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString())
+                    const warehouse = await Warehouse.findById(item.warehouse)
+                    // const warehouse = await Warehouse.findById(product.warehouse);
+                    console.log("ware")
+                    if (warehouse.otp == req.body.otp) {
+                        console.log("eaaaa opttt")
+                        const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString());
                         if (pro) {
                             pro.currentStock += (item.qty);
                             product.qty += item.qty;
                             product.pendingQty -= item.qty;
                             // pro.pendingStock -= (item.qty)
-                            await deleteProductInStock(product, product.warehouse, item, existingOrder.date)
+                            await deleteProductInStock(product, product.warehouse, item, existingOrder.date);
                             await warehouse.save();
-                            await product.save()
+                            await product.save();
                         }
                     } else{
-                        return res.status(400).json({ message: "otp does not matched", status: false }) 
+                        console.log("errrrrrrrrrrrr")
+                        return res.status(400).json({ message: "otp does not matched", status: false });
                     }
                 } else {
                     console.error(`Product with ID ${item.productId} not found`);
                 }
             } else {
-                console.log("Not Found")
+                console.log("Not Found");
             }
         }
         for (const item of existingOrder.orderItems) {
             if (item.status === "Cancelled") {
-                existingOrder.status = "Cancelled"
+                existingOrder.status = "Cancelled";
             } else {
-                existingOrder.status = "Cancel in process"
+                existingOrder.status = "Cancel in process";
             }
         }
         await existingOrder.save()
-        return res.status(200).json({ message: "Product Cancel Successfull!", status: true })
+        return res.status(200).json({ message: "Product Cancel Successfull!", status: true });
     }
     catch (err) {
         console.log(err);
-        return res.status(500).json({ error: "Internal Server Error", status: false })
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
 export const ViewWarehouseOrderCompletedOrCancel = async (req, res, next) => {
     try {
-        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: { $in: ["completed", "Cancelled"] } }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" })
+        const order = await CreateOrder.find({ "orderItems.warehouse": req.params.id, status: { $in: ["completed", "Cancelled"] } }).populate({ path: "orderItems.productId", model: "product" }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" });
         if (order.length === 0) {
-            return res.status(404).json({ message: "warehouse stock not found", status: false })
+            return res.status(404).json({ message: "warehouse stock not found", status: false });
         }
-        return res.status(200).json({ Order: order, status: false })
+        return res.status(200).json({ Order: order, status: false });
     }
     catch (err) {
         console.log(err)
@@ -471,14 +475,14 @@ export const ViewWarehouseOrderCompletedOrCancel = async (req, res, next) => {
 // Billing Time
 export const ProductInWarehouse = async (req, res, next) => {
     try {
-        const warehouse = await Warehouse.find({ "productItems.productId": req.params.productId, status: "Active" }).select('warehouseName')
+        const warehouse = await Warehouse.find({ "productItems.productId": req.params.productId, status: "Active" }).select('warehouseName');
         if (!warehouse) {
-            return res.status(404).json({ message: "Product Not Found in Warehouse", status: false })
+            return res.status(404).json({ message: "Product Not Found in Warehouse", status: false });
         }
-        return res.status(200).json({ Warehouse: warehouse, status: true })
+        return res.status(200).json({ Warehouse: warehouse, status: true });
     }
     catch (err) {
-        console.log(err)
-        return res.status(500).json({ error: "Internal Server Error", status: false })
+        console.log(err);
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
