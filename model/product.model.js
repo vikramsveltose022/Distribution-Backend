@@ -10,9 +10,14 @@ const ProductSchema = new mongoose.Schema({
     database: {
         type: String
     },
-    partyId: {
-        type: String
-    },
+    partyId: [{
+        paytyId:{
+            type:String
+        },
+        purchaseDate:{
+            type:Date
+        }
+    }],
     primaryUnit: {
         type: String
     },
