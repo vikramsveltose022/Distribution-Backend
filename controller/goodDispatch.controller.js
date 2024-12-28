@@ -381,8 +381,8 @@ export const SendOtpToDeliveryWarehouse = async (req, res) => {
         if (!warehouse) {
             return res.status(404).json({ message: "warehouse not found", status: false })
         }
-        warehouse.otp = otp
-        await warehouse.save()
+        existing.otp = otp
+        await existing.save()
         return res.status(200).json({ message: "otp send successfull!", status: true });
     } catch (error) {
         console.log(error);
@@ -419,7 +419,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                 if (product) {
                     // const warehouse = await Warehouse.findById(item.warehouse)
                     const warehouse = await Warehouse.findById(product.warehouse);
-                    if (warehouse.otp == req.body.otp) {
+                    if (existingOrder.otp == req.body.otp) {
                         const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString());
                         if (pro) {
                             pro.currentStock += (item.qty);

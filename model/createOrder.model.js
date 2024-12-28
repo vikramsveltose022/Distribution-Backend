@@ -315,6 +315,9 @@ const createOrderSchema = new mongoose.Schema({
     DispatchStatus:{
         type:Boolean,
         default:false
+    },
+    otp:{
+        type:Number
     }
 }, { timestamps: true })
 
