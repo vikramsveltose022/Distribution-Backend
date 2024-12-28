@@ -81,12 +81,11 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                             product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
                         }
                         product.purchaseDate = new Date()
-                        // let obj = {
-                        //     partyId:req.body.partyId,
-                        //     purchaseDate: new Date()
-                        // }
-                        // product.partyId.push(obj);
-                        product.partyId = req.body.partyId;
+                        let obj = {
+                            partyId:req.body.partyId,
+                            purchaseDate: new Date()
+                        }
+                        product.partyId.push(obj);
                         product.purchaseStatus = true
                         product.qty += orderItem.qty;
                         await addProductInWarehouse3(product, product.warehouse, orderItem, req.body.date)
@@ -129,12 +128,12 @@ export const purchaseInvoiceOrder = async (req, res, next) => {
                             product.Product_MRP = (product.SalesRate) * (1 + product.GSTRate / 100) * (1 + groupDiscount / 100);
                         }
                         product.purchaseDate = new Date()
-                        product.partyId = req.body.partyId;
-                        // let obj = {
-                        //     partyId:req.body.partyId,
-                        //     purchaseDate: new Date()
-                        // }
-                        // product.partyId.push(obj);
+                        // product.partyId = req.body.partyId;
+                        let obj = {
+                            partyId:req.body.partyId,
+                            purchaseDate: new Date()
+                        }
+                        product.partyId.push(obj);
                         product.purchaseStatus = true
                         product.qty += orderItem.qty;
                         await addProductInWarehouse3(product, product.warehouse, orderItem, req.body.date)
