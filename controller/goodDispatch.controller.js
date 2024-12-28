@@ -447,6 +447,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                 existingOrder.status = "Cancel in process";
             }
         }
+        existingOrder.otp = undefined;
         await existingOrder.save()
         return res.status(200).json({ message: "Product Cancel Successfull!", status: true });
     }
