@@ -205,7 +205,7 @@ export const StockAlert1 = async (req, res) => {
 export const StockAlert = async (req, res) => {
   try {
     const Stock = []
-    const product = await Product.find({ database: req.params.database, status: "Active" }).populate({ path: "partyId", model: "customer" }).populate({ path: "warehouse", model: "warehouse" })
+    const product = await Product.find({ database: req.params.database, status: "Active" }).populate({ path: "partyId.partyId", model: "customer" }).populate({ path: "warehouse", model: "warehouse" })
     if (product.length === 0) {
       return res.status(404).json({ message: "product not found", status: false })
     }
@@ -226,8 +226,8 @@ export const StockAlert = async (req, res) => {
           MIN_stockalert: item.MIN_stockalert,
           warehouseName: item.warehouse.warehouseName,
           warehosueAddress: item.warehouse.address,
-          SupplierName: item?.partyId?.ownerName || null,
-          SupplierGST: item?.partyId?.gstNumber || null,
+          SupplierName: item?.partyId[item.partyId.length-1]?.partyId.ownerName || null,
+          SupplierGST: item?.partyId[item.partyId.length-1]?.partyId.gstNumber || null,
           partyId: item.partyId
         };
         Stock.push(StockAlerts)
