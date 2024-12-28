@@ -11,7 +11,7 @@ const ProductSchema = new mongoose.Schema({
         type: String
     },
     partyId: [{
-        paytyId:{
+        partyId:{
             type:String
         },
         purchaseDate:{
