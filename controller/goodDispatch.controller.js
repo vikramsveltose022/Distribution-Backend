@@ -407,7 +407,6 @@ export const OrderCancelWarehouse = async (req, res, next) => {
     try {
         const existingOrder = await CreateOrder.findById(req.params.id)
         if (!existingOrder) {
-            console.log("orderdddd")
             return res.status(404).json({ message: "Order Not Found", status: false })
         }
         let productFound = false;
@@ -418,11 +417,9 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                 productFound = true;
                 const product = await Product.findById({ _id: item.productId });
                 if (product) {
-                    const warehouse = await Warehouse.findById(item.warehouse)
-                    // const warehouse = await Warehouse.findById(product.warehouse);
-                    console.log("ware")
+                    // const warehouse = await Warehouse.findById(item.warehouse)
+                    const warehouse = await Warehouse.findById(product.warehouse);
                     if (warehouse.otp == req.body.otp) {
-                        console.log("eaaaa opttt")
                         const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString());
                         if (pro) {
                             pro.currentStock += (item.qty);
@@ -434,7 +431,6 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                             await product.save();
                         }
                     } else{
-                        console.log("errrrrrrrrrrrr")
                         return res.status(400).json({ message: "otp does not matched", status: false });
                     }
                 } else {
