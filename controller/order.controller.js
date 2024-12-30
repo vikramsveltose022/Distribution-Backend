@@ -63,7 +63,7 @@ export const createOrder = async (req, res, next) => {
                             product.qty -= orderItem.qty;
                             product.pendingQty += orderItem.qty;
                             await addProductInWarehouse6(product, product.warehouse, orderItem, req.body.date)
-                            await warehouse.save();
+                            // await warehouse.save();
                             await product.save()
                         }
                     } else {
@@ -286,13 +286,19 @@ export const OrdertoBilling = async (req, res) => {
         for (const orderItem of req.body.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId });
             if (product) {
-                product.salesDate = new Date(new Date())
+                product.salesDate = new Date()
                 const warehouse = await Warehouse.findById(orderItem.warehouse)
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
+                    pro.currentStock -= (orderItem.qty);
+                    // product.qty -= orderItem.qty;
+                    // product.pendingQty += orderItem.qty;
+                    // await addProductInWarehouse6(product, product.warehouse, orderItem, req.body.date)
+                    await warehouse.save();
+                    // await product.save()
                 }
             } else {
-                console.error(`Product with ID ${orderItem.productId._id} not found`);
+                console.error(`Product with ID ${orderItem.productId} not found`);
             }
         }
         order.orderItems = req.body.orderItems;
@@ -313,14 +319,6 @@ export const OrdertoDispatch = async (req, res) => {
         if (!order) {
             return res.status(404).json({ message: 'Sales Order Not Found', status: false });
         }
-        // if(order.DispatchStatus===false){
-        //     order.orderItems = req.body.orderItems;
-        //     order.DispatchStatus = true;
-        // } else{
-        //     for(let item of req.body.orderItems){
-        //         order.orderItems.push(item)
-        //     }
-        // }
         for (const orderItem of order.orderItems) {
             if (orderItem.warehouse.toString() === req.body.warehouse.toString()) {
                 orderItem.status = "Dispatch";
@@ -340,40 +338,6 @@ export const OrdertoDispatch = async (req, res) => {
             }
         }
         const orders = await order.save();
-        
-        // const cancelOrder = {
-        //     orderNo:req.body.OrderNo,
-        //     partyId:req.body.PartyId,
-        //     orderItems:req.body.OrderItems,
-        //     status:"Cancelled"
-        // }
-        // for (const item of req.body.OrderItems) {
-        //     if (item.status !== "Cancelled") {
-        //         item.status = "Cancelled";
-        //         const product = await Product.findById({ _id: item.productId });
-        //         if (product) {
-        //             // const warehouse = await Warehouse.findById(item.warehouse)
-        //             const warehouse = await Warehouse.findById(product.warehouse)
-        //             if (warehouse) {
-        //                 const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString())
-        //                 if (pro) {
-        //                     pro.currentStock += (item.qty);
-        //                     product.qty += item.qty;
-        //                     product.pendingQty -= item.qty;
-        //                     await deleteProductInStock(product, product.warehouse, item, order.date);
-        //                     await warehouse.save();
-        //                     await product.save();
-        //                 }
-        //             }
-        //         } else {
-        //             console.error(`Product with ID ${orderItem.productId} not found`);
-        //         }
-        //     } else {
-        //         console.log("Not Found")
-        //     }
-        // }
-        // await CreateOrder.create(cancelOrder);
-       
         return res.status(200).json({ message: "Order Dispatch Seccessfull!", Order: orders, status: true });
     } catch (error) {
         console.error(error);
@@ -757,11 +721,13 @@ export const deleteProductInStock = async (warehouse, warehouseId, orderItem, da
                         existingStock.pendingStock -= orderItem.qty
                         existingStock.currentStock += orderItem.qty
                         existingStock.totalPrice -= (orderItem.qty * orderItem.price);
+                        existingStock.rQty += orderItem.qty
                         item.markModified('productItems');
                         await item.save();
                     } else {
                         existingStock.currentStock += orderItem.qty
                         existingStock.totalPrice -= (orderItem.qty * orderItem.price);
+                        existingStock.rQty += orderItem.qty
                         item.markModified('productItems');
                         await item.save();
                     }

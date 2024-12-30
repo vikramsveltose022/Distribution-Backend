@@ -245,7 +245,7 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             for (const orderItem of orders.orderItems) {
                 const product = await Product.findById({ _id: orderItem.productId });
                 if (product) {
-                    const warehouse = await Warehouse.findById(product.warehouse)
+                    const warehouse = await Warehouse.findById(orderItem.warehouse)
                     if (warehouse) {
                         let tax = 0;
                         tax = (orderItem.igstRate + orderItem.sgstRate + orderItem.cgstRate)
@@ -417,8 +417,8 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                 productFound = true;
                 const product = await Product.findById({ _id: item.productId });
                 if (product) {
-                    // const warehouse = await Warehouse.findById(item.warehouse)
-                    const warehouse = await Warehouse.findById(product.warehouse);
+                    const warehouse = await Warehouse.findById(item.warehouse)
+                    // const warehouse = await Warehouse.findById(product.warehouse);
                     if (existingOrder.otp == req.body.otp) {
                         const pro = warehouse.productItems.find((items) => items.productId.toString() === item.productId.toString());
                         if (pro) {
@@ -426,7 +426,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                             product.qty += item.qty;
                             product.pendingQty -= item.qty;
                             // pro.pendingStock -= (item.qty)
-                            await deleteProductInStock(product, product.warehouse, item, existingOrder.date);
+                            await deleteProductInStock(product, item.warehouse, item, existingOrder.date);
                             await warehouse.save();
                             await product.save();
                         }
