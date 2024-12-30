@@ -35,9 +35,9 @@ export const SaveInvoiceList = async (req, res, next) => {
         for (const orderItem of createOrder.orderItems) {
             const product = await Product.findById({ _id: orderItem.productId._id });
             if (product) {
-                ware = product.warehouse
+                ware = orderItem.warehouse
                 product.salesDate = new Date(new Date())
-                const warehouse = await Warehouse.findById(product.warehouse)
+                const warehouse = await Warehouse.findById(orderItem.warehouse)
                 if (warehouse) {
                     const pro = warehouse.productItems.find((item) => item.productId.toString() === orderItem.productId.toString())
                     // pro.currentStock -= (orderItem.qty);

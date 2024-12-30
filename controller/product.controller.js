@@ -440,7 +440,6 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
     const sourceProductItem = user.productItems.find(
       (pItem) => pItem.productId === id.productId);
     if (sourceProductItem) {
-      // sourceProductItem.Size += warehouse.Size;
       sourceProductItem.currentStock = warehouse.qty
       sourceProductItem.price = warehouse.Purchase_Rate;
       sourceProductItem.totalPrice = (warehouse.qty * warehouse.Purchase_Rate);
@@ -450,8 +449,6 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
     } else {
       let ware = {
         productId: id._id.toString(),
-        // Size: warehouse.Size,
-        // unitType: warehouse.unitType,
         primaryUnit: warehouse.primaryUnit,
         secondaryUnit: warehouse.secondaryUnit,
         secondarySize: warehouse.secondarySize,
@@ -1075,7 +1072,6 @@ export const addProductInWarehouse8 = async (warehouse, warehouseId, orderItem, 
     console.error(err);
   }
 };
-
 
 // HSN SALES SUMMARY REPORT
 
