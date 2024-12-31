@@ -1072,6 +1072,110 @@ export const addProductInWarehouse8 = async (warehouse, warehouseId, orderItem, 
     console.error(err);
   }
 };
+export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, date) => {
+  try {
+    const dates = new Date(date);
+    const startOfDay = new Date(dates);
+    const endOfDay = new Date(dates);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+    const user = await Warehouse.findById({ _id: warehouseId })
+    if (!user) {
+      return console.log("warehouse not found")
+    }
+    const stock = await Stock.findOne({warehouseId: warehouseId.toString(),date: { $gte: startOfDay, $lte: endOfDay }});
+    // const stock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay, $lte: endOfDay } });
+    if (!stock) {
+      let productItems = {
+        productId: warehouse._id.toString(),
+        gstPercentage: warehouse.GSTRate,
+        currentStock: warehouse.qty,
+        price: warehouse.Purchase_Rate,
+        totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
+        oQty: warehouse.Opening_Stock,
+        oRate: warehouse.Purchase_Rate,
+        oTaxRate: warehouse.GSTRate,
+        oTotal: (warehouse.qty * warehouse.Purchase_Rate),
+        rQty: orderItem.qty,
+        date: date
+      }
+      let warehouses = {
+        database: warehouse.database,
+        warehouseId: warehouseId,
+        closingStatus: "closing",
+        productItems: productItems,
+        date: date
+      }
+      const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
+      if (stock.length === 0) {
+        console.log("warehouse not found")
+      } else {
+        for (let item of stock) {
+          const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+          if (existingStock) {
+            existingStock.gstPercentage = warehouse.GSTRate
+            existingStock.currentStock += orderItem.qty
+            existingStock.price = orderItem.price;
+            existingStock.totalPrice += (orderItem.qty * orderItem.price);
+            item.markModified('productItems');
+            await item.save();
+          }
+        }
+      }
+      await Stock.create(warehouses)
+    } else {
+      const stock = await Stock.find({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay } });
+      if (stock.length === 0) {
+        console.log("warehouse not found")
+      } else {
+        for (let item of stock) {
+          const existingStock = item.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+          if (existingStock) {
+            if (item.date.toDateString() === dates.toDateString()) {
+              existingStock.rQty += (orderItem.qty);
+              existingStock.gstPercentage = warehouse.GSTRate
+              existingStock.currentStock += orderItem.qty
+              existingStock.price = orderItem.price;
+              existingStock.totalPrice += (orderItem.qty * orderItem.price);
+              item.markModified('productItems');
+              await item.save();
+            } else {
+              existingStock.gstPercentage = warehouse.GSTRate
+              existingStock.currentStock += orderItem.qty
+              existingStock.price = orderItem.price;
+              existingStock.totalPrice += (orderItem.qty * orderItem.price);
+              item.markModified('productItems');
+              await item.save();
+            }
+          }
+        }
+        const existProductInStock = await Stock.findOne({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay, $lte: endOfDay } });
+        if (existProductInStock) {
+          const existingProduct = existProductInStock.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+          if (!existingProduct) {
+            let productItems = {
+              productId: warehouse._id.toString(),
+              gstPercentage: warehouse.GSTRate,
+              currentStock: warehouse.qty,
+              price: warehouse.Purchase_Rate,
+              totalPrice: (warehouse.qty * warehouse.Purchase_Rate),
+              oQty: warehouse.Opening_Stock,
+              oRate: warehouse.Purchase_Rate,
+              oTaxRate: warehouse.GSTRate,
+              oTotal: (warehouse.qty * warehouse.Purchase_Rate),
+              rQty: orderItem.qty,
+              date: date
+            }
+            existProductInStock.productItems.push(productItems);
+            await existProductInStock.save();
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 // HSN SALES SUMMARY REPORT
 
