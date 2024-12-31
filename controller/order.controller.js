@@ -727,7 +727,7 @@ export const deleteProductInStock = async (warehouse, warehouseId, orderItem, da
                     } else {
                         existingStock.currentStock += orderItem.qty
                         existingStock.totalPrice -= (orderItem.qty * orderItem.price);
-                        existingStock.rQty += orderItem.qty
+                        // existingStock.rQty += orderItem.qty
                         item.markModified('productItems');
                         await item.save();
                     }

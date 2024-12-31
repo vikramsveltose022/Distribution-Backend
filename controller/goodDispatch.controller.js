@@ -9,7 +9,7 @@ import { Warehouse } from "../model/warehouse.model.js";
 import { Product } from "../model/product.model.js";
 import { ledgerPartyForDebit } from "../service/ledger.js";
 import { generateInvoice } from "../service/invoice.js";
-import { addProductInWarehouse7 } from "./product.controller.js";
+import { addProductInWarehouse7, addProductInWarehouse9 } from "./product.controller.js";
 import { deleteProductInStock } from "./order.controller.js";
 
 
@@ -426,7 +426,7 @@ export const OrderCancelWarehouse = async (req, res, next) => {
                             product.qty += item.qty;
                             product.pendingQty -= item.qty;
                             // pro.pendingStock -= (item.qty)
-                            await deleteProductInStock(product, item.warehouse, item, existingOrder.date);
+                            await addProductInWarehouse9(product, item.warehouse, item, new Date());
                             await warehouse.save();
                             await product.save();
                         }
