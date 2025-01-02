@@ -1075,6 +1075,10 @@ export const addProductInWarehouse8 = async (warehouse, warehouseId, orderItem, 
 export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, date1) => {
   try {
     const datess = new Date(date1);
+    const startOfDay1 = new Date(dates);
+    const endOfDay1 = new Date(dates);
+    startOfDay1.setUTCHours(0, 0, 0, 0);
+    endOfDay1.setUTCHours(23, 59, 59, 999);
     const date = new Date();
     const dates = new Date(date);
     const startOfDay = new Date(dates);
@@ -1122,6 +1126,16 @@ export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, 
             item.markModified('productItems');
             await item.save();
           }
+          // return qty
+          const stock1 = await Stock.findOne({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay1, $lte: endOfDay1 }});
+          if (stock1) {
+            const existingStock1 = stock.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+            if(existingStock1){
+              existingStock.pendingStock -= orderItem.qty;
+              item.markModified('productItems');
+              await item.save();
+            }
+          }
         }
       }
       await Stock.create(warehouses)
@@ -1149,13 +1163,15 @@ export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, 
               item.markModified('productItems');
               await item.save();
             }
-            console.log(item.date.toDateString())
-            console.log(datess.toDateString())
-            if(item.date.toDateString() === datess.toDateString()){
-              console.log("callinggggg")
-              existingStock.pendingStock -= orderItem.qty;
-              item.markModified('productItems');
-              await item.save();
+            // return qty
+            const stock1 = await Stock.findOne({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay1, $lte: endOfDay1 }});
+            if (stock1) {
+              const existingStock1 = stock1.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
+              if(existingStock1){
+                existingStock.pendingStock -= orderItem.qty;
+                item.markModified('productItems');
+                await item.save();
+              }
             }
           }
         }
