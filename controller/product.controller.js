@@ -1075,8 +1075,8 @@ export const addProductInWarehouse8 = async (warehouse, warehouseId, orderItem, 
 export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, date1) => {
   try {
     const datess = new Date(date1);
-    const startOfDay1 = new Date(dates);
-    const endOfDay1 = new Date(dates);
+    const startOfDay1 = new Date(datess);
+    const endOfDay1 = new Date(datess);
     startOfDay1.setUTCHours(0, 0, 0, 0);
     endOfDay1.setUTCHours(23, 59, 59, 999);
     const date = new Date();
