@@ -1072,8 +1072,10 @@ export const addProductInWarehouse8 = async (warehouse, warehouseId, orderItem, 
     console.error(err);
   }
 };
-export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, date) => {
+export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, date1) => {
   try {
+    const datess = new Date(date1);
+    const date = new Date();
     const dates = new Date(date);
     const startOfDay = new Date(dates);
     const endOfDay = new Date(dates);
@@ -1144,6 +1146,11 @@ export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, 
               existingStock.currentStock += orderItem.qty
               existingStock.price = orderItem.price;
               existingStock.totalPrice += (orderItem.qty * orderItem.price);
+              item.markModified('productItems');
+              await item.save();
+            }
+            if(item.date.toDateString() === datess.toDateString()){
+              existingStock.pendingStock -= orderItem.qty;
               item.markModified('productItems');
               await item.save();
             }

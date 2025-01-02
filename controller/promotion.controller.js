@@ -249,7 +249,8 @@ export const PromotionApply = async (req, res, next) => {
                                 Status: status,
                                 OfferAmount: offerQty,
                                 FreeProduct: freeProductName,
-                                type: "ProductWise"
+                                type: "ProductWise",
+                                ActivityType:item.activityId
                             }
                             if (productName) {
                                 await customers.push(Obj)
@@ -273,7 +274,8 @@ export const PromotionApply = async (req, res, next) => {
                             Balance: remainingAmount,
                             Status: status,
                             OfferAmount: offerAmount,
-                            type: "AmountWise"
+                            type: "AmountWise",
+                            ActivityType:item.activityId
                         }
                         await customers.push(Obj)
                     } else if (item.percentageWise.length > 0) {
@@ -294,7 +296,8 @@ export const PromotionApply = async (req, res, next) => {
                             Balance: remainingAmount,
                             Status: status,
                             OfferAmount: offerPercentage,
-                            type: "PercentageWise"
+                            type: "PercentageWise",
+                            ActivityType:item.activityId
                         }
                         await customers.push(Obj)
                     }
