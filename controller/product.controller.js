@@ -1149,7 +1149,10 @@ export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, 
               item.markModified('productItems');
               await item.save();
             }
+            console.log(item.date.toDateString())
+            console.log(datess.toDateString())
             if(item.date.toDateString() === datess.toDateString()){
+              console.log("callinggggg")
               existingStock.pendingStock -= orderItem.qty;
               item.markModified('productItems');
               await item.save();
