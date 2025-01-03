@@ -1127,15 +1127,15 @@ export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, 
             await item.save();
           }
           // return qty
-          console.log(startOfDay1)
-          console.log(endOfDay1)
+          // console.log(startOfDay1)
+          // console.log(endOfDay1)
           const stock1 = await Stock.findOne({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay1, $lte: endOfDay1 }});
-          console.log("step-1")
+          // console.log("step-1")
           if (stock1) {
-            console.log("step-2")
+            // console.log("step-2")
             const existingStock1 = stock.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
             if(existingStock1){
-              console.log("step-3")
+              // console.log("step-3")
               existingStock.pendingStock -= orderItem.qty;
               item.markModified('productItems');
               await item.save();
@@ -1170,15 +1170,15 @@ export const addProductInWarehouse9 = async (warehouse, warehouseId, orderItem, 
             }
           }
           // return qty
-          console.log(startOfDay1)
-          console.log(endOfDay1)
+          // console.log(startOfDay1)
+          // console.log(endOfDay1)
           const stock1 = await Stock.findOne({ warehouseId: warehouseId.toString(), date: { $gte: startOfDay1, $lte: endOfDay1 }});
-          console.log('step-4')
+          // console.log('step-4')
           if (stock1) {
-            console.log('step-5')
+            // console.log('step-5')
             const existingStock1 = stock1.productItems.find((item) => item.productId.toString() === warehouse._id.toString())
             if(existingStock1){
-              console.log('step-6')
+              // console.log('step-6')
               existingStock.pendingStock -= orderItem.qty;
               item.markModified('productItems');
               await item.save();
