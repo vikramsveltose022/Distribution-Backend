@@ -1,5 +1,5 @@
 import express from "express";
-import { deleteActivity, deletePromotion, PromotionApply, PromotionApplyForSalesPerson, SaveActivity, SavePromotion, UpdatedActivity, UpdatedPromotion, UpdatedPromotionProductWise, ViewActivity, ViewActivityById, ViewPromotion, ViewPromotionById } from "../controller/promotion.controller.js";
+import { deleteActivity, deletePromotion, PromotionApply, PromotionApplyForSalesPerson, PromotionApplySalesApp, SaveActivity, SavePromotion, UpdatedActivity, UpdatedPromotion, UpdatedPromotionProductWise, ViewActivity, ViewActivityById, ViewPromotion, ViewPromotionById } from "../controller/promotion.controller.js";
 
 const router = express.Router();
 
@@ -16,6 +16,7 @@ router.put("/update-promotion/:id", UpdatedPromotion)
 router.put("/update-product-promotion/:id", UpdatedPromotionProductWise)
 router.delete("/delete-promotion/:id", deletePromotion)
 router.get("/promotion-apply/:database", PromotionApply)
+router.get("/promotion-apply-salesperson/:database/:id", PromotionApplySalesApp)
 // router.post("/promotion-apply/:database", PromotionApply1)
 router.post("/promotion-apply-salesperson/:database/:id", PromotionApplyForSalesPerson)
 
