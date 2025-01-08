@@ -39,13 +39,15 @@ export const createOrder = async (req, res, next) => {
         } else {
             if (date1.toDateString() === date2.toDateString()) {
                 if (party.paymentTerm.toLowerCase() !== "cash") {
-                    const existOrders = await CreateOrder.find({ partyId: req.body.partyId, paymentStatus: false }).sort({ date: 1, sortorder: -1 })
+                    const existOrders = await CreateOrder.find({ partyId: req.body.partyId,
+                        status: { $nin: ['Deactive', 'Cancelled', 'Cancel in process'] },
+                        paymentStatus: false }).sort({ date: 1, sortorder: -1 })
                     if (existOrders.length > 0) {
-                        const due = existOrders[0]
-                        const lastOrderDate = due?.date
+                        const due = existOrders[0];
+                        const lastOrderDate = due?.date;
                         const currentDate = new Date();
                         const timeDifference = currentDate - lastOrderDate;
-                        const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
+                        const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
                         if (days >= party.lockInTime) {
                             return res.status(400).json({ message: "First, you need to pay the previous payment", status: false });
                         }
