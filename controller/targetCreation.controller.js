@@ -98,6 +98,12 @@ export const SaveTargetCreation = async (req, res) => {
         req.body.salesPersonId = "salesPerson"
         const target = await TargetCreation.create(req.body);
         req.body.salesPersonId = undefined
+        // check user role
+        const checkUser = await User.findById(user.created_by).populate({ path: "rolename", model: "role" });
+        if (checkUser.rolename.roleName === "SuperAdmin") {
+            console.log("SuperAdmin detected, not saving target.");
+            return res.status(200).json({ message: "Target saved successfully", status: true });
+        }
         const existingTargets = await TargetCreation.find({ userId: user.created_by }).sort({ sortorder: -1 });
         const lastTarget = existingTargets[existingTargets.length - 1];
         if (lastTarget) {
