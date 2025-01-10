@@ -48,7 +48,7 @@ export const ViewLastLedgerBalance = async (req, res, next) => {
 }
 export const viewLedgerByPartySalesApp = async (req, res, next) => {
     try {
-        const customer = await Customer.find({created_by:req.params.id}).sort({ date: 1, sortorder: -1 })
+        const customer = await Customer.find({created_by:req.params.id})
         if (customer.length === 0) {
             return res.status(404).json({ message: "Customer Not Found", status: false });
         }
