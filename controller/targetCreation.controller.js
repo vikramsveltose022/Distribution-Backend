@@ -1219,8 +1219,8 @@ export const latestAchievementSalesById = async (req, res) => {
                     actualQuantity: actualQuantity,
                     achievementPercentage: (actualQuantity / targetProduct.qtyAssign) * 100,
                     productPrice: targetProduct.price,
-                    targetTotalPrice: targetProduct.totalPrice,
-                    actualTotalPrice: actualTotalPrice
+                    targetTotalPrice: (targetProduct.qtyAssign*productDetails.Product_MRP), //targetProduct.totalPrice,
+                    actualTotalPrice: (actualQuantity*productDetails.Product_MRP)  //actualTotalPrice
                 };
             } else {
                 return null;
