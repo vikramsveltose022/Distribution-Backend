@@ -1700,25 +1700,17 @@ export const targetCalculation = async (req, res, next) => {
             averagePending: 0
         };
         let lastMonthCount
-        // const startOfDay = moment().startOf('day').toDate();
-        // const endOfDay = moment().endOf('day').toDate();
         const startOfDay = moment().startOf('month').toDate();
         const endOfDay = moment().endOf('month').toDate();
-        // const target = await TargetCreation.find({ database: req.params.database, createdAt: { $gte: startOfDay, $lte: endOfDay } }).sort({ sortorder: -1 })
-        // if (target.length === 0) {
-        //     return res.status(404).json({ message: "target not found", status: false })
-        // }
         const Achievement = await SalesPersonAchievement(req.params.database)
         if (Achievement.length === 0) {
             return res.status(404).json({ message: "achievement not found", status: false })
         }
-        // target.forEach(item => {
-        //     Target.currentMonthTarget = item.grandTotal
-        // })
-        Achievement.forEach(item => {
-            Target.currentMonthAchieve += item.achievements.actualTotalPrice
-            Target.currentMonthTarget += item.achievements.targetTotalPrice
-            lastMonthCount = (1 < item.achievements.lastMonthCount) ? item.achievements.lastMonthCount : 1
+        Achievement[0].achievements.forEach(item => {
+            console.log(item)
+            Target.currentMonthAchieve += item.actualTotalPrice
+            Target.currentMonthTarget += item.targetTotalPrice
+            lastMonthCount = (1 < item.lastMonthCount) ? item.lastMonthCount : 1
         })
         Target.targerPending = Target.currentMonthTarget - Target.currentMonthAchieve
         Target.averageTarget = Target.currentMonthTarget / lastMonthCount
@@ -1803,20 +1795,19 @@ export const SalesPersonAchievement = async (database) => {
             return { achievements };
         });
         const salesPerson = (await Promise.all(salesPersonPromises)).filter(Boolean);
-        const salesTarget = salesPerson.map(salesPerson => {
-            if (Array.isArray(salesPerson.achievements) && salesPerson.achievements.length === 1) {
-                salesPerson.achievements = salesPerson.achievements[0];
-            } else {
-                salesPerson.achievements = salesPerson.achievements[0];
+        // const salesTarget = salesPerson.map((salesPerson) => {
+        //     if (Array.isArray(salesPerson.achievements) && salesPerson.achievements.length === 1) {
+        //         salesPerson.achievements = salesPerson.achievements[0];
+        //     } else {
+        //         salesPerson.achievements = salesPerson.achievements[0];
 
-            }
-            return salesPerson;
-        });
+        //     }
+        //     return salesPerson;
+        // });
         // return res.status(200).json({ salesTarget, status: true });
-        return salesTarget
+        return salesPerson
     } catch (error) {
         console.error('Error calculating achievements:', error);
-        // res.status(500).json({ error: 'Internal Server Error', status: false });
     }
 };
 
