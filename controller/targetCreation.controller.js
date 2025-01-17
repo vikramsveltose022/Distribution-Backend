@@ -1707,16 +1707,14 @@ export const targetCalculation = async (req, res, next) => {
             return res.status(404).json({ message: "achievement not found", status: false })
         }
         Achievement[0].achievements.forEach(item => {
-            console.log(item)
             Target.currentMonthAchieve += item.actualTotalPrice
             Target.currentMonthTarget += item.targetTotalPrice
             lastMonthCount = (1 < item.lastMonthCount) ? item.lastMonthCount : 1
         })
-        Target.targerPending = Target.currentMonthTarget - Target.currentMonthAchieve
-        Target.averageTarget = Target.currentMonthTarget / lastMonthCount
-        Target.averageAchievement = Target.currentMonthAchieve / lastMonthCount
-        Target.averagePending = Target.averageTarget - Target.averageAchievement
-
+        Target.targerPending = Target.currentMonthTarget - Target.currentMonthAchieve;
+        Target.averageTarget = Target.currentMonthTarget / lastMonthCount;
+        Target.averageAchievement = Target.currentMonthAchieve / lastMonthCount;
+        Target.averagePending = Target.averageTarget - Target.averageAchievement;
         res.status(200).json({ Target, status: true })
     }
     catch (err) {
