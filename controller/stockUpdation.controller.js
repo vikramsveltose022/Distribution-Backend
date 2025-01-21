@@ -385,14 +385,13 @@ export const ViewAllWarehouse1 = async () => {
 };
 export const viewStockClosingWarehouse = async (req, res, next) => {
     try {
-        let stockProduct = []
-        let sqty = 0;
-        const warehouse = await Stock.find({ database: req.params.database }).sort({ date: 1, sortorder: -1 }).populate({ path: "productItems.productId", model: "product" }).populate({ path: "warehouseId", model: "warehouse" })
+        const warehouse = await Stock.find({ database: req.params.database }).sort({ date: 1, sortorder: -1 }).populate({ path: "productItems.productId", model: "product" });
+        //.populate({ path: "warehouseId", model: "warehouse" })
         return (warehouse.length > 0) ? res.status(200).json({ Warehouse: warehouse, status: true }) : res.status(404).json({ message: "Not Found", status: false })
     }
     catch (err) {
         console.log(err);
-        return res.status(500).json({ error: "Internal Server Error", status: false })
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
 export const viewOpeningStockWarehouse = async (req, res, next) => {
@@ -401,16 +400,16 @@ export const viewOpeningStockWarehouse = async (req, res, next) => {
         const currentDate = new Date();
         const warehouse = await Stock.find({}).sort({ sortorder: -1 }).populate({ path: "productItems.productId", model: "product" })
         for (let ware of warehouse) {
-            ware.openingStatus = "opening"
-            ware.Openingdate = currentDate
+            ware.openingStatus = "opening";
+            ware.Openingdate = currentDate;
             const openingWarehouse = await ware.save();
-            opening.push(openingWarehouse)
+            opening.push(openingWarehouse);
         }
         return (opening.length > 0) ? res.status(200).json({ Warehouse: opening, status: true }) : res.status(404).json({ message: "Not Found", status: false })
     }
     catch (err) {
         console.log(err);
-        return res.status(500).json({ error: "Internal Server Error", status: false })
+        return res.status(500).json({ error: "Internal Server Error", status: false });
     }
 }
 // my code

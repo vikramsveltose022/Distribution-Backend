@@ -15,16 +15,15 @@ const emptyObj = {};
 
 export const SaveTargetCreation1 = async (req, res) => {
     try {
-        const party = await Customer.findById({ _id: req.body.partyId })
-        const user = await User.findById({ _id: req.body.created_by })
+        const party = await Customer.findById({ _id: req.body.partyId });
+        const user = await User.findById({ _id: req.body.created_by });
         if (!user) {
-            return res.status(400).json({ message: "User Not Found", status: false })
+            return res.status(400).json({ message: "User Not Found", status: false });
         }
         req.body.database = user.database;
         const target = await TargetCreation.create(req.body)
         const existingTarget = await TargetCreation.find({ userId: party.created_by }).sort({ sortorder: -1 })
-        const tar = existingTarget[existingTarget.length - 1]
-        console.log(tar)
+        const tar = existingTarget[existingTarget.length - 1];
         if (tar) {
             for (let product of tar.products) {
                 const existingProduct = req.body.products.find(p => p.productId === product.productId);
@@ -42,8 +41,8 @@ export const SaveTargetCreation1 = async (req, res) => {
         req.body.partyId = undefined;
         req.body.created_by = undefined;
         req.body.userId = await party.created_by;
-        const newTarget = await TargetCreation.create(req.body)
-        return (target && newTarget) ? res.status(200).json({ message: "Target save successfully", status: true }) : res.status(400).json({ message: "something went wrong", status: false })
+        const newTarget = await TargetCreation.create(req.body);
+        return (target && newTarget) ? res.status(200).json({ message: "Target save successfully", status: true }) : res.status(400).json({ message: "Something Went Wrong", status: false })
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: "Internal Server Error" });
@@ -95,7 +94,7 @@ export const SaveTargetCreation = async (req, res) => {
             return res.status(400).json({ message: "User Not Found", status: false });
         }
         req.body.database = user.database;
-        req.body.salesPersonId = "salesPerson"
+        req.body.salesPersonId = "salesPerson";
         const target = await TargetCreation.create(req.body);
         req.body.salesPersonId = undefined
         // check user role
@@ -350,9 +349,7 @@ export const increasePercentage555 = async (req, res, next) => {
         if (!customers.length > 0) {
             return res.status(404).json({ message: "Party Not Found", status: false });
         }
-        let finalTarget;
         let id;
-        let total = 0;
         for (let customer of customers) {
             const date = new Date();
             const targetCreation = await TargetCreation.find({ partyId: customer._id });
