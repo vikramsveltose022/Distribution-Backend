@@ -32,8 +32,6 @@ export const saveReceipt = async (req, res, next) => {
             req.body.voucherDate = new Date();
             req.body.lockStatus = "No";
             const receiptData = { ...req.body, ...item };
-            // const particular = item.paymentMode + " " + "receipt";
-            // await ledgerPartyForCredit(item, particular);
             const receipt = await Receipt.create(receiptData);
             if (receipt.type === "receipt") {
                 const particular = receipt.paymentMode + " " + "receipt";
@@ -71,16 +69,6 @@ export const UpdateReceipt = async (req, res, next) => {
         req.body.voucherType = "receipt";
         req.body.voucherDate = new Date();
         req.body.lockStatus = "No";
-        // if (req.body.partyId) {
-        //     req.body.userId = undefined;
-        //     req.body.expenseId = undefined;
-        // } else if (req.body.userId) {
-        //     req.body.partyId = undefined;
-        //     req.body.expenseId = undefined;
-        // } else {
-        //     req.body.userId = undefined;
-        //     req.body.partyId = undefined;
-        // }
         const updatedReceipt = await Receipt.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (updatedReceipt.type === "receipt") {
             const particular = "receipt";
@@ -120,8 +108,6 @@ export const viewReceipt = async (req, res, next) => {
 export const ViewReceiptById = async (req, res, next) => {
     try {
         let receipt = await Receipt.findById({ _id: req.params.id }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" }).populate({ path: "userId", model: "user" }).populate({ path: "expenseId", model: "createAccount" }).populate({ path: "transporterId", model: "transporter" })
-        // const customer = await Customer.findOne({ uniqueCode: receipt.code }).populate({path:"partyId",model:"customer"});
-        // const receipts = { ...receipt.toObject(), partyId: customer };
         return receipt ? res.status(200).json({ Receipts: receipt, status: true }) : res.status(404).json({ error: "Not Found", status: false });
     } catch (err) {
         console.log(err);
@@ -157,18 +143,8 @@ export const savePayment = async (req, res, next) => {
             const rece = await Receipt.find(query).sort({ sortorder: -1 });
             if (rece.length > 0) {
                 const latestReceipt = rece[rece.length - 1];
-                if (isBankPayment) {
-                    // req.body.runningAmount = latestReceipt.runningAmount - item.amount;
-                } else {
-                    // req.body.cashRunningAmount = latestReceipt.cashRunningAmount - item.amount;
-                }
                 req.body.voucherNo = latestReceipt.voucherNo + 1;
             } else {
-                if (isBankPayment) {
-                    // req.body.runningAmount = item.amount;
-                } else {
-                    // req.body.cashRunningAmount = item.amount;
-                }
                 req.body.voucherNo = 1;
             }
             req.body.voucherType = "payment";
@@ -202,16 +178,6 @@ export const UpdatePayment = async (req, res, next) => {
             return res.status(404).json({ message: "Payment Not Found", status: false });
         }
         req.body.voucherType = "payment";
-        // if (req.body.partyId) {
-        //     req.body.userId = undefined;
-        //     req.body.expenseId = undefined;
-        // } else if (req.body.userId) {
-        //     req.body.partyId = undefined;
-        //     req.body.expenseId = undefined;
-        // } else {
-        //     req.body.userId = undefined;
-        //     req.body.partyId = undefined;
-        // }
         const updatedReceipt = await Receipt.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (updatedReceipt.type === "payment") {
             const particular = "payment";
@@ -792,48 +758,6 @@ export const TaxReport = async (req, res, next) => {
 // --------------------------------------------------------------------
 
 // For DashBoard
-export const transactionCalculate11 = async (req, res, next) => {
-    try {
-        let transaction = {
-            BankAmount: 0,
-            CashAmount: 0,
-            marketOutstanding: 0,
-        };
-        let creditAmount = 0;
-        let debitAmount = 0;
-        let creditAmounts = 0;
-        let debitAmounts = 0;
-        const receipts = await Receipt.find({ database: req.params.database, paymentMode: "Bank", status: "Active" }).sort({ sortorder: -1 })
-        const receipt = await Receipt.find({ database: req.params.database, paymentMode: "Cash", status: "Active" }).sort({ sortorder: -1 })
-        if (receipts.length === 0) {
-            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false })
-        }
-        if (receipt.length === 0) {
-            return res.status(404).json({ message: "Bank and Cash Balance Not Found", status: false })
-        }
-        receipts.forEach(item => {
-            if (item.type === "receipt") {
-                creditAmount += item.amount
-            } else if (item.type === "payment") {
-                debitAmount += item.amount
-            }
-        })
-        transaction.BankAmount = (creditAmount - debitAmount)
-        receipt.forEach(item => {
-            if (item.type === "receipt") {
-                creditAmounts += item.amount
-            } else if (item.type === "payment") {
-                debitAmounts += item.amount
-            }
-        })
-        transaction.CashAmount = (creditAmounts - debitAmounts)
-        res.status(200).json({ transaction, status: true })
-    }
-    catch (err) {
-        console.log(err)
-        return res.status(500).json({ message: "Internal Server Error", status: false })
-    }
-}
 export const transactionCalculate = async (req, res, next) => {
     try {
         let transaction = {
@@ -873,28 +797,65 @@ export const transactionCalculate = async (req, res, next) => {
         return res.status(500).json({ message: "Internal Server Error", status: false });
     }
 }
+export const transactionCalculate2 = async (req, res, next) => {
+    try {
+        const { database } = req.params;
+        const aggregationPipeline = [
+            { 
+                $match: { 
+                    database, 
+                    status: "Active", 
+                    paymentMode: { $in: ["Bank", "Cash"] } 
+                } 
+            },
+            {
+                $group: {
+                    _id: "$paymentMode",
+                    creditAmount: {
+                        $sum: {
+                            $cond: [{ $eq: ["$type", "receipt"] }, "$amount", 0]
+                        }
+                    },
+                    debitAmount: {
+                        $sum: {
+                            $cond: [{ $eq: ["$type", "payment"] }, "$amount", 0]
+                        }
+                    }
+                }
+            }
+        ];
+        const results = await Receipt.aggregate(aggregationPipeline);
+        let transaction = {
+            BankAmount: 0,
+            CashAmount: 0,
+            marketOutstanding: 0,
+        };
+        results.forEach((item) => {
+            if (item._id === "Bank") {
+                transaction.BankAmount = item.creditAmount - item.debitAmount;
+            } else if (item._id === "Cash") {
+                transaction.CashAmount = item.creditAmount - item.debitAmount;
+            }
+        });
+        res.status(200).json({ transaction, status: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal Server Error", status: false });
+    }
+};
+
 
 // For App
 export const PartySendOtp = async (req, res, next) => {
     try {
-        // if (!req.body.otp) {
-        //     return res.status(400).json({ message: "otp required", status: false })
-        // }
-        // const existingOtp = await OtpVerify.findOne({ otp: req.body.otp })
-        // if (!existingOtp) {
-        //     return res.status(404).json({ message: "otp don't matched..", status: false })
-        // }
-        // req.body.status = "Deactive"
         if (req.body.partyId) {
             if (req.body.type === "receipt" && req.body.paymentMode !== "Cash") {
                 const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
                 if (rece.length > 0) {
                     const latestReceipt = rece[rece.length - 1];
-                    // req.body.runningAmount = latestReceipt.runningAmount + req.body.amount
                     req.body.voucherType = "receipt"
                     req.body.voucherNo = latestReceipt.voucherNo + 1
                 } else {
-                    // req.body.runningAmount = req.body.amount
                     req.body.voucherType = "receipt"
                     req.body.voucherNo = 1
                 }
@@ -902,11 +863,9 @@ export const PartySendOtp = async (req, res, next) => {
                 const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
                 if (rece.length > 0) {
                     const latestReceipt = rece[rece.length - 1];
-                    // req.body.cashRunningAmount = latestReceipt.cashRunningAmount + req.body.amount
                     req.body.voucherType = "receipt"
                     req.body.voucherNo = latestReceipt.voucherNo + 1
                 } else {
-                    // req.body.cashRunningAmount = req.body.amount
                     req.body.voucherType = "receipt"
                     req.body.voucherNo = 1
                 }
@@ -923,9 +882,7 @@ export const PartySendOtp = async (req, res, next) => {
             await PaymentDueReport.create(req.body)
             return receipt ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
         } else {
-            return res.status(404).json({ message: "PartyId Required..", status: false })
-            // const receipt = await Receipt.create(req.body);
-            // return receipt ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(404).json({ message: "Not Found", status: false })
+            return res.status(404).json({ message: "PartyId Required..", status: false });
         }
     }
     catch (err) {
@@ -950,11 +907,9 @@ export const VerifyPartyPayment = async (req, res, next) => {
             const rece = await Receipt.find({ status: "Active", paymentMode: "Bank" }).sort({ sortorder: -1 })
             if (rece.length > 0) {
                 const latestReceipt = rece[rece.length - 1];
-                // req.body.runningAmount = latestReceipt.runningAmount + req.body.amount
                 req.body.voucherType = "receipt"
                 req.body.voucherNo = latestReceipt.voucherNo + 1
             } else {
-                // req.body.runningAmount = req.body.amount
                 req.body.voucherType = "receipt"
                 req.body.voucherNo = 1
             }
@@ -962,16 +917,11 @@ export const VerifyPartyPayment = async (req, res, next) => {
             const rece = await Receipt.find({ status: "Active", paymentMode: "Cash" }).sort({ sortorder: -1 })
             if (rece.length > 0) {
                 const latestReceipt = rece[rece.length - 1];
-                // req.body.cashRunningAmount = latestReceipt.cashRunningAmount + req.body.amount
-                // req.body.voucherType = "receipt"
                 req.body.voucherNo = latestReceipt.voucherNo + 1
             } else {
-                // req.body.cashRunningAmount = req.body.amount
-                // req.body.voucherType = "receipt"
                 req.body.voucherNo = 1
             }
         }
-        // const receipt = await Receipt.create(req.body);
         await existingParty.save()
         if (req.body.type === "receipt") {
             let particular = req.body.paymentMode + " receipt";
@@ -1042,8 +992,6 @@ export const OtpVerifyForReceipt = async (req, res) => {
 export const ViewReceiptByPartyId = async (req, res, next) => {
     try {
         let receipt = await Receipt.find({ database: req.params.database, partyId: req.params.id }).sort({ sortorder: -1 }).populate({ path: "partyId", model: "customer" })
-        // const customer = await Customer.findOne({ uniqueCode: receipt.code }).populate({path:"partyId",model:"customer"});
-        // const receipts = { ...receipt.toObject(), partyId: customer };
         return (receipt.length > 0) ? res.status(200).json({ Receipts: receipt, status: true }) : res.status(404).json({ message: "Receipt Not Found", status: false });
     } catch (err) {
         console.log(err);
