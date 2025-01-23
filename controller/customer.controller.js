@@ -945,7 +945,7 @@ export const SaveRemark = async (req, res, next) => {
             return res.status(404).json({ message: "Party Not Found", status: false })
         }
         await party.remark.push(req.body.remark)
-        await party.save()
+        await party.save();
         return res.status(200).json({ message: "Remark Saved Successfull!", status: true })
     }
     catch (err) {
