@@ -56,9 +56,9 @@ export const viewLedgerByPartySalesApp = async (req, res, next) => {
         for(let items of customer){
             let totalBillAmount = 0;
             let totalReceipt = 0;
-            const ledger = await Ledger.find({partyId:items._id}).sort({ date: 1, sortorder: -1 }).populate({ path: "partyId", model: "customer" })
+            const ledger = await Ledger.find({partyId:items._id}).sort({ date: 1, sortorder: -1 }).populate({ path: "partyId", model: "customer" });
             if (ledger.length === 0) {
-               console.log("party ledger not found");
+                continue;
             }
             for(let item of ledger){
                 const existingLedger = await ledgerData.find((i)=>i.partyId._id.toString()===item.partyId._id.toString());

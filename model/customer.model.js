@@ -179,9 +179,17 @@ const CustomerSchema = new mongoose.Schema({
     type: String,
     default: "false"
   },
-  remark: {
-    type: []
-  },
+  remark: [{
+    remark:{
+      type:String
+    },
+    date:{
+      type:Date
+    },
+    time:{
+      type:String
+    }
+  }],
   dummyAmount: {
     type: Number,
     default: 0
