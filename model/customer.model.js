@@ -140,6 +140,15 @@ const CustomerSchema = new mongoose.Schema({
   address2: {
     type: String
   },
+  Account_Name: {
+    type: String
+  },
+  Account_No: {
+    type: String
+  },
+  Ifsc_code: {
+    type: String
+  },
   shopPhoto: {
     type: []
   },

@@ -81,6 +81,9 @@ const UserSchema = new mongoose.Schema({
   Account_No: {
     type: String
   },
+  Ifsc_code: {
+    type: String
+  },
   Country: {
     type: String
   },
@@ -97,9 +100,6 @@ const UserSchema = new mongoose.Schema({
     type: String
   },
   address2: {
-    type: String
-  },
-  Ifsc_code: {
     type: String
   },
   Ref_name_one: {
