@@ -791,8 +791,8 @@ export const paymentDueReport = async (req, res) => {
 export const SaveLeadPartyExcel = async (req, res) => {
     try {
         let leadStatusCheck = "leadStatusCheck";
-        let database = "database"
-        const existingMobileNo = []
+        let database = "database";
+        const existingMobileNo = [];
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
@@ -803,7 +803,7 @@ export const SaveLeadPartyExcel = async (req, res) => {
             headings.push(cell.value);
         });
         const insertedDocuments = [];
-        const dataNotExist = []
+        const dataNotExist = [];
         for (let rowIndex = 2; rowIndex <= worksheet.actualRowCount; rowIndex++) {
             const dataRow = worksheet.getRow(rowIndex);
             const document = {};
@@ -817,7 +817,7 @@ export const SaveLeadPartyExcel = async (req, res) => {
                 }
                 // document[heading] = cellValue;
             }
-            document[database] = req.params.database
+            document[database] = req.params.database;
             if (document.database) {
                 const existingId = await Customer.findOne({ mobileNumber: document.mobileNumber, database: document.database });
                 if (existingId) {
@@ -1051,6 +1051,7 @@ export const DeleteCustomer11 = async (req, res, next) => {
 //         return res.status(500).json({ error: "Internal Server Error", status: false });
 //     }
 // };
+
 export const ViewDeadParty = async (req, res, next) => {
     try {
         let days = 0

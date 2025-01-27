@@ -2,6 +2,15 @@ import { DashboardTab, Tab } from "../model/createTab.model.js";
 import { Role } from "../model/role.model.js";
 import { User } from "../model/user.model.js";
 
+export const CreatRole1 = async (req, res, next) => {
+    try {
+        const role = await Role.create(req.body);
+        return res.status(200).json({ Role: role, message: "Role Creation successful", status: true });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Internal server error", status: false });
+    }
+}
 export const CreatRole = async (req, res, next) => {
     try {
         const user = await User.findById({ _id: req.body.createdBy })
