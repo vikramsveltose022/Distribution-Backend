@@ -45,6 +45,9 @@ export const SaveCustomer = async (req, res, next) => {
         if (req.body.assignTransporter) {
             req.body.assignTransporter = JSON.parse(req.body.assignTransporter)
         }
+        if (req.body.bankDetails) {
+            req.body.bankDetails = JSON.parse(req.body.bankDetails)
+        }
         if (req.body.limit) {
             req.body.remainingLimit = req.body.limit
         }
