@@ -161,6 +161,9 @@ export const UpdateCustomer = async (req, res, next) => {
                     }
                 }
             }
+            if (req.body.bankDetails) {
+                req.body.bankDetails = JSON.parse(req.body.bankDetails)
+            }
             const updatedCustomer = req.body;
             const existOver = await OverDueReport.findOne({ partyId: customerId, activeStatus: "Active" })
             if (existOver) {
