@@ -3,6 +3,12 @@ const UserSchema = new mongoose.Schema({
   id: {
     type: String
   },
+  companyName: {
+    type: String
+  },
+  Gst_No: {
+    type: String
+  },
   profileImage: {
     type: String
   },
