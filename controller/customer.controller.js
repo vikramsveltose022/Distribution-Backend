@@ -63,12 +63,7 @@ export const ViewCustomer = async (req, res, next) => {
     try {
         const userId = req.params.id;
         const database = req.params.database;
-        const adminDetail = await getCustomerHierarchy(userId, database)
-        // const adminDetail = await getUserHierarchyBottomToTop(userId, database)
-        // if (!adminDetail.length > 0) {
-        //     return res.status(404).json({ error: "Unit Not Found", status: false })
-        // }
-        // let customer = await Customer.find({ database: database }).sort({ sortorder: -1 })
+        const adminDetail = await getCustomerHierarchy(userId, database);
         return (adminDetail.length > 0) ? res.status(200).json({ Customer: adminDetail, status: true }) : res.status(404).json({ error: "Not Found", status: false })
     }
     catch (err) {
@@ -1126,5 +1121,41 @@ export const Check = async (req, res, next) => {
     }
     catch (err) {
         console.log(err)
+    }
+}
+
+export const testWhatsapp = async (req, res) => {
+    try {
+        // const { number, type, message, instance_id } = req.body;
+        const number = "919131662204"
+        const type = "text"
+        const message = "Hello Sir"
+        const instance_id = "679B68E25C979"
+        // const media_url = "https://res.cloudinary.com/daxxybbvr/image/upload/v1738239943/dvfb3uklzlzdh3k2oige.pdf"
+        const media_url = "https://customer-node.rupioo.com/Images/signature-1738304552078-258633115.svg"
+        // console.log(media_url)
+        if (!number || !type || !message || !instance_id) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
+
+        const payload = {
+            number,
+            type,
+            message,
+            media_url,
+            instance_id,
+            access_token: "679a2648320f5"
+        };
+
+        // const response = await axios.post("https://hisocial.in/api/send", payload, {
+            // headers: { "Content-Type": "application/json" }
+        // });
+        const response = await axios.post("https://hisocial.in/api/send", payload, {
+            headers: { "Content-Type": "application/json" }
+        });
+        res.status(200).json({message:response.data,status:true});
+    } catch (error) {
+        consle.log(error)
+        res.status(500).json({ error: error.response ? error.response.data : error.message });
     }
 }
