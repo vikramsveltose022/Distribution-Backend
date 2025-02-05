@@ -120,7 +120,6 @@ export const DeleteBulkCustomer = async (req, res, next) => {
 export const UpdateCustomer = async (req, res, next) => {
     try {
         if (req.files) {
-            let image = [];
             let images = [];
             req.files.map(file => {
                 if (file.fieldname === "file") {
@@ -131,7 +130,6 @@ export const UpdateCustomer = async (req, res, next) => {
                 }
             })
             req.body.shopPhoto = images;
-            // req.body.photo = images
         }
         const customerId = req.params.id;
         const existingCustomer = await Customer.findById(customerId);
@@ -168,22 +166,6 @@ export const UpdateCustomer = async (req, res, next) => {
             await Customer.findByIdAndUpdate(customerId, updatedCustomer, { new: true });
             return res.status(200).json({ message: 'Customer Updated Successfully', status: true });
         }
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error', status: false });
-    }
-};
-export const UpdateCustomer1 = async (req, res, next) => {
-    try {
-        const party = await Customer.find({ database: req.body.database, leadStatusCheck: "false" })
-        console.log(party.length)
-        // for (let id of party) {
-        //     const customer = await Customer.findById(id._id)
-        //     customer.leadStatusCheck = "false";
-        //     await customer.save()
-        // }
-        return res.status(200).json({ message: 'Customer Updated Successfully', status: true });
-
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: 'Internal Server Error', status: false });
