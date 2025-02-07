@@ -6,8 +6,8 @@ var transporterss = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: 'vikramsveltose022@gmail.com',
-        pass: 'mhxnhbobrhegjlat'
+        user: 'dakshglobalservices@gmail.com',
+        pass: 'zjbizyfvtjjuabmb'
     },
 });
 export default transporterss;
