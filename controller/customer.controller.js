@@ -16,6 +16,7 @@ import { Receipt } from "../model/receipt.model.js";
 import axios from "axios";
 import { CreateOrder } from "../model/createOrder.model.js";
 import { PurchaseOrder } from "../model/purchaseOrder.model.js";
+import { LoginVerificationMail } from "../service/sendmail.js";
 dotenv.config();
 
 export const SaveCustomer = async (req, res, next) => {
@@ -1142,3 +1143,5 @@ export const testWhatsapp = async (req, res) => {
         res.status(500).json({ error: error.response ? error.response.data : error.message });
     }
 }
+
+
