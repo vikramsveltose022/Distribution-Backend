@@ -4,8 +4,10 @@ import { User } from "../model/user.model.js";
 
 export const CreatRole1 = async (req, res, next) => {
     try {
-        const role = await Role.create(req.body);
-        return res.status(200).json({ Role: role, message: "Role Creation successful", status: true });
+        for(let item of req.body.Role){
+           await Role.create(item)
+        }
+        return res.status(200).json({ message: "Role Creation successful", status: true });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: "Internal server error", status: false });

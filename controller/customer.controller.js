@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import moment from "moment"
 import ExcelJS from 'exceljs'
 import Jwt from "jsonwebtoken";
+import crypto from 'crypto'
 import { Customer } from '../model/customer.model.js';
 import { getCustomerHierarchy } from '../rolePermission/RolePermission.js';
 import transporter from "../service/email.js";
