@@ -56,5 +56,6 @@ router.post("/save-remark/:id", SaveRemark)
 router.get("/dead-party/:database", ViewDeadParty)
 router.post("/check", Check)
 router.post("/test", testWhatsapp)
+// router.post("/gst-test", testGST)
 
 export default router;
