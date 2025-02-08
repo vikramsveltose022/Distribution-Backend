@@ -1145,3 +1145,81 @@ export const testWhatsapp = async (req, res) => {
 }
 
 
+// const API_URL = "https://developers.eraahi.com/eInvoiceGateway/eivital/v1.04/auth";
+// const OCP_APIM_SUBSCRIPTION_KEY = "AL6A04h7q7u2g1T9o";
+
+// const generateAppKey = () => {
+//     const randomBytes = crypto.randomBytes(16).toString("hex");
+//     console.log("Generated Random Bytes:", randomBytes);
+    
+//     const appKey = Buffer.from(randomBytes).toString("base64");
+//     console.log("AppKey (Base64):", appKey);
+    
+//     return appKey;
+// };
+
+// export const testGST = async (req, res) => {
+//     try {
+//         const UserName = "AL001";
+//         const Password = "Alankit@123";
+//         const Gstin = "07AGAPA5363L002";
+//         const ForceRefreshAccessToken = true;
+//         const AppKey = generateAppKey();
+        
+//         const headers = {
+//             "Content-Type": "application/json",
+//             "Ocp-Apim-Subscription-Key": OCP_APIM_SUBSCRIPTION_KEY,
+//             "Gstin": Gstin,
+//         };
+
+//         const payload = { UserName, Password, AppKey, ForceRefreshAccessToken };
+
+//         console.log("Headers being sent:", headers);
+//         console.log("Payload being sent:", JSON.stringify(payload, null, 2));
+
+//         const response = await axios.post(API_URL, payload, { headers });
+//         console.log("Response Data:", response.data);
+//         res.json(response.data);
+//     } catch (error) {
+//         console.error("Error Response:", error.response?.data || error.message);
+//         res.status(500).json({ 
+//             error: "GST Authentication Failed",
+//             details: error.response?.data,
+//         });
+//     }
+// };
+
+const API_URL = "https://developers.eraahi.com/api/ewaybillapi/v1.03/auth";
+const OCP_APIM_SUBSCRIPTION_KEY = "AL6A04h7q7u2g1T9o";
+
+const generateAppKey = () => {
+    const randomBytes = crypto.randomBytes(16).toString("hex");
+    const appKey = Buffer.from(randomBytes).toString("base64");
+    
+    return appKey;
+};
+
+export const testGST = async (req, res) => {
+    try {
+        const username = "AL001";
+        const password = "Alankit@123";
+        const gstin = "07AGAPA5363L002";
+        // const ForceRefreshAccessToken = true;
+        const app_key = generateAppKey();
+        
+        const headers = {
+            "Content-Type": "application/json",
+            "Ocp-Apim-Subscription-Key": OCP_APIM_SUBSCRIPTION_KEY,
+            "Gstin": gstin,
+        };
+
+        const payload = { username, password, app_key };
+
+        const response = await axios.post(API_URL, payload, { headers });
+        console.log("Response Data:", response.data);
+        res.json(response.data);
+    } catch (error) {
+        console.error("Error Response:", error.response?.data || error.message);
+        res.status(500).json({ error: "GST Authentication Failed",details: error.response?.data,});
+    }
+};

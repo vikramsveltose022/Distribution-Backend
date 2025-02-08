@@ -49,7 +49,7 @@ export const SaveUser = async (req, res, next) => {
         req.body.planStatus = "paid";
       }
     } else{
-        const existRole = await Role.findOne({roleName:"SuperAdmin",database:req.body.database});
+        const existRole = await Role.findOne({roleName:"SuperAdmin"});
         if(!existRole){
           console.log("Role Not Found");
         }
