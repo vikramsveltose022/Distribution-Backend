@@ -44,22 +44,21 @@ export const saveDepartment = async (req, res, next) => {
     try {
         for (let departData of req.body.Departments) {
             if (departData.departmentId !== null) {
-                const existingDepartment = await Department.findById({ _id: departData.departmentId});
+                const existingDepartment = await Department.findById({ _id: departData.departmentId,status:"Active"});
                 if (existingDepartment) {
-                    console.log("callin9000222222222222222222222222000000000000g")
                     await Department.findByIdAndUpdate(departData.departmentId, departData, { new: true });
-                    console.log("calling"+existingDepartment.status)
-                } else if(existingDepartment.status === "Deactive") {
-                    console.log("calling"+existingDepartment.status)
-                    await AssignRole.findOneAndDelete({departmentName:existingDepartment._id.toString()});
                 } else {
-                    console.log("callin9000000000000000g")
                     const department = await Department.create(departData);
                 }
             }
             else {
-                console.log("calling8888888888")
                 const department = await Department.create(departData);
+            }
+        }
+        const deActiveDepartment = await Department.find({status:"Deactive"});
+        if(deActiveDepartment.length>0){
+            for(let item of deActiveDepartment){
+                await AssignRole.findOneAndDelete({departmentName:item._id.toString()})
             }
         }
         return res.status(200).json({ message: "Data saved successfully", status: true });
