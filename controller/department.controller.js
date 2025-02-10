@@ -48,7 +48,8 @@ export const saveDepartment = async (req, res, next) => {
                 if (existingDepartment) {
                     console.log("callin9000222222222222222222222222000000000000g")
                     await Department.findByIdAndUpdate(departData.departmentId, departData, { new: true });
-                } else if(existingDepartment.status == "Deactive") {
+                    console.log("calling"+existingDepartment.status)
+                } else if(existingDepartment.status === "Deactive") {
                     console.log("calling"+existingDepartment.status)
                     await AssignRole.findOneAndDelete({departmentName:existingDepartment._id.toString()});
                 } else {
