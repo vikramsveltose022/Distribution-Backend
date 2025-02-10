@@ -1,3 +1,4 @@
+import { AssignRole } from "../model/assignRoleToDepartment.model.js";
 import { Department } from "../model/department.model.js";
 
 export const saveDepartment1 = async (req, res, next) => {
@@ -43,9 +44,11 @@ export const saveDepartment = async (req, res, next) => {
     try {
         for (let departData of req.body.Departments) {
             if (departData.departmentId !== null) {
-                const existingDepartment = await Department.findById({ _id: departData.departmentId });
+                const existingDepartment = await Department.findById({ _id: departData.departmentId});
                 if (existingDepartment) {
                     await Department.findByIdAndUpdate(departData.departmentId, departData, { new: true });
+                } else if(existingDepartment.status == "Deactive") {
+                    await AssignRole.findOneAndDelete({departmentName:existingDepartment._id.toString()});
                 } else {
                     const department = await Department.create(departData);
                 }
