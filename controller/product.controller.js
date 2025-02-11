@@ -438,7 +438,7 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
       return console.log("warehouse not found")
     }
     const sourceProductItem = user.productItems.find(
-      (pItem) => pItem.productId === id.productId);
+      (pItem) => pItem.productId === id._id.toString());
     if (sourceProductItem) {
       sourceProductItem.currentStock = warehouse.qty
       sourceProductItem.price = warehouse.Purchase_Rate;
@@ -447,6 +447,7 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
       user.markModified('productItems');
       await user.save();
     } else {
+      console.log("calling")
       let ware = {
         productId: id._id.toString(),
         primaryUnit: warehouse.primaryUnit,
@@ -465,6 +466,7 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
         oTotal: (warehouse.qty * warehouse.Purchase_Rate),
       }
       const updated = await Warehouse.updateOne({ _id: warehouseId }, { $push: { productItems: ware }, }, { upsert: true });
+      console.log(updated)
     }
   } catch (error) {
     console.error(error);

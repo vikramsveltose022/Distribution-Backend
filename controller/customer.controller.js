@@ -1139,20 +1139,48 @@ export const testWhatsapp = async (req, res) => {
         });
         res.status(200).json({message:response.data,status:true});
     } catch (error) {
-        consle.log(error)
+        console.log(error)
         res.status(500).json({ error: error.response ? error.response.data : error.message });
     }
 }
-
+// import axios from "axios";
+import CryptoJS from "crypto-js";
+import NodeRSA from "node-rsa";
 
 const API_URL = "https://developers.eraahi.com/eInvoiceGateway/eivital/v1.04/auth";
 const OCP_APIM_SUBSCRIPTION_KEY = "AL6A04h7q7u2g1T9o";
 
+const PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArxd93uLDs8HTPqcSPpxZ
+rf0Dc29r3iPp0a8filjAyeX4RAH6lWm9qFt26CcE8ESYtmo1sVtswvs7VH4Bjg/F
+DlRpd+MnAlXuxChij8/vjyAwE71ucMrmZhxM8rOSfPML8fniZ8trr3I4R2o4xWh6
+no/xTUtZ02/yUEXbphw3DEuefzHEQnEF+quGji9pvGnPO6Krmnri9H4WPY0ysPQQ
+Qd82bUZCk9XdhSZcW/am8wBulYokITRMVHlbRXqu1pOFmQMO5oSpyZU3pXbsx+Ox
+IOc4EDX0WMa9aH4+snt18WAXVGwF2B4fmBk7AtmkFzrTmbpmyVqA3KO2IjzMZPw0
+hQIDAQAB
+-----END PUBLIC KEY-----`;
+
+/**
+ * Generate a 256-bit (32-byte) random AppKey in Base64 format.
+ */
 const generateAppKey = () => {
-    const randomBytes = crypto.randomBytes(16).toString("hex");
-    const appKey = Buffer.from(randomBytes).toString("base64");
+    return CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Base64);
+};
+
+/**
+ * Encrypt the payload using the provided RSA public key.
+ */
+const encryptPayload = (payload, publicKey) => {
+    // Convert the payload to a Base64-encoded JSON string
+    const base64Payload = Buffer.from(JSON.stringify(payload)).toString("base64");
+
+    // Encrypt the Base64-encoded payload using RSA public key
+    const key = new NodeRSA(publicKey, "public", {
+        encryptionScheme: "pkcs1",
+    });
     
-    return appKey;
+    const encrypted = key.encrypt(base64Payload, "base64");
+    return encrypted;
 };
 
 export const testGST = async (req, res) => {
@@ -1162,7 +1190,9 @@ export const testGST = async (req, res) => {
         const Gstin = "07AGAPA5363L002";
         const ForceRefreshAccessToken = true;
         const AppKey = generateAppKey();
-        
+
+        console.log("Generated AppKey:", AppKey);
+
         const headers = {
             "Content-Type": "application/json",
             "Ocp-Apim-Subscription-Key": OCP_APIM_SUBSCRIPTION_KEY,
@@ -1170,11 +1200,70 @@ export const testGST = async (req, res) => {
         };
 
         const payload = { UserName, Password, AppKey, ForceRefreshAccessToken };
+        const encryptedPayload = encryptPayload(payload, PUBLIC_KEY);
 
-        console.log("Headers being sent:", headers);
-        console.log("Payload being sent:", JSON.stringify(payload, null, 2));
+        console.log("Encrypted Payload:", encryptedPayload);
 
-        const response = await axios.post(API_URL, payload, { headers });
+        const response = await axios.post(API_URL, { Data: encryptedPayload }, { headers });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error("Error Response:", error.response?.data || error.message);
+        res.status(500).json({
+            error: "GST Authentication Failed",
+            details: error.response?.data,
+        });
+    }
+};
+
+
+const API_URL1 = "https://developers.eraahi.com/api/ewaybillapi/v1.03/auth";
+const OCP_APIM_SUBSCRIPTION_KEY1 = "AL6A04h7q7u2g1T9o";
+
+const PUBLIC_KEY1 = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2PkhjvWu+lDEv/ane+uV
+N44MAZBhWn2Xbr5zEu7h9LpXJXhrwKYhtvWR6YmjAR4AcXDwA3P74Hjc8/jsW92Q
+5B4ddXJrRbsU3lac1GhjCNma31FlW7Mpjr5eqPNTuImJr1WgDR9iRuCFYt4enRkv
+fywdnDa++QK6fdjS4/kssJxlEXBtlXKoFuSBGjbf0JA56qHo8yqXoYoqgl9Z7e9X
+8GZv6soB1JDH9dxMmaqEwsxaonDG+8NdR2RcYeJAnx2s/PBokpbCVPCQiSD5mmYW
+SZePF7L4mqvYS7ByrIj1cBH8qq6TafTcLkrr/TiZjpAADPwuynQDE120BpFaqIEq
+lQIDAQAB
+-----END PUBLIC KEY-----`
+
+const generateAppKey1 = () => {
+    const randomBytes = crypto.randomBytes(16).toString("hex");
+    return randomBytes
+    // return CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Base64);
+};
+
+const encryptPayload1 = (payload, publicKey) => {
+    const base64Payload = Buffer.from(JSON.stringify(payload)).toString("base64");
+    const key = new NodeRSA(publicKey, "public", {
+        encryptionScheme: "pkcs1",
+    });
+    
+    const encrypted = key.encrypt(base64Payload, "base64");
+    return encrypted;
+};
+
+export const testGST1 = async (req, res) => {
+    try {
+        const username = "AL001";
+        const password = "Alankit@123";
+        const gstin = "07AGAPA5363L002";
+        const action = 'ACCESSTOKEN';
+        const app_key = generateAppKey1();
+
+        const headers = {
+            "Content-Type": "application/json",
+            "Ocp-Apim-Subscription-Key": OCP_APIM_SUBSCRIPTION_KEY1,
+            "gstin": gstin
+        };
+
+        const payload = { username, password, app_key,action };
+        const encryptedPayload = encryptPayload1(payload, PUBLIC_KEY1);
+        const response = await axios.post(API_URL1, {Date:encryptedPayload}, { headers });
+
         console.log("Response Data:", response.data);
         res.json(response.data);
     } catch (error) {
@@ -1182,38 +1271,3 @@ export const testGST = async (req, res) => {
         res.status(500).json({ error: "GST Authentication Failed",details: error.response?.data,});
     }
 };
-
-// const API_URL = "https://developers.eraahi.com/api/ewaybillapi/v1.03/auth";
-// const OCP_APIM_SUBSCRIPTION_KEY = "AL6A04h7q7u2g1T9o";
-
-// const generateAppKey = () => {
-//     const randomBytes = crypto.randomBytes(16).toString("hex");
-//     const appKey = Buffer.from(randomBytes).toString("base64");
-    
-//     return appKey;
-// };
-
-// export const testGST = async (req, res) => {
-//     try {
-//         const username = "AL001";
-//         const password = "Alankit@123";
-//         const gstin = "07AGAPA5363L002";
-//         // const ForceRefreshAccessToken = true;
-//         const app_key = generateAppKey();
-        
-//         const headers = {
-//             "Content-Type": "application/json",
-//             "Ocp-Apim-Subscription-Key": OCP_APIM_SUBSCRIPTION_KEY,
-//             "Gstin": gstin,
-//         };
-
-//         const payload = { username, password, app_key };
-
-//         const response = await axios.post(API_URL, payload, { headers });
-//         console.log("Response Data:", response.data);
-//         res.json(response.data);
-//     } catch (error) {
-//         console.error("Error Response:", error.response?.data || error.message);
-//         res.status(500).json({ error: "GST Authentication Failed",details: error.response?.data,});
-//     }
-// };
