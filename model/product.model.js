@@ -53,7 +53,8 @@ const ProductSchema = new mongoose.Schema({
         type: String
     },
     qty: {
-        type: Number
+        type: Number,
+        default:0
     },
     discount: {
         type: Number
