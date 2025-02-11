@@ -182,16 +182,16 @@ export const UpdatePayment = async (req, res, next) => {
         if (updatedReceipt.type === "payment") {
             const particular = "payment";
             if (updatedReceipt.partyId) {
-                req.body.credit = updatedReceipt.amount;
+                req.body.debit = updatedReceipt.amount;
                 await Ledger.findOneAndUpdate({ orderId: existingReceipt._id.toString() }, req.body, { new: true });
             } else if (updatedReceipt.userId) {
-                req.body.credit = updatedReceipt.amount;
+                req.body.debit = updatedReceipt.amount;
                 await Ledger.findOneAndUpdate({ orderId: existingReceipt._id.toString() }, req.body, { new: true });
             } else if (updatedReceipt.expenseId) {
-                req.body.credit = updatedReceipt.amount;
+                req.body.debit = updatedReceipt.amount;
                 await Ledger.findOneAndUpdate({ orderId: existingReceipt._id.toString() }, req.body, { new: true });
             } else {
-                req.body.credit = updatedReceipt.amount;
+                req.body.debit = updatedReceipt.amount;
                 await Ledger.findOneAndUpdate({ orderId: existingReceipt._id.toString() }, req.body, { new: true });
             }
         }
