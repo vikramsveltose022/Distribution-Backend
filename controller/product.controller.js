@@ -447,7 +447,6 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
       user.markModified('productItems');
       await user.save();
     } else {
-      console.log("calling")
       let ware = {
         productId: id._id.toString(),
         primaryUnit: id.primaryUnit,
@@ -466,7 +465,6 @@ export const addProductInWarehouse1 = async (warehouse, warehouseId, id) => {
         oTotal: (id.qty * id.Purchase_Rate),
       }
       const updated = await Warehouse.updateOne({ _id: warehouseId }, { $push: { productItems: ware }, }, { upsert: true });
-      console.log(updated)
     }
   } catch (error) {
     console.error(error);
