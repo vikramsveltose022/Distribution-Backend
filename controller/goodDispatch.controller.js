@@ -372,7 +372,6 @@ export const ViewWarehouseOrderCancel = async (req, res, next) => {
 }
 export const SendOtpToDeliveryWarehouse = async (req, res) => {
     try {
-        console.log("calling")
         const otp = Math.floor(1000 + Math.random() * 9000);
         const existing = await CreateOrder.findById(req.params.id)
         if (!existing) {
@@ -383,9 +382,7 @@ export const SendOtpToDeliveryWarehouse = async (req, res) => {
             return res.status(404).json({ message: "warehouse not found", status: false })
         }
         existing.otp = otp
-        console.log(otp)
         const updateWarehouse = await existing.save();
-        console.log(updateWarehouse)
         return res.status(200).json({ message: "otp send successfull!", status: true });
     } catch (error) {
         console.log(error);
