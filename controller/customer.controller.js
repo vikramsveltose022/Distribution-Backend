@@ -1215,7 +1215,71 @@ export const testGST = async (req, res) => {
         });
     }
 };
+// const generateAppKey1 = () => {
+//     const randomBytes = crypto.randomBytes(16).toString("hex");
+//     return randomBytes
+//     // return CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Base64);
+// };
 
+// --------------------------------------------------------------------------------------------
+// const API_URL1 = "https://developers.eraahi.com/api/ewaybillapi/v1.03/auth";
+// const OCP_APIM_SUBSCRIPTION_KEY1 = "AL6A04h7q7u2g1T9o";
+
+// const PUBLIC_KEY1 = `-----BEGIN PUBLIC KEY-----
+// MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2PkhjvWu+lDEv/ane+uV
+// N44MAZBhWn2Xbr5zEu7h9LpXJXhrwKYhtvWR6YmjAR4AcXDwA3P74Hjc8/jsW92Q
+// 5B4ddXJrRbsU3lac1GhjCNma31FlW7Mpjr5eqPNTuImJr1WgDR9iRuCFYt4enRkv
+// fywdnDa++QK6fdjS4/kssJxlEXBtlXKoFuSBGjbf0JA56qHo8yqXoYoqgl9Z7e9X
+// 8GZv6soB1JDH9dxMmaqEwsxaonDG+8NdR2RcYeJAnx2s/PBokpbCVPCQiSD5mmYW
+// SZePF7L4mqvYS7ByrIj1cBH8qq6TafTcLkrr/TiZjpAADPwuynQDE120BpFaqIEq
+// lQIDAQAB
+// -----END PUBLIC KEY-----`
+
+
+// const generateAppKey1 = () => {
+//     return CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Base64);
+// };
+
+// const encryptPayload1 = (payload, publicKey) => {
+//     const base64Payload = Buffer.from(JSON.stringify(payload)).toString("base64");
+//     const key = new NodeRSA(publicKey, "public", {
+//         encryptionScheme: "pkcs1",
+//     });
+    
+//     const encrypted = key.encrypt(base64Payload, "base64");
+//     return encrypted;
+// };
+
+// export const testGST1 = async (req, res) => {
+//     try {
+//         const username = "AL001";
+//         const password = "Alankit@123";
+//         const gstin = "07AGAPA5363L002";
+//         const action = 'ACCESSTOKEN';
+//         const app_key = generateAppKey1();
+//         const headers = {
+//             "Content-Type": "application/json",
+//             "Ocp-Apim-Subscription-Key": OCP_APIM_SUBSCRIPTION_KEY1,
+//             "gstin": gstin
+//         };
+
+//         const payload = {action, username, password, app_key };
+//         const encryptedPayload = encryptPayload1(payload, PUBLIC_KEY1);
+//         const response = await axios.post(API_URL1, {Date:encryptedPayload}, { headers });
+
+//         console.log("Response Data:", response.data);
+//         res.json(response.data);
+//     } catch (error) {
+//         console.error("Error Response:", error.response?.data || error.message);
+//         res.status(500).json({ error: "GST Authentication Failed",details: error.response?.data,});
+//     }
+// };
+
+
+// import CryptoJS from "crypto-js";
+// import NodeRSA from "node-rsa";
+// import axios from "axios";
+import { Buffer } from "buffer";
 
 const API_URL1 = "https://developers.eraahi.com/api/ewaybillapi/v1.03/auth";
 const OCP_APIM_SUBSCRIPTION_KEY1 = "AL6A04h7q7u2g1T9o";
@@ -1228,22 +1292,22 @@ fywdnDa++QK6fdjS4/kssJxlEXBtlXKoFuSBGjbf0JA56qHo8yqXoYoqgl9Z7e9X
 8GZv6soB1JDH9dxMmaqEwsxaonDG+8NdR2RcYeJAnx2s/PBokpbCVPCQiSD5mmYW
 SZePF7L4mqvYS7ByrIj1cBH8qq6TafTcLkrr/TiZjpAADPwuynQDE120BpFaqIEq
 lQIDAQAB
------END PUBLIC KEY-----`
+-----END PUBLIC KEY-----`;
 
 const generateAppKey1 = () => {
-    const randomBytes = crypto.randomBytes(16).toString("hex");
-    return randomBytes
-    // return CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Base64);
+    return CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Base64); // 16-byte key
 };
 
 const encryptPayload1 = (payload, publicKey) => {
-    const base64Payload = Buffer.from(JSON.stringify(payload)).toString("base64");
-    const key = new NodeRSA(publicKey, "public", {
-        encryptionScheme: "pkcs1",
-    });
-    
-    const encrypted = key.encrypt(base64Payload, "base64");
-    return encrypted;
+    try {
+        const base64Payload = Buffer.from(JSON.stringify(payload)).toString("base64");
+        // console.log(base64Payload)
+        const key = new NodeRSA(publicKey, "public", { encryptionScheme: "pkcs1" });
+        return key.encrypt(base64Payload, "base64");
+    } catch (error) {
+        console.error("Encryption Error:", error.message);
+        throw new Error("Payload encryption failed.");
+    }
 };
 
 export const testGST1 = async (req, res) => {
@@ -1251,7 +1315,7 @@ export const testGST1 = async (req, res) => {
         const username = "AL001";
         const password = "Alankit@123";
         const gstin = "07AGAPA5363L002";
-        const action = 'ACCESSTOKEN';
+        const action = "ACCESSTOKEN";
         const app_key = generateAppKey1();
 
         const headers = {
@@ -1260,14 +1324,18 @@ export const testGST1 = async (req, res) => {
             "gstin": gstin
         };
 
-        const payload = { username, password, app_key,action };
+        const payload = { action, username, password, app_key };
         const encryptedPayload = encryptPayload1(payload, PUBLIC_KEY1);
-        const response = await axios.post(API_URL1, {Date:encryptedPayload}, { headers });
+        // console.log(encryptedPayload)
+        const response = await axios.post(API_URL1, { data: encryptedPayload }, { headers });
 
-        console.log("Response Data:", response.data);
+        // console.log("Response Data:", response.data);
         res.json(response.data);
     } catch (error) {
         console.error("Error Response:", error.response?.data || error.message);
-        res.status(500).json({ error: "GST Authentication Failed",details: error.response?.data,});
+        res.status(500).json({
+            error: "GST Authentication Failed",
+            details: error.response?.data || error.message,
+        });
     }
 };
