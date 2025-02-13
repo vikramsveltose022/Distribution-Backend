@@ -51,13 +51,13 @@ const CompanySchema = new mongoose.Schema({
         type: String
     },
     Suffix: {
-        type: Number
+        type: String
     },
     billNo: {
         type: Number
     },
     dummy: {
-        type: Number
+        type: String
     },
     bankName: {
         type: String
@@ -105,6 +105,11 @@ const CompanySchema = new mongoose.Schema({
     warehouseDummy: {
         type: Number,
         default: 0
-    }
+    },
+    cancelInvoice:[{
+        invoice:{
+            type:String
+        }
+    }]
 }, { timestamps: true })
 export const CompanyDetails = mongoose.model("companyDetail", CompanySchema)

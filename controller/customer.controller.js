@@ -1280,6 +1280,7 @@ export const testGST = async (req, res) => {
 // import NodeRSA from "node-rsa";
 // import axios from "axios";
 import { Buffer } from "buffer";
+import { CompanyDetails } from "../model/companyDetails.model.js";
 
 const API_URL1 = "https://developers.eraahi.com/api/ewaybillapi/v1.03/auth";
 const OCP_APIM_SUBSCRIPTION_KEY1 = "AL6A04h7q7u2g1T9o";
@@ -1337,5 +1338,30 @@ export const testGST1 = async (req, res) => {
             error: "GST Authentication Failed",
             details: error.response?.data || error.message,
         });
+    }
+};
+
+
+export const generateInvoice = async (req,res,next) => {
+    const companyDetail = await CompanyDetails.findOne({database:req.body.database})
+    if(!companyDetail){
+        return false
+    }
+    if(!companyDetail.dummy){
+        const no = 1
+        const invoice1 = `${companyDetail.Prefix}${no.toString().padStart(5, '0')}${companyDetail.Suffix}`;
+        console.log(invoice1)
+        companyDetail.dummy = invoice1;
+        await companyDetail.save();
+    } else{
+        const length = companyDetail.Prefix.length
+        const lengths = companyDetail.Suffix.length
+        const first = companyDetail.dummy;
+        const middlePart = first.slice(length, -lengths);
+        const newMiddleNumber = (parseInt(middlePart, 10) + 1).toString().padStart(middlePart.length, "0"); 
+        const updatedString = first.slice(0, length) + newMiddleNumber + first.slice(-lengths);
+        console.log(updatedString)
+        companyDetail.dummy = updatedString;
+        await companyDetail.save();
     }
 };
