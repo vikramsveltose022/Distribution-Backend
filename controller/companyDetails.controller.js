@@ -20,7 +20,7 @@ export const saveCompanyDetails = async (req, res, next) => {
           }
         });
       }
-      req.body.dummy = req.body.Suffix
+      // req.body.dummy = req.body.Suffix
       const companyDetail = await CompanyDetails.create(req.body);
       return companyDetail ? res.status(200).json({ message: "data save successfull", status: true }) : res.status(400).json({ message: "something went wrong", status: false });
     } else {
@@ -39,7 +39,7 @@ export const saveCompanyDetails = async (req, res, next) => {
             }
           });
         }
-        req.body.dummy = req.body.Suffix
+        // req.body.dummy = req.body.Suffix
         const companyDetails = req.body;
         const updateDetails = await CompanyDetails.findByIdAndUpdate(companyId, companyDetails, { new: true });
         return updateDetails ? res.status(200).json({ message: "Data Updated Successfully", status: true }) : res.status(400).json({ message: "Something Went Wrong" });

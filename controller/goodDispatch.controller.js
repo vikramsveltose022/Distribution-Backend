@@ -11,6 +11,7 @@ import { ledgerPartyForDebit } from "../service/ledger.js";
 import { generateInvoice } from "../service/invoice.js";
 import { addProductInWarehouse7, addProductInWarehouse9 } from "./product.controller.js";
 import { deleteProductInStock } from "./order.controller.js";
+import { CompanyDetails } from "../model/companyDetails.model.js";
 
 
 export const saveGoodDispatch = async (req, res) => {
@@ -211,6 +212,13 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                 await user.save();
                 await customer.save();
             }
+            // if (50000 > orders.grandTotal) {
+            //   const companyDetails = await CompanyDetails.findOne({database:orders.database});
+            //   if(companyDetails){
+            //     companyDetails.cancelInvoice.push({invoice:orders.invoiceId})
+            //     await companyDetails.save();
+            //   }
+            // }
         } else {
             const user = await Customer.findById(partyId);
             if (!user) {

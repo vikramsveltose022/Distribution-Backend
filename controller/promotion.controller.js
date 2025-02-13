@@ -225,7 +225,7 @@ export const PromotionApply = async (req, res, next) => {
                                     productName = item.productId.Product_Title;
                                 }
                             })
-                            if (items.targetQty < totalProductQty) {
+                            if (items.targetQty <= totalProductQty) {
                                 AchieveQty = totalProductQty
                                 if (items.freeProductQty) {
                                     offerQty = `${items.freeProductQty} qty`;
@@ -236,6 +236,7 @@ export const PromotionApply = async (req, res, next) => {
                                     offerQty = `₹${items.discountAmount}`
                                 }
                                 status = "Completed"
+                                console.log(status)
                             } else {
                                 AchieveQty = totalProductQty
                                 remainingQty = items.targetQty - totalProductQty
