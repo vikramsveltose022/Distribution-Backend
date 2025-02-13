@@ -51,13 +51,13 @@ const CompanySchema = new mongoose.Schema({
         type: String
     },
     Suffix: {
-        type: String
+        type: Number
     },
     billNo: {
         type: Number
     },
     dummy: {
-        type: String
+        type: Number
     },
     bankName: {
         type: String
