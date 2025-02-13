@@ -227,16 +227,17 @@ export const PromotionApply = async (req, res, next) => {
                             })
                             if (items.targetQty <= totalProductQty) {
                                 AchieveQty = totalProductQty
+                                const result = totalProductQty/items.targetQty;
+                                const noToMultiple = Math.floor(result);
                                 if (items.freeProductQty) {
-                                    offerQty = `${items.freeProductQty} qty`;
+                                    offerQty = `${items.freeProductQty*noToMultiple} qty`;
                                     freeProductName = items.freeProduct.Product_Title
                                 } else if (items.discountPercentage) {
                                     offerQty = `${items.discountPercentage}%`
                                 } else {
-                                    offerQty = `₹${items.discountAmount}`
+                                    offerQty = `₹${items.discountAmount*noToMultiple}`
                                 }
                                 status = "Completed"
-                                console.log(status)
                             } else {
                                 AchieveQty = totalProductQty
                                 remainingQty = items.targetQty - totalProductQty
@@ -262,9 +263,11 @@ export const PromotionApply = async (req, res, next) => {
                         let status = "Pending";
                         let offerAmount = 0;
                         if (item.amountWise[0].totalAmount <= totalAmount) {
+                            const result = totalAmount/item.amountWise[0].totalAmount;
+                            const noToMultiple = Math.floor(result);
                             remainingAmount = 0
                             status = "Completed"
-                            offerAmount = `₹${item.amountWise[0].percentageAmount}`
+                            offerAmount = `₹${item.amountWise[0].percentageAmount*noToMultiple}`
                         } else {
                             remainingAmount = item.amountWise[0].totalAmount - totalAmount;
                         }
