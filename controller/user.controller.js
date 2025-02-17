@@ -356,7 +356,7 @@ export const ViewWarehouse = async (req, res, next) => {
 
 export const saveUserWithExcel = async (req, res) => {
   try {
-    let code = "code";
+    // let code = "code";
     let database = "database";
     let rolename = "rolename";
     let shift = "shift";

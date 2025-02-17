@@ -242,8 +242,9 @@ export const SavePurchaseInvoice = async (req, res, next) => {
             purchase.status = req.body.status;
             const invoiceList = await purchase.save()
             if (existingCustomer.paymentTerm.toLowerCase() !== "cash") {
-                existingCustomer.limit += purchase.grandTotal
-                existingCustomer.remainingLimit += purchase.grandTotal
+                // existingCustomer.limit += purchase.grandTotal
+                // existingCustomer.remainingLimit += purchase.grandTotal
+                existingCustomer.AdvanceAmount += purchase.grandTotal
             }
             if (invoiceList) {
                 // await existingCustomer.save()

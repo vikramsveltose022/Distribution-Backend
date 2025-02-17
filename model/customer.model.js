@@ -4,9 +4,6 @@ const CustomerSchema = new mongoose.Schema({
   id: {
     type: String
   },
-  code: {
-    type: String
-  },
   userName: {
     type: String
   },
@@ -74,11 +71,16 @@ const CustomerSchema = new mongoose.Schema({
     type: Number
   },
   limit: {
-    type: Number
+    type: Number,
+    default: 0
   },
   remainingLimit: {
     type: Number,
     default: 0
+  },
+  AdvanceAmount: {
+    type: Number,
+    default:0
   },
   paymentTerm: {
     type: String

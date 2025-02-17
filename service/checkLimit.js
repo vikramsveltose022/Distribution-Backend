@@ -82,12 +82,27 @@ export const checkLimit = async (body) => {
         const party = await Customer.findById(body.partyId)
         if (party) {
             if (party.remainingLimit > 0) {
-                party.remainingLimit = party.remainingLimit - body.grandTotal
-                // over.totalAmount = over.totalAmount + body.grandTotal
-                // over.remainingAmount = remainingAmount;
-                // over.lockingAmount = party.limit
-                await party.save()
-                if (party.remainingLimit <= 0) {
+                let amount = 0;
+                if(party.AdvanceAmount>0){
+                    amount = party.AdvanceAmount-body.grandTotal;
+                    if(amount>0){
+                        // console.log("saved with advance amount");
+                        party.AdvanceAmount = amount;
+                        await party.save()
+                    } else{
+                        // console.log("saved with advance zero");
+                        party.AdvanceAmount = 0;
+                        party.remainingLimit = party.remainingLimit + amount
+                        await party.save()
+                    }
+                }else{
+                    party.remainingLimit = party.remainingLimit - body.grandTotal
+                    // over.totalAmount = over.totalAmount + body.grandTotal
+                    // over.remainingAmount = remainingAmount;
+                    // over.lockingAmount = party.limit
+                    await party.save()
+                }
+                if (party.remainingLimit < 0) {
                     party.autoBillingStatus = "locked";
                     await party.save()
                     body.dueStatus = "overDue"
@@ -96,6 +111,19 @@ export const checkLimit = async (body) => {
                     await overDue(body)
                 }
             } else {
+                // let amount = 0;
+                // if(party.AdvanceAmount>0){
+                //     amount = party.AdvanceAmount-body.grandTotal;
+                //     if(amount>0){
+                //         console.log("saved with advance amount");
+                //         party.AdvanceAmount = amount;
+                //         await party.save()
+                //     } else{
+                //         console.log("saved with advance zero");
+                //         party.AdvanceAmount = 0;
+                //         await party.save()
+                //     }
+                // }
                 const remainingAmount = party.limit - body.grandTotal
                 party.remainingLimit = remainingAmount
                 await party.save()

@@ -346,7 +346,7 @@ export const updatePassword = async (request, response, next) => {
 
 export const saveExcelFile11 = async (req, res) => {
     try {
-        let code = "code";
+        // let code = "code";
         let database = "database"
         const filePath = await req.file.path;
         const workbook = new ExcelJS.Workbook();
@@ -382,7 +382,7 @@ export const saveExcelFile11 = async (req, res) => {
                 } else {
                     if (document.comPanNo) {
                         const codes = document.comPanNo;
-                        document[code] = codes;
+                        // document[code] = codes;
                         const existingRecord = await Customer.findOne({
                             comPanNo: document.comPanNo, database: document.database
                         });
@@ -395,7 +395,7 @@ export const saveExcelFile11 = async (req, res) => {
                     } else {
                         if (document.aadharNo) {
                             const codes = document.aadharNo;
-                            document[code] = codes;
+                            // document[code] = codes;
                             const existingRecord = await Customer.findOne({
                                 aadharNo: document.aadharNo, database: document.database
                             });
