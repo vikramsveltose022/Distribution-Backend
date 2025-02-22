@@ -507,7 +507,7 @@ export const checkPartyOrderLimit = async (req, res, next) => {
         // const party = await PartyOrderLimit.findOne({ partyId: req.params.id })
         const party = await Customer.findById(req.params.id)
         if (party) {
-            const CustomerLimit = (party.remainingLimit > 0) ? party.remainingLimit : party.limit;
+            const CustomerLimit = (party.remainingLimit > 0) ? party.remainingLimit+party.AdvanceAmount : party.limit;
             return res.status(200).json({ CustomerLimit, message: `The limit on your order amount is ${CustomerLimit}`, status: true })
         } else {
             return res.status(404).json({ message: "Party Not Found", status: true })
@@ -712,6 +712,11 @@ export const deletedSalesOrder = async (req, res, next) => {
         order.status = "Deactive";
         await order.save();
         await Ledger.findOneAndDelete({ orderId: req.params.id })
+        const companyDetails = await CompanyDetails.findOne({database:order.database})
+        if(companyDetails){
+            companyDetails.cancelInvoice.push({invoice:order.invoiceId})
+            await companyDetails.save();
+        }
         return res.status(200).json({ message: "delete successfull!", status: true })
     } catch (err) {
         console.log(err);
