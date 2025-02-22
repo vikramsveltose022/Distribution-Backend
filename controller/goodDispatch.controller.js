@@ -212,13 +212,13 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
                 await user.save();
                 await customer.save();
             }
-            // if (50000 > orders.grandTotal) {
-            //   const companyDetails = await CompanyDetails.findOne({database:orders.database});
-            //   if(companyDetails){
-            //     companyDetails.cancelInvoice.push({invoice:orders.invoiceId})
-            //     await companyDetails.save();
-            //   }
-            // }
+            if (50000 > orders.grandTotal) {
+              const companyDetails = await CompanyDetails.findOne({database:orders.database});
+              if(companyDetails){
+                companyDetails.cancelInvoice.push({invoice:orders.invoiceId})
+                await companyDetails.save();
+              }
+            }
         } else {
             const user = await Customer.findById(partyId);
             if (!user) {

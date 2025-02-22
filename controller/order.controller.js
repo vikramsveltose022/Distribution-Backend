@@ -21,6 +21,7 @@ import { Receipt } from "../model/receipt.model.js";
 import { ledgerPartyForDebit } from "../service/ledger.js";
 import { addProductInWarehouse5, addProductInWarehouse6 } from "./product.controller.js";
 import { Stock } from "../model/stock.js";
+import { CompanyDetails } from "../model/companyDetails.model.js";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -251,6 +252,11 @@ export const deleteSalesOrder = async (req, res, next) => {
         await UpdateCheckLimitSales(order)
         order.status = "Deactive";
         await order.save();
+        const companyDetails = await CompanyDetails.findOne({database:order.database})
+        if(companyDetails){
+            companyDetails.cancelInvoice.push({invoice:order.invoiceId})
+            await companyDetails.save();
+        }
         return res.status(200).json({ message: "delete successfull!", status: true })
     } catch (err) {
         console.log(err);
