@@ -231,16 +231,13 @@ export const updateOrderStatusByDeliveryBoy = async (req, res) => {
             if (user.otpVerify !== parseInt(otp)) {
                 return res.status(400).json({ message: "Incorrect OTP", status: false });
             }
-            const result = await generateInvoice(user.database);
-            // if (50000 >= orders.grandTotal) {
-            let challanNo = result
-            let invoiceId = result
-            // }
-            //  else {
-            //     req.body.invoiceId = result
-            // }
+            // const result = await generateInvoice(user.database);
+          
+            // let challanNo = result
+            // let invoiceId = result
+          
             user.otpVerify = undefined
-            // let invoiceId = orders.challanNo || orders.invoiceId
+
             const commonUpdate = { status, paymentMode, CNUpload, invoiceId, challanNo, CNDetails };
             if (reason) {
                 commonUpdate.reason = reason;
