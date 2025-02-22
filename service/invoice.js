@@ -27,7 +27,8 @@ export const generateInvoice = async (database) => {
         } else{
             const generatedInvoice = companyDetail.cancelInvoice.shift();
             // console.log(result.invoice);
-            return generatedInvoice
+            await companyDetail.save();
+            return generatedInvoice.invoice
         }
     }
     // const companyDetail = await CompanyDetails.findOne({ database: database });
