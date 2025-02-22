@@ -14,15 +14,21 @@ export const generateInvoice = async (database) => {
         await companyDetail.save();
         return generatedInvoice
     } else{
-        const length = companyDetail.Prefix.length
-        const lengths = companyDetail.Suffix.length
-        const first = companyDetail.dummy;
-        const middlePart = first.slice(length, -lengths);
-        const newMiddleNumber = (parseInt(middlePart, 10) + 1).toString().padStart(middlePart.length, "0"); 
-        const generatedInvoice = first.slice(0, length) + newMiddleNumber + first.slice(-lengths);
-        companyDetail.dummy = generatedInvoice;
-        await companyDetail.save();
-        return generatedInvoice
+        if(companyDetail.cancelInvoice.length===0){
+            const length = companyDetail.Prefix.length
+            const lengths = companyDetail.Suffix.length
+            const first = companyDetail.dummy;
+            const middlePart = first.slice(length, -lengths);
+            const newMiddleNumber = (parseInt(middlePart, 10) + 1).toString().padStart(middlePart.length, "0"); 
+            const generatedInvoice = first.slice(0, length) + newMiddleNumber + first.slice(-lengths);
+            companyDetail.dummy = generatedInvoice;
+            await companyDetail.save();
+            return generatedInvoice
+        } else{
+            const generatedInvoice = companyDetail.cancelInvoice.shift();
+            // console.log(result.invoice);
+            return generatedInvoice
+        }
     }
     // const companyDetail = await CompanyDetails.findOne({ database: database });
     // const invoice = companyDetail.dummy + 1;
