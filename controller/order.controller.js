@@ -8,7 +8,7 @@ import pdf from 'html-pdf'
 import { User } from "../model/user.model.js";
 import { Product } from "../model/product.model.js";
 import { CreateOrder } from "../model/createOrder.model.js";
-import {generateOrderNo } from "../service/invoice.js";
+import {generateInvoice, generateOrderNo } from "../service/invoice.js";
 import { getCreateOrderHierarchy, getUserHierarchyBottomToTop } from "../rolePermission/RolePermission.js";
 import { Customer } from "../model/customer.model.js";
 import { createInvoiceTemplate } from "../Invoice/invoice.js";
@@ -73,6 +73,13 @@ export const createOrder = async (req, res, next) => {
                         console.error(`Product with ID ${orderItem.productId} not found`);
                     }
                 }
+                const result = await generateInvoice(user.database);
+          
+                let challanNo = result
+                let invoiceId = result
+                req.body.challanNo = challanNo
+                req.body.invoiceId = invoiceId
+
                 req.body.userId = party.created_by
                 req.body.database = user.database
                 req.body.orderNo = orderNo
